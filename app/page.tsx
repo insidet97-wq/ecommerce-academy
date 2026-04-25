@@ -238,26 +238,34 @@ export default function Home() {
             </p>
 
             <div className="fade-up-d3 flex flex-col sm:flex-row gap-3 items-start">
-              <GlowButton href="/quiz">Build my free plan →</GlowButton>
-              <Link
-                href="/login"
-                className="text-sm font-medium px-7 py-3.5 rounded-xl transition-all duration-200"
-                style={{ color: "rgba(255,255,255,0.5)", border: "1px solid rgba(255,255,255,0.1)" }}
-                onMouseEnter={e => { const t = e.currentTarget; t.style.color = "white"; t.style.borderColor = "rgba(255,255,255,0.25)"; t.style.background = "rgba(255,255,255,0.05)"; }}
-                onMouseLeave={e => { const t = e.currentTarget; t.style.color = "rgba(255,255,255,0.5)"; t.style.borderColor = "rgba(255,255,255,0.1)"; t.style.background = "transparent"; }}
-              >
-                Log in
-              </Link>
+              {loggedIn ? (
+                <GlowButton href="/dashboard">Continue learning →</GlowButton>
+              ) : (
+                <>
+                  <GlowButton href="/quiz">Build my free plan →</GlowButton>
+                  <Link
+                    href="/login"
+                    className="text-sm font-medium px-7 py-3.5 rounded-xl transition-all duration-200"
+                    style={{ color: "rgba(255,255,255,0.5)", border: "1px solid rgba(255,255,255,0.1)" }}
+                    onMouseEnter={e => { const t = e.currentTarget; t.style.color = "white"; t.style.borderColor = "rgba(255,255,255,0.25)"; t.style.background = "rgba(255,255,255,0.05)"; }}
+                    onMouseLeave={e => { const t = e.currentTarget; t.style.color = "rgba(255,255,255,0.5)"; t.style.borderColor = "rgba(255,255,255,0.1)"; t.style.background = "transparent"; }}
+                  >
+                    Log in
+                  </Link>
+                </>
+              )}
             </div>
 
-            <div className="fade-up-d4 flex items-center gap-5 mt-8">
-              {["Free forever", "No credit card", "Takes 2 minutes"].map((t) => (
-                <div key={t} className="flex items-center gap-1.5">
-                  <span style={{ color: "#818cf8", fontSize: "12px" }}>✓</span>
-                  <span className="text-xs font-medium" style={{ color: "rgba(255,255,255,0.4)" }}>{t}</span>
-                </div>
-              ))}
-            </div>
+            {!loggedIn && (
+              <div className="fade-up-d4 flex items-center gap-5 mt-8">
+                {["Free forever", "No credit card", "Takes 2 minutes"].map((t) => (
+                  <div key={t} className="flex items-center gap-1.5">
+                    <span style={{ color: "#818cf8", fontSize: "12px" }}>✓</span>
+                    <span className="text-xs font-medium" style={{ color: "rgba(255,255,255,0.4)" }}>{t}</span>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
 
           {/* Right — floating product mockup */}
