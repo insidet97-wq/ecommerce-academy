@@ -35,7 +35,6 @@ export default function SignupPage() {
   const [password,  setPassword]  = useState("");
   const [error,     setError]     = useState("");
   const [loading,   setLoading]   = useState(false);
-  const [success,   setSuccess]   = useState(false);
 
   async function handleSignup(e: React.FormEvent) {
     e.preventDefault();
@@ -61,22 +60,6 @@ export default function SignupPage() {
       } catch {}
       router.push("/dashboard");
     }
-  }
-
-  if (success) {
-    return (
-      <div className="min-h-screen flex items-center justify-center px-6" style={{ background: HERO_BG }}>
-        <div style={{ maxWidth: 420, width: "100%", background: "#fff", borderRadius: 28, padding: "40px 32px", textAlign: "center", boxShadow: "0 24px 64px rgba(0,0,0,0.25)" }}>
-          <div style={{ fontSize: 48, marginBottom: 16 }}>📬</div>
-          <h1 style={{ fontSize: 22, fontWeight: 800, color: "#09090b", marginBottom: 8, letterSpacing: "-0.5px" }}>
-            Check your email, {firstName}!
-          </h1>
-          <p style={{ fontSize: 13, color: "#71717a", lineHeight: 1.65 }}>
-            We sent a confirmation link to <strong style={{ color: "#09090b" }}>{email}</strong>. Click it to activate your account and access your personalised roadmap.
-          </p>
-        </div>
-      </div>
-    );
   }
 
   return (
