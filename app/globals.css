@@ -1,0 +1,58 @@
+@import "tailwindcss";
+
+body {
+  font-family: var(--font-geist-sans), -apple-system, BlinkMacSystemFont, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background: #ffffff;
+  color: #09090b;
+}
+
+/* ── Entrance animations ── */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(24px); }
+  to   { opacity: 1; transform: translateY(0);    }
+}
+
+.fade-up    { animation: fadeUp 0.6s cubic-bezier(0.16,1,0.3,1) both; }
+.fade-up-d1 { animation: fadeUp 0.6s cubic-bezier(0.16,1,0.3,1) 0.08s both; }
+.fade-up-d2 { animation: fadeUp 0.6s cubic-bezier(0.16,1,0.3,1) 0.16s both; }
+.fade-up-d3 { animation: fadeUp 0.6s cubic-bezier(0.16,1,0.3,1) 0.24s both; }
+.fade-up-d4 { animation: fadeUp 0.6s cubic-bezier(0.16,1,0.3,1) 0.32s both; }
+.fade-up-d5 { animation: fadeUp 0.6s cubic-bezier(0.16,1,0.3,1) 0.40s both; }
+
+/* ── Quiz slide transitions ── */
+@keyframes slideInRight {
+  from { opacity: 0; transform: translateX(40px); }
+  to   { opacity: 1; transform: translateX(0);    }
+}
+@keyframes slideOutLeft {
+  from { opacity: 1; transform: translateX(0);    }
+  to   { opacity: 0; transform: translateX(-40px);}
+}
+
+.slide-in  { animation: slideInRight 0.35s cubic-bezier(0.16,1,0.3,1) both; }
+.slide-out { animation: slideOutLeft 0.2s cubic-bezier(0.4,0,1,1) both; }
+
+/* ── Spinner ── */
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+.spinner {
+  width: 20px; height: 20px;
+  border: 2px solid rgba(99,102,241,0.2);
+  border-top-color: #6366f1;
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+}
+
+/* ── Dot grid overlay ── */
+.dot-grid {
+  background-image: radial-gradient(circle, rgba(255,255,255,0.07) 1px, transparent 1px);
+  background-size: 28px 28px;
+}
+
+/* ── Smooth global transitions ── */
+*, *::before, *::after {
+  transition-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
+}

@@ -1,0 +1,22 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(cd /tmp)",
+      "Bash(python3 -c ' *)",
+      "Bash(py --version)",
+      "Bash(where python *)",
+      "Bash(where py *)",
+      "Read(//c/Users/Ebay/AppData/Local/Programs//**)",
+      "Read(//c/Users/Ebay/AppData/Local//**)",
+      "Bash(ls /c/Python*)",
+      "Read(//c/Users/Ebay/**)",
+      "Bash(where node *)",
+      "Bash(npm install *)",
+      "Bash(node -e ' *)",
+      "Bash(node -e \"const d=require\\('/dev/stdin'\\); console.log\\(JSON.stringify\\(d.exports||d.main,null,2\\)\\)\")",
+      "Bash(node --input-type=module)",
+      "Bash(2>&1)",
+      "Bash(node -e \"process.stdin.resume\\(\\); process.stdin.on\\('data', d => process.stdout.write\\(d.toString\\(\\).substring\\(0,2000\\)\\)\\)\")"
+    ]
+  }
+}
