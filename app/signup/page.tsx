@@ -48,6 +48,18 @@ export default function SignupPage() {
       setLoading(false);
     } else {
       if (data.user) await saveQuizResults(data.user.id, firstName.trim());
+
+      // Send welcome email (fire and forget)
+      try {
+        const quizRaw = localStorage.getItem("quiz_results");
+        const startModule = quizRaw ? (JSON.parse(quizRaw).startModule ?? 1) : 1;
+        fetch("/api/send-welcome", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ firstName: firstName.trim(), email, startModule }),
+        });
+      } catch {}
+
       const next = localStorage.getItem("ea_next");
       if (next) { localStorage.removeItem("ea_next"); router.push(next); return; }
       // Fall back to quiz start module if available

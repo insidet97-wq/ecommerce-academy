@@ -89,11 +89,13 @@ export default function ModulePage() {
   const moduleId = Number(params.id);
   const mod      = getModule(moduleId);
 
-  const [userId,   setUserId]   = useState<string | null>(null);
+  const [userId,    setUserId]    = useState<string | null>(null);
+  const [userEmail, setUserEmail] = useState<string>("");
+  const [firstName, setFirstName] = useState<string>("");
   const [completed, setCompleted] = useState<number[]>([]);
-  const [checked,  setChecked]  = useState<boolean[]>([]);
-  const [marking,  setMarking]  = useState(false);
-  const [loading,  setLoading]  = useState(true);
+  const [checked,   setChecked]   = useState<boolean[]>([]);
+  const [marking,   setMarking]   = useState(false);
+  const [loading,   setLoading]   = useState(true);
   const [showIntro, setShowIntro] = useState(true);
   const [showCompletion, setShowCompletion] = useState(false);
   const [countdown, setCountdown] = useState(5);
@@ -103,6 +105,15 @@ export default function ModulePage() {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) { router.push("/login"); return; }
       setUserId(user.id);
+      setUserEmail(user.email ?? "");
+
+      // Fetch first name for emails
+      const { data: profile } = await supabase
+        .from("user_profiles")
+        .select("first_name")
+        .eq("id", user.id)
+        .single();
+      setFirstName(profile?.first_name || user.email?.split("@")[0] || "there");
 
       const { data } = await supabase
         .from("user_progress")
@@ -130,6 +141,16 @@ export default function ModulePage() {
     setMarking(true);
     await supabase.from("user_progress").upsert({ user_id: userId, module_id: moduleId });
     setMarking(false);
+
+    // Send completion email (fire and forget)
+    if (userEmail) {
+      fetch("/api/send-completion", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ firstName, email: userEmail, completedModuleId: moduleId }),
+      });
+    }
+
     setCountdown(5);
     setShowCompletion(true);
   }
