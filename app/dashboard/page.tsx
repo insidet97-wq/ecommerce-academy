@@ -119,19 +119,9 @@ export default function DashboardPage() {
   const [profile,    setProfile]    = useState<Profile>({ track: null, start_module: 1, goal: null, first_name: null, streak_days: null, last_active: null });
   const [loading,    setLoading]    = useState(true);
   const [showCert,   setShowCert]   = useState(false);
-  const [menuOpen,   setMenuOpen]   = useState(false);
-  const menuRef = useRef<HTMLDivElement>(null);
 
   const openCert  = useCallback(() => setShowCert(true),  []);
   const closeCert = useCallback(() => setShowCert(false), []);
-
-  useEffect(() => {
-    function handleClick(e: MouseEvent) {
-      if (menuRef.current && !menuRef.current.contains(e.target as Node)) setMenuOpen(false);
-    }
-    document.addEventListener("mousedown", handleClick);
-    return () => document.removeEventListener("mousedown", handleClick);
-  }, []);
 
   useEffect(() => {
     async function load() {
@@ -191,6 +181,7 @@ export default function DashboardPage() {
       {/* ── Nav ── */}
       <nav style={{ background: "rgba(255,255,255,0.85)", backdropFilter: "blur(12px)", borderBottom: "1px solid rgba(0,0,0,0.06)", position: "sticky", top: 0, zIndex: 40 }}>
         <div style={{ maxWidth: 680, margin: "0 auto", padding: "0 24px", height: 60, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+          {/* Left — logo + admin badge */}
           <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
             <Link href="/" style={{ fontWeight: 700, fontSize: 15, color: "#09090b", textDecoration: "none", letterSpacing: "-0.3px" }}>
               Ecommerce Academy
@@ -202,35 +193,25 @@ export default function DashboardPage() {
             )}
           </div>
 
-          {/* ··· menu */}
-          <div ref={menuRef} style={{ position: "relative" }}>
-            <button
-              onClick={() => setMenuOpen(p => !p)}
-              style={{ width: 36, height: 36, borderRadius: 10, border: "1.5px solid rgba(0,0,0,0.08)", background: menuOpen ? "#f4f4f5" : "#fff", cursor: "pointer", fontSize: 16, display: "flex", alignItems: "center", justifyContent: "center", color: "#52525b" }}
-            >
-              ···
-            </button>
-            {menuOpen && (
-              <div style={{ position: "absolute", right: 0, top: "calc(100% + 8px)", background: "#fff", borderRadius: 14, border: "1.5px solid rgba(0,0,0,0.07)", boxShadow: "0 12px 32px rgba(0,0,0,0.12)", padding: "6px", minWidth: 160, zIndex: 50 }}>
-                {[
-                  { href: "/tools",     label: "🛠 Tools"     },
-                  { href: "/resources", label: "📚 Resources" },
-                  ...(admin ? [{ href: "/admin", label: "📊 Analytics" }] : []),
-                ].map(item => (
-                  <Link key={item.href} href={item.href} onClick={() => setMenuOpen(false)} style={{ display: "block", padding: "9px 12px", borderRadius: 8, fontSize: 13, fontWeight: 500, color: "#3f3f46", textDecoration: "none" }}
-                    onMouseEnter={e => (e.currentTarget.style.background = "#f4f4f5")}
-                    onMouseLeave={e => (e.currentTarget.style.background = "transparent")}
-                  >{item.label}</Link>
-                ))}
-                <div style={{ height: 1, background: "#f4f4f5", margin: "4px 0" }} />
-                <button onClick={handleLogout} style={{ width: "100%", textAlign: "left", padding: "9px 12px", borderRadius: 8, fontSize: 13, fontWeight: 500, color: "#ef4444", background: "none", border: "none", cursor: "pointer" }}
-                  onMouseEnter={e => (e.currentTarget.style.background = "#fff7f7")}
-                  onMouseLeave={e => (e.currentTarget.style.background = "transparent")}
-                >
-                  Log out
-                </button>
-              </div>
-            )}
+          {/* Right — nav links + logout */}
+          <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
+            {[
+              { href: "/tools",     label: "Tools"     },
+              { href: "/resources", label: "Resources" },
+              ...(admin ? [{ href: "/admin", label: "Analytics" }] : []),
+            ].map(item => (
+              <Link key={item.href} href={item.href}
+                style={{ fontSize: 13, fontWeight: 500, color: "#52525b", textDecoration: "none", padding: "6px 12px", borderRadius: 8 }}
+                onMouseEnter={e => { e.currentTarget.style.background = "#f4f4f5"; e.currentTarget.style.color = "#09090b"; }}
+                onMouseLeave={e => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = "#52525b"; }}
+              >{item.label}</Link>
+            ))}
+            <div style={{ width: 1, height: 16, background: "#e4e4e7", margin: "0 4px" }} />
+            <button onClick={handleLogout}
+              style={{ fontSize: 13, fontWeight: 500, color: "#a1a1aa", background: "none", border: "none", cursor: "pointer", padding: "6px 12px", borderRadius: 8 }}
+              onMouseEnter={e => { e.currentTarget.style.background = "#fff7f7"; e.currentTarget.style.color = "#ef4444"; }}
+              onMouseLeave={e => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = "#a1a1aa"; }}
+            >Log out</button>
           </div>
         </div>
       </nav>
