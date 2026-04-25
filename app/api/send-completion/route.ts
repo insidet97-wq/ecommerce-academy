@@ -60,7 +60,7 @@ export async function POST(req: Request) {
       <table width="100%" cellpadding="0" cellspacing="0" style="max-width:560px;">
 
         <!-- Header -->
-        <tr><td style="background:${isLast ? "linear-gradient(135deg,#064e3b 0%,#065f46 50%,#047857 100%)" : "linear-gradient(135deg,#1e1b4b 0%,#312e81 40%,#4c1d95 100%)"};border-radius:20px 20px 0 0;padding:36px 40px;text-align:center;">
+        <tr><td style="background:${isLast ? "#065f46" : "#312e81"};border-radius:20px 20px 0 0;padding:36px 40px;text-align:center;">
           <div style="font-size:48px;line-height:1;margin-bottom:14px;">${isLast ? "🏆" : "✅"}</div>
           <h1 style="margin:0 0 8px;font-size:24px;font-weight:900;color:#fff;letter-spacing:-0.5px;">
             ${isLast ? "Course complete!" : `Module ${completedModuleId} complete!`}

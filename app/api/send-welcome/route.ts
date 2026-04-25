@@ -50,7 +50,7 @@ export async function POST(req: Request) {
       <table width="100%" cellpadding="0" cellspacing="0" style="max-width:560px;">
 
         <!-- Header -->
-        <tr><td style="background:linear-gradient(135deg,#1e1b4b 0%,#312e81 40%,#4c1d95 100%);border-radius:20px 20px 0 0;padding:40px 40px 36px;text-align:center;">
+        <tr><td style="background:#312e81;border-radius:20px 20px 0 0;padding:40px 40px 36px;text-align:center;">
           <p style="margin:0 0 6px;font-size:11px;font-weight:700;letter-spacing:0.15em;text-transform:uppercase;color:rgba(255,255,255,0.4);">Welcome to</p>
           <p style="margin:0 0 20px;font-size:22px;font-weight:800;color:#fff;letter-spacing:-0.5px;">First Sale Lab</p>
           <div style="font-size:52px;line-height:1;margin-bottom:16px;">🎉</div>
