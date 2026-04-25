@@ -94,6 +94,7 @@ export default function ModulePage() {
   const [checked,  setChecked]  = useState<boolean[]>([]);
   const [marking,  setMarking]  = useState(false);
   const [loading,  setLoading]  = useState(true);
+  const [showIntro, setShowIntro] = useState(true);
   const [showCompletion, setShowCompletion] = useState(false);
   const [countdown, setCountdown] = useState(5);
 
@@ -114,6 +115,9 @@ export default function ModulePage() {
       const admin   = isAdmin(user.email);
       const unlocked = admin || moduleId === 1 || doneIds.includes(moduleId - 1);
       if (!unlocked) { router.push("/dashboard"); return; }
+
+      // Already completed → skip intro, go straight to review
+      if (doneIds.includes(moduleId)) setShowIntro(false);
 
       if (mod) setChecked(new Array(mod.checklist.length).fill(false));
       setLoading(false);
@@ -159,6 +163,92 @@ export default function ModulePage() {
 
   const isDone       = completed.includes(moduleId);
   const allChecked   = checked.every(Boolean);
+
+  // ── Module intro screen ──
+  if (showIntro) {
+    return (
+      <div className="min-h-screen" style={{ background: "#f8f8fb" }}>
+        {/* Nav */}
+        <nav style={{ background: "rgba(255,255,255,0.85)", backdropFilter: "blur(12px)", borderBottom: "1px solid rgba(0,0,0,0.06)", position: "sticky", top: 0, zIndex: 40 }}>
+          <div style={{ maxWidth: 720, margin: "0 auto", padding: "0 24px", height: 60, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+            <Link href="/" style={{ fontWeight: 700, fontSize: 15, color: "#09090b", textDecoration: "none", letterSpacing: "-0.3px" }}>Ecommerce Academy</Link>
+            <Link href="/dashboard" style={{ fontSize: 13, fontWeight: 500, color: "#6366f1", textDecoration: "none" }}
+              onMouseEnter={e => (e.currentTarget.style.color = "#4338ca")}
+              onMouseLeave={e => (e.currentTarget.style.color = "#6366f1")}
+            >← Dashboard</Link>
+          </div>
+        </nav>
+
+        {/* Hero */}
+        <div style={{ background: "linear-gradient(135deg, #1e1b4b 0%, #312e81 40%, #4c1d95 100%)", padding: "64px 24px 56px", textAlign: "center", position: "relative", overflow: "hidden" }}>
+          <div className="dot-grid" style={{ position: "absolute", inset: 0, pointerEvents: "none" }} />
+          <div style={{ position: "absolute", inset: 0, pointerEvents: "none", background: "radial-gradient(ellipse 60% 50% at 50% 0%, rgba(139,92,246,0.35) 0%, transparent 70%)" }} />
+          <div style={{ position: "relative" }}>
+            <span style={{ display: "inline-block", fontSize: 11, fontWeight: 700, letterSpacing: "0.15em", textTransform: "uppercase", color: "rgba(255,255,255,0.45)", marginBottom: 16, background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.12)", padding: "5px 14px", borderRadius: 99 }}>
+              Module {mod.id} of 12
+            </span>
+            <div style={{ fontSize: 64, marginBottom: 18, lineHeight: 1 }}>{emoji}</div>
+            <h1 style={{ fontSize: 32, fontWeight: 900, color: "#fff", letterSpacing: "-0.8px", marginBottom: 14, lineHeight: 1.15 }}>{mod.title}</h1>
+            <p style={{ fontSize: 15, color: "rgba(255,255,255,0.65)", maxWidth: 500, margin: "0 auto 24px", lineHeight: 1.65 }}>{mod.objective}</p>
+            <div style={{ display: "inline-flex", alignItems: "center", gap: 16, flexWrap: "wrap", justifyContent: "center" }}>
+              <span style={{ fontSize: 12, fontWeight: 600, color: "rgba(255,255,255,0.6)", background: "rgba(255,255,255,0.09)", border: "1px solid rgba(255,255,255,0.12)", padding: "5px 14px", borderRadius: 99 }}>⏱ {mod.duration}</span>
+              <span style={{ fontSize: 12, fontWeight: 600, color: "rgba(255,255,255,0.6)", background: "rgba(255,255,255,0.09)", border: "1px solid rgba(255,255,255,0.12)", padding: "5px 14px", borderRadius: 99 }}>✅ {mod.checklist.length} tasks</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Intro content */}
+        <main style={{ maxWidth: 600, margin: "0 auto", padding: "36px 24px 80px", display: "flex", flexDirection: "column", gap: 20 }}>
+
+          {/* What you'll learn */}
+          <div className="fade-up" style={{ background: "#fff", borderRadius: 20, border: "1.5px solid rgba(0,0,0,0.06)", padding: "24px", boxShadow: "0 1px 4px rgba(0,0,0,0.04)" }}>
+            <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: "#6366f1", marginBottom: 16 }}>What you&apos;ll learn</p>
+            <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+              {mod.concepts.map((c, i) => (
+                <div key={i} style={{ display: "flex", gap: 12, alignItems: "flex-start" }}>
+                  <span style={{ width: 22, height: 22, borderRadius: 7, background: "linear-gradient(135deg, #6366f1, #7c3aed)", color: "#fff", fontSize: 10, fontWeight: 700, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, marginTop: 1 }}>{i + 1}</span>
+                  <div>
+                    <p style={{ fontSize: 13, fontWeight: 700, color: "#09090b", marginBottom: 2 }}>{c.title}</p>
+                    <p style={{ fontSize: 12, color: "#a1a1aa", lineHeight: 1.5 }}>{c.body}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* What you'll do */}
+          <div className="fade-up-d1" style={{ background: "#fff", borderRadius: 20, border: "1.5px solid rgba(0,0,0,0.06)", padding: "24px", boxShadow: "0 1px 4px rgba(0,0,0,0.04)" }}>
+            <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: "#059669", marginBottom: 16 }}>Your action steps</p>
+            <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+              {mod.steps.slice(0, 4).map((step, i) => (
+                <div key={i} style={{ display: "flex", gap: 10, alignItems: "flex-start" }}>
+                  <span style={{ fontSize: 13, color: "#34d399", flexShrink: 0, marginTop: 1 }}>✓</span>
+                  <p style={{ fontSize: 13, color: "#3f3f46", lineHeight: 1.55 }}>{step}</p>
+                </div>
+              ))}
+              {mod.steps.length > 4 && (
+                <p style={{ fontSize: 12, color: "#a1a1aa", paddingLeft: 22 }}>+ {mod.steps.length - 4} more steps inside…</p>
+              )}
+            </div>
+          </div>
+
+          {/* CTA */}
+          <div className="fade-up-d2" style={{ textAlign: "center", paddingTop: 8 }}>
+            <button
+              onClick={() => setShowIntro(false)}
+              style={{ width: "100%", padding: "16px", background: "linear-gradient(135deg, #6366f1, #7c3aed)", color: "#fff", fontWeight: 800, fontSize: 16, borderRadius: 16, border: "none", cursor: "pointer", boxShadow: "0 4px 24px rgba(99,102,241,0.35)", letterSpacing: "-0.3px", transition: "transform 0.2s, box-shadow 0.2s" }}
+              onMouseEnter={e => { e.currentTarget.style.transform = "translateY(-2px)"; e.currentTarget.style.boxShadow = "0 8px 36px rgba(99,102,241,0.5)"; }}
+              onMouseLeave={e => { e.currentTarget.style.transform = "translateY(0)"; e.currentTarget.style.boxShadow = "0 4px 24px rgba(99,102,241,0.35)"; }}
+            >
+              Start Module {mod.id} →
+            </button>
+            <p style={{ fontSize: 12, color: "#a1a1aa", marginTop: 12 }}>Takes approximately {mod.duration}</p>
+          </div>
+
+        </main>
+      </div>
+    );
+  }
   const checkedCount = checked.filter(Boolean).length;
   const emoji        = MODULE_EMOJIS[moduleId] ?? "📖";
   const isLast       = moduleId === 12;

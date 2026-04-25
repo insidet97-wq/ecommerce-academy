@@ -118,7 +118,6 @@ export default function DashboardPage() {
   const [profile,    setProfile]    = useState<Profile>({ track: null, start_module: 1, goal: null, first_name: null });
   const [loading,    setLoading]    = useState(true);
   const [showCert,   setShowCert]   = useState(false);
-  const [showModules, setShowModules] = useState(false);
   const [menuOpen,   setMenuOpen]   = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
 
@@ -250,17 +249,23 @@ export default function DashboardPage() {
           </div>
         </div>
 
-        {/* ── Progress strip ── */}
+        {/* ── Progress card ── */}
         <div className="fade-up-d1" style={{ marginBottom: 28 }}>
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
-            <span style={{ fontSize: 13, color: "#71717a" }}>
-              <strong style={{ color: "#09090b" }}>{completedCount}</strong> of {MODULES.length} modules complete
-              {minutesInvested > 0 && <span style={{ marginLeft: 10, color: "#a1a1aa" }}>· {timeLabel}</span>}
-            </span>
-            <span style={{ fontSize: 13, fontWeight: 800, color: trackColor, letterSpacing: "-0.3px" }}>{progressPercent}%</span>
-          </div>
-          <div style={{ height: 6, borderRadius: 99, background: "#e4e4e7" }}>
-            <div style={{ height: 6, borderRadius: 99, background: `linear-gradient(90deg, ${trackColor}, #7c3aed)`, width: `${progressPercent}%`, transition: "width 0.8s cubic-bezier(0.16,1,0.3,1)" }} />
+          <div style={{ background: "#fff", borderRadius: 20, border: "1.5px solid rgba(0,0,0,0.06)", padding: "18px 20px", boxShadow: "0 1px 4px rgba(0,0,0,0.04)" }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
+              <div>
+                <span style={{ fontSize: 14, fontWeight: 700, color: "#09090b" }}>
+                  {completedCount} <span style={{ fontWeight: 400, color: "#71717a" }}>of {MODULES.length} modules complete</span>
+                </span>
+                {minutesInvested > 0 && (
+                  <p style={{ fontSize: 12, color: "#a1a1aa", marginTop: 2 }}>{timeLabel}</p>
+                )}
+              </div>
+              <span style={{ fontSize: 22, fontWeight: 900, color: trackColor, letterSpacing: "-0.5px" }}>{progressPercent}%</span>
+            </div>
+            <div style={{ height: 8, borderRadius: 99, background: "#f4f4f5" }}>
+              <div style={{ height: 8, borderRadius: 99, background: `linear-gradient(90deg, ${trackColor}, #7c3aed)`, width: `${progressPercent}%`, transition: "width 0.8s cubic-bezier(0.16,1,0.3,1)" }} />
+            </div>
           </div>
         </div>
 
@@ -331,53 +336,43 @@ export default function DashboardPage() {
           </div>
         )}
 
-        {/* ── Module list toggle ── */}
+        {/* ── Module list ── */}
         <div className="fade-up-d3">
-          <button
-            onClick={() => setShowModules(p => !p)}
-            style={{ width: "100%", background: "#fff", border: "1.5px solid rgba(0,0,0,0.06)", borderRadius: 14, padding: "13px 18px", display: "flex", alignItems: "center", justifyContent: "space-between", cursor: "pointer", marginBottom: showModules ? 10 : 0 }}
-          >
-            <span style={{ fontSize: 13, fontWeight: 600, color: "#09090b" }}>All modules</span>
-            <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-              <span style={{ fontSize: 12, color: "#a1a1aa" }}>{completedCount}/{MODULES.length} complete</span>
-              <span style={{ fontSize: 12, color: "#a1a1aa", transition: "transform 0.2s", display: "inline-block", transform: showModules ? "rotate(180deg)" : "rotate(0deg)" }}>▼</span>
-            </div>
-          </button>
-
-          {showModules && (
-            <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-              {MODULES.map(mod => {
-                const isDone   = completed.includes(mod.id);
-                const unlocked = isUnlocked(mod.id);
-                const isNext   = nextModule?.id === mod.id;
-                const isSkipped = mod.id < startModule && !isDone;
-                return (
-                  <ModuleCard key={mod.id} unlocked={unlocked}>
-                    <div style={{ background: "#fff", borderRadius: 18, border: `1.5px solid ${isNext ? "#c7d2fe" : isDone ? "#d1fae5" : "rgba(0,0,0,0.06)"}`, padding: "14px 16px", display: "flex", alignItems: "center", gap: 14, opacity: unlocked ? 1 : 0.45 }}>
-                      <div style={{ width: 44, height: 44, borderRadius: 14, flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 20, background: isDone ? "#ecfdf5" : isNext ? "#eef2ff" : "#f4f4f5" }}>
-                        {isDone ? "✅" : mod.emoji}
-                      </div>
-                      <div style={{ flex: 1, minWidth: 0 }}>
-                        <div style={{ display: "flex", alignItems: "center", gap: 6, flexWrap: "wrap", marginBottom: 2 }}>
-                          <span style={{ fontSize: 13, fontWeight: 600, color: isDone ? "#a1a1aa" : "#09090b", textDecoration: isDone ? "line-through" : "none" }}>{mod.title}</span>
-                          {isNext && <span style={{ fontSize: 10, fontWeight: 700, padding: "2px 7px", borderRadius: 99, background: trackColor, color: "#fff" }}>Up next</span>}
-                          {isSkipped && <span style={{ fontSize: 10, fontWeight: 600, padding: "2px 7px", borderRadius: 99, background: "#fffbeb", color: "#d97706", border: "1px solid #fde68a" }}>Pre-unlocked</span>}
-                        </div>
-                        <p style={{ fontSize: 12, color: "#a1a1aa" }}>{mod.duration} · {mod.description}</p>
-                      </div>
-                      {!unlocked ? (
-                        <span style={{ fontSize: 16, flexShrink: 0, color: "#d4d4d8" }}>🔒</span>
-                      ) : (
-                        <Link href={`/modules/${mod.id}`} style={{ fontSize: 12, fontWeight: 700, flexShrink: 0, padding: "7px 16px", borderRadius: 10, textDecoration: "none", background: isDone ? "#ecfdf5" : isNext ? trackColor : "#f4f4f5", color: isDone ? "#16a34a" : isNext ? "#fff" : "#52525b" }}>
-                          {isDone ? "Review" : "Start →"}
-                        </Link>
-                      )}
+          <p style={{ fontSize: 12, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: "#a1a1aa", marginBottom: 12 }}>
+            All Modules
+          </p>
+          <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+            {MODULES.map(mod => {
+              const isDone   = completed.includes(mod.id);
+              const unlocked = isUnlocked(mod.id);
+              const isNext   = nextModule?.id === mod.id;
+              const isSkipped = mod.id < startModule && !isDone;
+              return (
+                <ModuleCard key={mod.id} unlocked={unlocked}>
+                  <div style={{ background: "#fff", borderRadius: 18, border: `1.5px solid ${isNext ? "#c7d2fe" : isDone ? "#d1fae5" : "rgba(0,0,0,0.06)"}`, padding: "14px 16px", display: "flex", alignItems: "center", gap: 14, opacity: unlocked ? 1 : 0.45 }}>
+                    <div style={{ width: 44, height: 44, borderRadius: 14, flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 20, background: isDone ? "#ecfdf5" : isNext ? "#eef2ff" : "#f4f4f5" }}>
+                      {isDone ? "✅" : mod.emoji}
                     </div>
-                  </ModuleCard>
-                );
-              })}
-            </div>
-          )}
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div style={{ display: "flex", alignItems: "center", gap: 6, flexWrap: "wrap", marginBottom: 2 }}>
+                        <span style={{ fontSize: 13, fontWeight: 600, color: isDone ? "#a1a1aa" : "#09090b", textDecoration: isDone ? "line-through" : "none" }}>{mod.title}</span>
+                        {isNext && <span style={{ fontSize: 10, fontWeight: 700, padding: "2px 7px", borderRadius: 99, background: trackColor, color: "#fff" }}>Up next</span>}
+                        {isSkipped && <span style={{ fontSize: 10, fontWeight: 600, padding: "2px 7px", borderRadius: 99, background: "#fffbeb", color: "#d97706", border: "1px solid #fde68a" }}>Pre-unlocked</span>}
+                      </div>
+                      <p style={{ fontSize: 12, color: "#a1a1aa" }}>{mod.duration} · {mod.description}</p>
+                    </div>
+                    {!unlocked ? (
+                      <span style={{ fontSize: 16, flexShrink: 0, color: "#d4d4d8" }}>🔒</span>
+                    ) : (
+                      <Link href={`/modules/${mod.id}`} style={{ fontSize: 12, fontWeight: 700, flexShrink: 0, padding: "7px 16px", borderRadius: 10, textDecoration: "none", background: isDone ? "#ecfdf5" : isNext ? trackColor : "#f4f4f5", color: isDone ? "#16a34a" : isNext ? "#fff" : "#52525b" }}>
+                        {isDone ? "Review" : "Start →"}
+                      </Link>
+                    )}
+                  </div>
+                </ModuleCard>
+              );
+            })}
+          </div>
         </div>
 
       </main>

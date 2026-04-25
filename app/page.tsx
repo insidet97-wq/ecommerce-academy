@@ -156,13 +156,13 @@ export default function Home() {
                 Hey, <span style={{ color: "rgba(255,255,255,0.85)", fontWeight: 600 }}>{firstName}</span> 👋
               </span>
               <Link
-                href={nextModId ? `/modules/${nextModId}` : "/dashboard"}
+                href="/dashboard"
                 className="text-sm font-semibold px-4 py-2 rounded-lg text-white transition-all duration-200"
                 style={{ border: "1px solid rgba(255,255,255,0.15)", background: "rgba(255,255,255,0.06)" }}
                 onMouseEnter={e => { const t = e.currentTarget; t.style.background = "rgba(255,255,255,0.12)"; t.style.borderColor = "rgba(255,255,255,0.25)"; }}
                 onMouseLeave={e => { const t = e.currentTarget; t.style.background = "rgba(255,255,255,0.06)"; t.style.borderColor = "rgba(255,255,255,0.15)"; }}
               >
-                {nextModId ? "Continue learning →" : "Dashboard →"}
+                Continue learning →
               </Link>
             </div>
           ) : (
