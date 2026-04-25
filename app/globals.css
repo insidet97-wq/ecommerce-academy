@@ -56,3 +56,14 @@ body {
 *, *::before, *::after {
   transition-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
 }
+
+/* ── Responsive grid helpers ── */
+.tool-selector { grid-template-columns: repeat(4, 1fr); }
+.calc-grid     { grid-template-columns: repeat(2, 1fr); }
+
+@media (max-width: 600px) {
+  .tool-selector { grid-template-columns: repeat(2, 1fr) !important; }
+  .calc-grid     { grid-template-columns: 1fr !important; }
+  .hide-mobile   { display: none !important; }
+  .stack-mobile  { flex-direction: column !important; }
+}

@@ -1,9 +1,107 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useCallback } from "react";
 import { supabase } from "@/lib/supabase";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+
+/* ── Completion Certificate Modal ── */
+function CertificateModal({ name, onClose }: { name: string; onClose: () => void }) {
+  const date = new Date().toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" });
+  const [copied, setCopied] = useState(false);
+
+  function share() {
+    const text = `🎉 I just completed all 12 modules of Ecommerce Academy!\n\nI now know how to find a winning product, build a Shopify store, run ads, and grow an ecommerce business from scratch.\n\nStart your free roadmap → https://ecommerce-academy.vercel.app`;
+    navigator.clipboard.writeText(text).then(() => {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2500);
+    });
+  }
+
+  return (
+    <div
+      style={{
+        position: "fixed", inset: 0, zIndex: 100,
+        background: "rgba(0,0,0,0.7)", backdropFilter: "blur(6px)",
+        display: "flex", alignItems: "center", justifyContent: "center",
+        padding: 24,
+      }}
+      onClick={e => { if (e.target === e.currentTarget) onClose(); }}
+    >
+      <div style={{
+        background: "#fff", borderRadius: 28, maxWidth: 480, width: "100%",
+        overflow: "hidden",
+        boxShadow: "0 32px 80px rgba(0,0,0,0.4)",
+        animation: "fadeUp 0.4s cubic-bezier(0.16,1,0.3,1) both",
+      }}>
+        {/* Gradient header */}
+        <div style={{
+          background: "linear-gradient(135deg, #1e1b4b 0%, #312e81 40%, #4c1d95 100%)",
+          padding: "36px 32px 28px", textAlign: "center", position: "relative", overflow: "hidden",
+        }}>
+          <div className="dot-grid" style={{ position: "absolute", inset: 0, pointerEvents: "none" }} />
+          <div style={{ position: "absolute", inset: 0, pointerEvents: "none", background: "radial-gradient(ellipse 80% 60% at 50% 0%, rgba(139,92,246,0.4) 0%, transparent 70%)" }} />
+          <div style={{ position: "relative" }}>
+            <div style={{ fontSize: 52, marginBottom: 12 }}>🏆</div>
+            <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.15em", color: "rgba(255,255,255,0.45)", marginBottom: 6, textTransform: "uppercase" }}>
+              Certificate of Completion
+            </p>
+            <h2 style={{ fontSize: 26, fontWeight: 900, color: "#fff", letterSpacing: "-0.6px", lineHeight: 1.15 }}>
+              Ecommerce Academy
+            </h2>
+          </div>
+        </div>
+
+        {/* Certificate body */}
+        <div style={{ padding: "28px 32px 32px", textAlign: "center" }}>
+          <p style={{ fontSize: 13, color: "#a1a1aa", marginBottom: 6 }}>This certifies that</p>
+          <p style={{
+            fontSize: 28, fontWeight: 900, letterSpacing: "-0.8px", marginBottom: 6,
+            background: "linear-gradient(135deg, #6366f1, #7c3aed)",
+            WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent",
+          }}>
+            {name}
+          </p>
+          <p style={{ fontSize: 13, color: "#71717a", lineHeight: 1.65, marginBottom: 4 }}>
+            has successfully completed all <strong style={{ color: "#09090b" }}>12 modules</strong> of
+          </p>
+          <p style={{ fontSize: 14, fontWeight: 700, color: "#09090b", marginBottom: 16 }}>
+            Ecommerce Academy — From Zero to First Sale
+          </p>
+
+          {/* Divider */}
+          <div style={{ height: 1, background: "linear-gradient(90deg, transparent, #e4e4e7, transparent)", margin: "16px 0" }} />
+
+          <p style={{ fontSize: 12, color: "#a1a1aa", marginBottom: 24 }}>Completed on {date}</p>
+
+          {/* Buttons */}
+          <div style={{ display: "flex", gap: 10, justifyContent: "center", flexWrap: "wrap" }}>
+            <button
+              onClick={share}
+              style={{
+                background: "linear-gradient(135deg, #6366f1, #7c3aed)",
+                color: "#fff", fontWeight: 700, fontSize: 13,
+                padding: "11px 24px", borderRadius: 12, border: "none", cursor: "pointer",
+                boxShadow: "0 4px 16px rgba(99,102,241,0.3)",
+              }}
+            >
+              {copied ? "✓ Copied!" : "Share achievement 🎉"}
+            </button>
+            <button
+              onClick={onClose}
+              style={{
+                background: "#f4f4f5", color: "#52525b", fontWeight: 600, fontSize: 13,
+                padding: "11px 24px", borderRadius: 12, border: "none", cursor: "pointer",
+              }}
+            >
+              Back to dashboard
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
 
 /* ── Design tokens ── */
 const TRACK_COLORS: Record<string, string> = {
@@ -72,7 +170,11 @@ export default function DashboardPage() {
   const [email, setEmail]     = useState("");
   const [completed, setCompleted] = useState<number[]>([]);
   const [profile, setProfile] = useState<Profile>({ track: null, start_module: 1, goal: null, first_name: null });
-  const [loading, setLoading] = useState(true);
+  const [loading,  setLoading]  = useState(true);
+  const [showCert, setShowCert] = useState(false);
+
+  const openCert  = useCallback(() => setShowCert(true),  []);
+  const closeCert = useCallback(() => setShowCert(false), []);
 
   useEffect(() => {
     async function load() {
@@ -124,6 +226,11 @@ export default function DashboardPage() {
 
   return (
     <div className="min-h-screen" style={{ background: "#f8f8fb" }}>
+
+      {/* ── Certificate modal ── */}
+      {showCert && (
+        <CertificateModal name={firstName} onClose={closeCert} />
+      )}
 
       {/* ── Nav ── */}
       <nav style={{
@@ -264,8 +371,18 @@ export default function DashboardPage() {
           )}
 
           {completedCount === MODULES.length && (
-            <div style={{ marginTop: 20, paddingTop: 20, borderTop: "1px solid rgba(255,255,255,0.15)", textAlign: "center", position: "relative" }}>
-              <p style={{ fontWeight: 700, fontSize: 14 }}>🎉 You&apos;ve completed all modules! You&apos;re ready to sell.</p>
+            <div style={{ marginTop: 20, paddingTop: 20, borderTop: "1px solid rgba(255,255,255,0.15)", position: "relative", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12, flexWrap: "wrap" }}>
+              <p style={{ fontWeight: 700, fontSize: 14 }}>🎉 All modules complete — you&apos;re ready to sell!</p>
+              <button
+                onClick={openCert}
+                style={{
+                  background: "#fff", fontWeight: 700, fontSize: 12,
+                  padding: "7px 16px", borderRadius: 10, border: "none", cursor: "pointer",
+                  color: trackColor, flexShrink: 0,
+                }}
+              >
+                View Certificate 🏆
+              </button>
             </div>
           )}
 

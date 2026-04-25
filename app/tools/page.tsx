@@ -153,7 +153,7 @@ function ProfitCalculator() {
 
   return (
     <div>
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: 12 }}>
+      <div className="calc-grid" style={{ display: "grid", gap: 12, marginBottom: 12 }}>
         <NumInput label="Product cost (what you pay)" value={cost} onChange={setCost} />
         <NumInput label="Selling price (what you charge)" value={price} onChange={setPrice} />
         <NumInput label="Shipping cost per unit" value={shipping} onChange={setShipping} />
@@ -373,7 +373,7 @@ function ROASCalculator() {
         <strong style={{ color: "#09090b" }}>ROAS = Revenue ÷ Ad Spend.</strong> Your break-even ROAS is the minimum you need to not lose money on ads. Your <em>target</em> ROAS must be higher — ideally 30%+ above break-even to build real profit.
       </p>
 
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: 12 }}>
+      <div className="calc-grid" style={{ display: "grid", gap: 12, marginBottom: 12 }}>
         <NumInput label="Selling price" value={price} onChange={setPrice} />
         <NumInput label="Product cost (what you pay)" value={cost} onChange={setCost} />
         <NumInput label="Shipping cost per unit" value={shipping} onChange={setShipping} />
@@ -638,7 +638,7 @@ export default function ToolsPage() {
       <main style={{ maxWidth: 760, margin: "0 auto", padding: "28px 24px 80px" }}>
 
         {/* Tool selector */}
-        <div className="fade-up" style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 10, marginBottom: 24 }}>
+        <div className="fade-up tool-selector" style={{ display: "grid", gap: 10, marginBottom: 24 }}>
           {TOOLS_META.map(tool => {
             const isActive = active === tool.id;
             return (
