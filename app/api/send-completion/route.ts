@@ -42,7 +42,7 @@ export async function POST(req: Request) {
     const milestone = MILESTONE_COPY[completedModuleId] ?? "Keep the momentum going.";
 
     await resend.emails.send({
-      from: "First Sale Lab <onboarding@resend.dev>",
+      from: "First Sale Lab <hello@firstsalelab.com>",
       to: email,
       subject: isLast
         ? `🏆 You've completed First Sale Lab, ${firstName}!`

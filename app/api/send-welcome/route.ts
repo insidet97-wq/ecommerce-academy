@@ -33,7 +33,7 @@ export async function POST(req: Request) {
     const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://firstsalelab.com";
 
     await resend.emails.send({
-      from: "First Sale Lab <onboarding@resend.dev>",
+      from: "First Sale Lab <hello@firstsalelab.com>",
       to: email,
       subject: `Your roadmap is ready, ${firstName} 🚀`,
       html: `
