@@ -35,7 +35,11 @@ export const metadata: Metadata = {
     description: "12 focused modules, real tools, and a personalised roadmap that gets complete beginners to their first online sale.",
   },
   icons: {
-    icon: "/icon.svg",
+    icon: [
+      { url: "/icon.svg",  type: "image/svg+xml" },
+      { url: "/logo.png",  type: "image/png",    sizes: "any" },
+    ],
+    apple: "/logo.png",
   },
 };
 

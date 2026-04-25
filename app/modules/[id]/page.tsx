@@ -196,9 +196,7 @@ export default function ModulePage() {
         <nav style={{ background: "rgba(255,255,255,0.85)", backdropFilter: "blur(12px)", borderBottom: "1px solid rgba(0,0,0,0.06)", position: "sticky", top: 0, zIndex: 40 }}>
           <div style={{ maxWidth: 720, margin: "0 auto", padding: "0 24px", height: 60, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
             <Link href="/" style={{ display: "flex", alignItems: "center", gap: 9, textDecoration: "none" }}>
-              <div style={{ background: "#09090b", borderRadius: 8, padding: "2px 6px", display: "flex", alignItems: "center" }}>
-                <img src="/logo.png" alt="First Sale Lab" style={{ height: 26, width: "auto" }} />
-              </div>
+              <img src="/logo.png" alt="First Sale Lab" style={{ height: 40, width: "auto" }} />
               <span style={{ fontWeight: 800, fontSize: 15, color: "#09090b", letterSpacing: "-0.4px" }}>First Sale Lab</span>
             </Link>
             <Link href="/dashboard" style={{ fontSize: 13, fontWeight: 500, color: "#6366f1", textDecoration: "none" }}
