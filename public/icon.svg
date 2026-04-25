@@ -1,18 +1,18 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48">
   <defs>
-    <linearGradient id="g" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#6366f1"/>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#4f46e5"/>
       <stop offset="100%" stop-color="#7c3aed"/>
     </linearGradient>
   </defs>
-  <rect width="32" height="32" rx="8" fill="url(#g)"/>
+  <rect width="48" height="48" rx="11" fill="url(#bg)"/>
   <text
-    x="16" y="22"
-    font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif"
-    font-size="13"
-    font-weight="800"
+    x="24" y="34"
+    font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif"
+    font-weight="900"
+    font-size="17"
     fill="white"
     text-anchor="middle"
     letter-spacing="-0.5"
-  >EA</text>
+  >FSL</text>
 </svg>

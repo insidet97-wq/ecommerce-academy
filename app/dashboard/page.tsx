@@ -183,8 +183,9 @@ export default function DashboardPage() {
         <div style={{ maxWidth: 680, margin: "0 auto", padding: "0 24px", height: 60, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
           {/* Left — logo + admin badge */}
           <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-            <Link href="/" style={{ fontWeight: 700, fontSize: 15, color: "#09090b", textDecoration: "none", letterSpacing: "-0.3px" }}>
-              First Sale Lab
+            <Link href="/" style={{ display: "flex", alignItems: "center", gap: 9, textDecoration: "none" }}>
+              <img src="/logo.svg" alt="First Sale Lab" style={{ height: 28, width: "auto" }} />
+              <span style={{ fontWeight: 800, fontSize: 15, color: "#09090b", letterSpacing: "-0.4px" }}>First Sale Lab</span>
             </Link>
             {admin && (
               <span style={{ fontSize: 10, fontWeight: 700, padding: "2px 7px", borderRadius: 99, background: "linear-gradient(135deg, #6366f1, #7c3aed)", color: "#fff", letterSpacing: "0.1em", textTransform: "uppercase" }}>

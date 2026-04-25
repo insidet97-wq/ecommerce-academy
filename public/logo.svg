@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 138 68" fill="none">
+  <defs>
+    <linearGradient id="fslg" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%"   stop-color="#4f46e5"/>
+      <stop offset="52%"  stop-color="#7c3aed"/>
+      <stop offset="100%" stop-color="#d946ef"/>
+    </linearGradient>
+  </defs>
+
+  <g stroke="url(#fslg)" stroke-width="8.5" stroke-linecap="round" stroke-linejoin="round">
+    <!-- F: vertical + top arm + mid arm -->
+    <polyline points="9,60 9,8 34,8"/>
+    <line x1="9" y1="33" x2="28" y2="33"/>
+
+    <!-- S: two-arc flowing curve -->
+    <path d="M 68,17 C 68,8 45,8 45,23 C 45,37 68,37 68,51 C 68,62 45,62 45,53"/>
+
+    <!-- L: vertical + bottom arm -->
+    <polyline points="80,8 80,60 110,60"/>
+
+    <!-- Arrow: stem then head -->
+    <line x1="121" y1="6"  x2="121" y2="44"/>
+    <polyline points="113,25 121,6 129,25"/>
+  </g>
+</svg>
