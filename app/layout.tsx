@@ -13,8 +13,29 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Ecommerce Academy — Learn to sell online",
-  description: "A step-by-step guide for complete beginners to launch their first online store.",
+  title: {
+    default:  "Ecommerce Academy — Stop learning. Start selling.",
+    template: "%s | Ecommerce Academy",
+  },
+  description:
+    "12 focused modules, real tools, and a personalised roadmap that gets complete beginners to their first online sale. Free forever.",
+  metadataBase: new URL("https://ecommerce-academy.vercel.app"),
+  openGraph: {
+    siteName:    "Ecommerce Academy",
+    type:        "website",
+    locale:      "en_US",
+    title:       "Ecommerce Academy — Stop learning. Start selling.",
+    description: "12 focused modules, real tools, and a personalised roadmap that gets complete beginners to their first online sale.",
+    url:         "https://ecommerce-academy.vercel.app",
+  },
+  twitter: {
+    card:        "summary_large_image",
+    title:       "Ecommerce Academy — Stop learning. Start selling.",
+    description: "12 focused modules, real tools, and a personalised roadmap that gets complete beginners to their first online sale.",
+  },
+  icons: {
+    icon: "/icon.svg",
+  },
 };
 
 export default function RootLayout({
