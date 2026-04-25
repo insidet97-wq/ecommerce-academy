@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import Link from "next/link";
 import { useRef, useEffect, useState } from "react";
@@ -149,7 +149,7 @@ export default function Home() {
       {/* ── NAV ── */}
       <nav className="absolute top-0 left-0 right-0 z-20 px-8 py-5 flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <img src="/logo.svg" alt="First Sale Lab" style={{ height: 28, width: "auto" }} />
+          <img src="/logo.png" alt="First Sale Lab" style={{ height: 28, width: "auto" }} />
           <span className="text-base font-bold text-white tracking-tight" style={{ letterSpacing: "-0.4px" }}>First Sale Lab</span>
         </div>
         <div className="flex items-center gap-6">

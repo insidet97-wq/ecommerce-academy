@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useEffect, useRef, useState, useCallback } from "react";
 import { supabase } from "@/lib/supabase";
@@ -184,7 +184,9 @@ export default function DashboardPage() {
           {/* Left — logo + admin badge */}
           <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
             <Link href="/" style={{ display: "flex", alignItems: "center", gap: 9, textDecoration: "none" }}>
-              <img src="/logo.svg" alt="First Sale Lab" style={{ height: 28, width: "auto" }} />
+              <div style={{ background: "#09090b", borderRadius: 8, padding: "2px 6px", display: "flex", alignItems: "center" }}>
+                <img src="/logo.png" alt="First Sale Lab" style={{ height: 26, width: "auto" }} />
+              </div>
               <span style={{ fontWeight: 800, fontSize: 15, color: "#09090b", letterSpacing: "-0.4px" }}>First Sale Lab</span>
             </Link>
             {admin && (
