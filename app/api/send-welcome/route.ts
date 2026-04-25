@@ -80,7 +80,7 @@ export async function POST(req: Request) {
           <!-- CTA -->
           <div style="text-align:center;margin-bottom:28px;">
             <a href="${siteUrl}/modules/${moduleNum}"
-              style="display:inline-block;background:linear-gradient(135deg,#6366f1,#7c3aed);color:#fff;font-weight:800;font-size:15px;padding:15px 40px;border-radius:14px;text-decoration:none;letter-spacing:-0.2px;box-shadow:0 4px 20px rgba(99,102,241,0.35);">
+              style="display:inline-block;background:#6366f1;color:#fff;font-weight:800;font-size:15px;padding:15px 40px;border-radius:14px;text-decoration:none;letter-spacing:-0.2px;">
               Start Module ${moduleNum} →
             </a>
           </div>

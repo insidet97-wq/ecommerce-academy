@@ -85,7 +85,7 @@ export async function POST(req: Request) {
           </p>
           <div style="text-align:center;margin-bottom:24px;">
             <a href="${siteUrl}/dashboard"
-              style="display:inline-block;background:linear-gradient(135deg,#059669,#047857);color:#fff;font-weight:800;font-size:15px;padding:15px 40px;border-radius:14px;text-decoration:none;letter-spacing:-0.2px;box-shadow:0 4px 20px rgba(5,150,105,0.35);">
+              style="display:inline-block;background:#059669;color:#fff;font-weight:800;font-size:15px;padding:15px 40px;border-radius:14px;text-decoration:none;letter-spacing:-0.2px;">
               View Your Certificate 🏆
             </a>
           </div>
@@ -114,7 +114,7 @@ export async function POST(req: Request) {
           </div>
           <div style="text-align:center;margin-bottom:24px;">
             <a href="${siteUrl}/modules/${completedModuleId + 1}"
-              style="display:inline-block;background:linear-gradient(135deg,#6366f1,#7c3aed);color:#fff;font-weight:800;font-size:15px;padding:15px 40px;border-radius:14px;text-decoration:none;letter-spacing:-0.2px;box-shadow:0 4px 20px rgba(99,102,241,0.35);">
+              style="display:inline-block;background:#6366f1;color:#fff;font-weight:800;font-size:15px;padding:15px 40px;border-radius:14px;text-decoration:none;letter-spacing:-0.2px;">
               Start Module ${completedModuleId + 1} →
             </a>
           </div>
