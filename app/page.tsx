@@ -1,7 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { useRef } from "react";
+import { useRef, useEffect, useState } from "react";
+import { supabase } from "@/lib/supabase";
 
 /* ── Design tokens ── */
 const HERO_BG   = "linear-gradient(135deg, #08080f 0%, #0f0a2e 55%, #150a2e 100%)";
@@ -117,6 +118,14 @@ function ProductMockup() {
 
 /* ── Main page ── */
 export default function Home() {
+  const [loggedIn, setLoggedIn] = useState(false);
+
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setLoggedIn(!!session);
+    });
+  }, []);
+
   return (
     <div className="min-h-screen bg-white flex flex-col">
 
@@ -124,24 +133,38 @@ export default function Home() {
       <nav className="absolute top-0 left-0 right-0 z-20 px-8 py-5 flex items-center justify-between">
         <span className="text-base font-bold text-white tracking-tight">Ecommerce Academy</span>
         <div className="flex items-center gap-6">
-          <Link
-            href="/login"
-            className="text-sm font-medium transition-colors duration-200"
-            style={{ color: "rgba(255,255,255,0.55)" }}
-            onMouseEnter={e => (e.currentTarget.style.color = "white")}
-            onMouseLeave={e => (e.currentTarget.style.color = "rgba(255,255,255,0.55)")}
-          >
-            Log in
-          </Link>
-          <Link
-            href="/quiz"
-            className="text-sm font-semibold px-4 py-2 rounded-lg text-white transition-all duration-200"
-            style={{ border: "1px solid rgba(255,255,255,0.15)", background: "rgba(255,255,255,0.06)" }}
-            onMouseEnter={e => { const t = e.currentTarget; t.style.background = "rgba(255,255,255,0.12)"; t.style.borderColor = "rgba(255,255,255,0.25)"; }}
-            onMouseLeave={e => { const t = e.currentTarget; t.style.background = "rgba(255,255,255,0.06)"; t.style.borderColor = "rgba(255,255,255,0.15)"; }}
-          >
-            Get Started
-          </Link>
+          {loggedIn ? (
+            <Link
+              href="/dashboard"
+              className="text-sm font-semibold px-4 py-2 rounded-lg text-white transition-all duration-200"
+              style={{ border: "1px solid rgba(255,255,255,0.15)", background: "rgba(255,255,255,0.06)" }}
+              onMouseEnter={e => { const t = e.currentTarget; t.style.background = "rgba(255,255,255,0.12)"; t.style.borderColor = "rgba(255,255,255,0.25)"; }}
+              onMouseLeave={e => { const t = e.currentTarget; t.style.background = "rgba(255,255,255,0.06)"; t.style.borderColor = "rgba(255,255,255,0.15)"; }}
+            >
+              Dashboard →
+            </Link>
+          ) : (
+            <>
+              <Link
+                href="/login"
+                className="text-sm font-medium transition-colors duration-200"
+                style={{ color: "rgba(255,255,255,0.55)" }}
+                onMouseEnter={e => (e.currentTarget.style.color = "white")}
+                onMouseLeave={e => (e.currentTarget.style.color = "rgba(255,255,255,0.55)")}
+              >
+                Log in
+              </Link>
+              <Link
+                href="/quiz"
+                className="text-sm font-semibold px-4 py-2 rounded-lg text-white transition-all duration-200"
+                style={{ border: "1px solid rgba(255,255,255,0.15)", background: "rgba(255,255,255,0.06)" }}
+                onMouseEnter={e => { const t = e.currentTarget; t.style.background = "rgba(255,255,255,0.12)"; t.style.borderColor = "rgba(255,255,255,0.25)"; }}
+                onMouseLeave={e => { const t = e.currentTarget; t.style.background = "rgba(255,255,255,0.06)"; t.style.borderColor = "rgba(255,255,255,0.15)"; }}
+              >
+                Get Started
+              </Link>
+            </>
+          )}
         </div>
       </nav>
 
