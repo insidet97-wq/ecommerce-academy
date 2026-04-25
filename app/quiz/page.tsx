@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState, useRef } from "react";
 import Link from "next/link";
@@ -311,7 +311,7 @@ export default function QuizPage() {
 
       {/* Nav */}
       <nav className="relative z-10 px-6 py-5 flex items-center justify-between flex-shrink-0">
-        <Link href="/" className="text-base font-bold text-white tracking-tight">Ecommerce Academy</Link>
+        <Link href="/" className="text-base font-bold text-white tracking-tight">First Sale Lab</Link>
         <span className="text-xs font-semibold px-3 py-1 rounded-full" style={{ background: "rgba(255,255,255,0.08)", color: "rgba(255,255,255,0.5)", border: "1px solid rgba(255,255,255,0.1)" }}>
           {current + 1} / {questions.length}
         </span>

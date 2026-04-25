@@ -1,4 +1,4 @@
-import { Resend } from "resend";
+﻿import { Resend } from "resend";
 import { NextResponse } from "next/server";
 
 const resend = new Resend(process.env.RESEND_API_KEY);
@@ -35,17 +35,17 @@ const MILESTONE_COPY: Record<number, string> = {
 export async function POST(req: Request) {
   try {
     const { firstName, email, completedModuleId } = await req.json();
-    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://ecommerce-academy.vercel.app";
+    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://firstsalelab.com";
     const done = MODULES[completedModuleId];
     const isLast = completedModuleId === 12;
     const next = !isLast ? MODULES[completedModuleId + 1] : null;
     const milestone = MILESTONE_COPY[completedModuleId] ?? "Keep the momentum going.";
 
     await resend.emails.send({
-      from: "Ecommerce Academy <onboarding@resend.dev>",
+      from: "First Sale Lab <onboarding@resend.dev>",
       to: email,
       subject: isLast
-        ? `🏆 You've completed Ecommerce Academy, ${firstName}!`
+        ? `🏆 You've completed First Sale Lab, ${firstName}!`
         : `✅ Module ${completedModuleId} complete — here's what's next`,
       html: `
 <!DOCTYPE html>
@@ -125,7 +125,7 @@ export async function POST(req: Request) {
 
         <!-- Footer -->
         <tr><td style="background:#f8f8fb;border-radius:0 0 20px 20px;padding:24px 40px;text-align:center;border-top:1px solid #e4e4e7;">
-          <p style="margin:0 0 6px;font-size:13px;font-weight:700;color:#09090b;">Ecommerce Academy</p>
+          <p style="margin:0 0 6px;font-size:13px;font-weight:700;color:#09090b;">First Sale Lab</p>
           <p style="margin:0;font-size:12px;color:#a1a1aa;">Free forever · Built for complete beginners</p>
         </td></tr>
 

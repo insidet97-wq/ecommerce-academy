@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState } from "react";
 import { supabase } from "@/lib/supabase";
@@ -56,7 +56,7 @@ export default function LoginPage() {
       <div className="max-w-md w-full">
         <div className="bg-white rounded-3xl p-8 shadow-2xl">
           <div className="mb-8 text-center">
-            <Link href="/" className="text-lg font-bold text-gray-900">Ecommerce Academy</Link>
+            <Link href="/" className="text-lg font-bold text-gray-900">First Sale Lab</Link>
             <h1 className="mt-4 text-2xl font-bold text-gray-900">Welcome back</h1>
             <p className="mt-2 text-gray-500 text-sm">Continue your journey to your first sale.</p>
           </div>

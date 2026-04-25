@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState, useRef, useEffect } from "react";
 import Link from "next/link";
@@ -603,7 +603,7 @@ export default function ToolsPage() {
       }}>
         <div style={{ maxWidth: 760, margin: "0 auto", padding: "0 24px", height: 60, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
           <Link href="/" style={{ fontWeight: 700, fontSize: 15, color: "#09090b", textDecoration: "none", letterSpacing: "-0.3px" }}>
-            Ecommerce Academy
+            First Sale Lab
           </Link>
           <Link href="/dashboard" style={{ fontSize: 13, fontWeight: 500, color: INDIGO, textDecoration: "none" }}
             onMouseEnter={e => (e.currentTarget.style.color = "#4338ca")}

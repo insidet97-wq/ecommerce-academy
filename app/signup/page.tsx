@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState, useRef } from "react";
 import { supabase } from "@/lib/supabase";
@@ -81,7 +81,7 @@ export default function SignupPage() {
 
           <div style={{ textAlign: "center", marginBottom: 28 }}>
             <Link href="/" style={{ fontWeight: 700, fontSize: 15, color: "#09090b", textDecoration: "none", letterSpacing: "-0.3px" }}>
-              Ecommerce Academy
+              First Sale Lab
             </Link>
             <h1 style={{ fontSize: 22, fontWeight: 800, color: "#09090b", letterSpacing: "-0.5px", marginTop: 16, marginBottom: 6 }}>
               Create your free account

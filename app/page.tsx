@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import Link from "next/link";
 import { useRef, useEffect, useState } from "react";
@@ -148,7 +148,7 @@ export default function Home() {
 
       {/* ── NAV ── */}
       <nav className="absolute top-0 left-0 right-0 z-20 px-8 py-5 flex items-center justify-between">
-        <span className="text-base font-bold text-white tracking-tight">Ecommerce Academy</span>
+        <span className="text-base font-bold text-white tracking-tight">First Sale Lab</span>
         <div className="flex items-center gap-6">
           {loggedIn ? (
             <div className="flex items-center gap-4">
@@ -317,7 +317,7 @@ export default function Home() {
               className="rounded-2xl p-7 border"
               style={{ background: "rgba(99,102,241,0.04)", borderColor: "rgba(99,102,241,0.2)" }}
             >
-              <p className="text-xs font-bold uppercase tracking-[0.1em] mb-5" style={{ color: "#6366f1" }}>Ecommerce Academy</p>
+              <p className="text-xs font-bold uppercase tracking-[0.1em] mb-5" style={{ color: "#6366f1" }}>First Sale Lab</p>
               <div className="space-y-4">
                 {[
                   "12 focused modules, 20–45 min each",
@@ -452,7 +452,7 @@ export default function Home() {
 
       {/* ── FOOTER ── */}
       <footer className="bg-white border-t border-gray-100 px-8 py-10 text-center">
-        <p className="text-base font-bold text-gray-900 mb-1">Ecommerce Academy</p>
+        <p className="text-base font-bold text-gray-900 mb-1">First Sale Lab</p>
         <p className="text-sm text-gray-400">© 2026 · Built for complete beginners</p>
       </footer>
     </div>

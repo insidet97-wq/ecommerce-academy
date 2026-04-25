@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useEffect, useRef, useState, useCallback } from "react";
 import { supabase } from "@/lib/supabase";
@@ -63,7 +63,7 @@ function CertificateModal({ name, onClose }: { name: string; onClose: () => void
   const date = new Date().toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" });
   const [copied, setCopied] = useState(false);
   function share() {
-    const text = `🎉 I just completed all 12 modules of Ecommerce Academy!\n\nI now know how to find a winning product, build a Shopify store, run ads, and scale an ecommerce business from scratch.\n\nStart your free roadmap → https://ecommerce-academy.vercel.app`;
+    const text = `🎉 I just completed all 12 modules of First Sale Lab!\n\nI now know how to find a winning product, build a Shopify store, run ads, and scale an ecommerce business from scratch.\n\nStart your free roadmap → https://firstsalelab.com`;
     navigator.clipboard.writeText(text).then(() => { setCopied(true); setTimeout(() => setCopied(false), 2500); });
   }
   return (
@@ -76,14 +76,14 @@ function CertificateModal({ name, onClose }: { name: string; onClose: () => void
           <div style={{ position: "relative" }}>
             <div style={{ fontSize: 52, marginBottom: 12 }}>🏆</div>
             <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.15em", color: "rgba(255,255,255,0.45)", marginBottom: 6, textTransform: "uppercase" }}>Certificate of Completion</p>
-            <h2 style={{ fontSize: 26, fontWeight: 900, color: "#fff", letterSpacing: "-0.6px" }}>Ecommerce Academy</h2>
+            <h2 style={{ fontSize: 26, fontWeight: 900, color: "#fff", letterSpacing: "-0.6px" }}>First Sale Lab</h2>
           </div>
         </div>
         <div style={{ padding: "28px 32px 32px", textAlign: "center" }}>
           <p style={{ fontSize: 13, color: "#a1a1aa", marginBottom: 6 }}>This certifies that</p>
           <p style={{ fontSize: 28, fontWeight: 900, letterSpacing: "-0.8px", marginBottom: 6, background: "linear-gradient(135deg, #6366f1, #7c3aed)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>{name}</p>
           <p style={{ fontSize: 13, color: "#71717a", lineHeight: 1.65, marginBottom: 4 }}>has successfully completed all <strong style={{ color: "#09090b" }}>12 modules</strong> of</p>
-          <p style={{ fontSize: 14, fontWeight: 700, color: "#09090b", marginBottom: 16 }}>Ecommerce Academy — From Zero to First Sale</p>
+          <p style={{ fontSize: 14, fontWeight: 700, color: "#09090b", marginBottom: 16 }}>First Sale Lab — From Zero to First Sale</p>
           <div style={{ height: 1, background: "linear-gradient(90deg, transparent, #e4e4e7, transparent)", margin: "16px 0" }} />
           <p style={{ fontSize: 12, color: "#a1a1aa", marginBottom: 24 }}>Completed on {date}</p>
           <div style={{ display: "flex", gap: 10, justifyContent: "center", flexWrap: "wrap" }}>
@@ -184,7 +184,7 @@ export default function DashboardPage() {
           {/* Left — logo + admin badge */}
           <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
             <Link href="/" style={{ fontWeight: 700, fontSize: 15, color: "#09090b", textDecoration: "none", letterSpacing: "-0.3px" }}>
-              Ecommerce Academy
+              First Sale Lab
             </Link>
             {admin && (
               <span style={{ fontSize: 10, fontWeight: 700, padding: "2px 7px", borderRadius: 99, background: "linear-gradient(135deg, #6366f1, #7c3aed)", color: "#fff", letterSpacing: "0.1em", textTransform: "uppercase" }}>

@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+﻿import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { Analytics } from "@vercel/analytics/react";
 import "./globals.css";
@@ -15,23 +15,23 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: {
-    default:  "Ecommerce Academy — Stop learning. Start selling.",
-    template: "%s | Ecommerce Academy",
+    default:  "First Sale Lab — Stop learning. Start selling.",
+    template: "%s | First Sale Lab",
   },
   description:
     "12 focused modules, real tools, and a personalised roadmap that gets complete beginners to their first online sale. Free forever.",
-  metadataBase: new URL("https://ecommerce-academy.vercel.app"),
+  metadataBase: new URL("https://firstsalelab.com"),
   openGraph: {
-    siteName:    "Ecommerce Academy",
+    siteName:    "First Sale Lab",
     type:        "website",
     locale:      "en_US",
-    title:       "Ecommerce Academy — Stop learning. Start selling.",
+    title:       "First Sale Lab — Stop learning. Start selling.",
     description: "12 focused modules, real tools, and a personalised roadmap that gets complete beginners to their first online sale.",
-    url:         "https://ecommerce-academy.vercel.app",
+    url:         "https://firstsalelab.com",
   },
   twitter: {
     card:        "summary_large_image",
-    title:       "Ecommerce Academy — Stop learning. Start selling.",
+    title:       "First Sale Lab — Stop learning. Start selling.",
     description: "12 focused modules, real tools, and a personalised roadmap that gets complete beginners to their first online sale.",
   },
   icons: {
