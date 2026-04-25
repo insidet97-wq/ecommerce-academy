@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 import { getModule } from "@/lib/modules";
+import { isAdmin } from "@/lib/admin";
 import Link from "next/link";
 
 const MODULE_EMOJIS: Record<number, string> = {
@@ -108,7 +109,8 @@ export default function ModulePage() {
       const doneIds = (data ?? []).map((r: { module_id: number }) => r.module_id);
       setCompleted(doneIds);
 
-      const unlocked = moduleId === 1 || doneIds.includes(moduleId - 1);
+      const admin   = isAdmin(user.email);
+      const unlocked = admin || moduleId === 1 || doneIds.includes(moduleId - 1);
       if (!unlocked) { router.push("/dashboard"); return; }
 
       if (mod) setChecked(new Array(mod.checklist.length).fill(false));

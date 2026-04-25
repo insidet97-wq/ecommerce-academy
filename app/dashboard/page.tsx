@@ -4,6 +4,7 @@ import { useEffect, useRef, useState, useCallback } from "react";
 import { supabase } from "@/lib/supabase";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { isAdmin } from "@/lib/admin";
 
 /* ── Completion Certificate Modal ── */
 function CertificateModal({ name, onClose }: { name: string; onClose: () => void }) {
@@ -216,12 +217,13 @@ export default function DashboardPage() {
     );
   }
 
+  const admin            = isAdmin(email);
   const completedCount   = completed.length;
   const progressPercent  = Math.round((completedCount / MODULES.length) * 100);
   const startModule      = profile.start_module ?? 1;
   const firstName        = profile.first_name || email.split("@")[0];
   const trackColor       = profile.track ? (TRACK_COLORS[profile.track] ?? "#4f46e5") : "#4f46e5";
-  const isUnlocked       = (id: number) => id <= startModule || completed.includes(id - 1);
+  const isUnlocked       = (id: number) => admin || id <= startModule || completed.includes(id - 1);
   const nextModule       = MODULES.find(m => !completed.includes(m.id) && isUnlocked(m.id));
 
   return (
@@ -240,9 +242,20 @@ export default function DashboardPage() {
         position: "sticky", top: 0, zIndex: 40,
       }}>
         <div style={{ maxWidth: 760, margin: "0 auto", padding: "0 24px", height: 60, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-          <Link href="/" style={{ fontWeight: 700, fontSize: 15, color: "#09090b", textDecoration: "none", letterSpacing: "-0.3px" }}>
-            Ecommerce Academy
-          </Link>
+          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+            <Link href="/" style={{ fontWeight: 700, fontSize: 15, color: "#09090b", textDecoration: "none", letterSpacing: "-0.3px" }}>
+              Ecommerce Academy
+            </Link>
+            {admin && (
+              <span style={{
+                fontSize: 10, fontWeight: 700, padding: "2px 7px", borderRadius: 99,
+                background: "linear-gradient(135deg, #6366f1, #7c3aed)", color: "#fff",
+                letterSpacing: "0.1em", textTransform: "uppercase",
+              }}>
+                Admin
+              </span>
+            )}
+          </div>
           <div style={{ display: "flex", alignItems: "center", gap: 20 }}>
             <Link href="/tools" style={{ fontSize: 13, fontWeight: 500, color: "#6366f1", textDecoration: "none" }}
               onMouseEnter={e => (e.currentTarget.style.color = "#4338ca")}
@@ -370,9 +383,11 @@ export default function DashboardPage() {
             </div>
           )}
 
-          {completedCount === MODULES.length && (
+          {(completedCount === MODULES.length || admin) && (
             <div style={{ marginTop: 20, paddingTop: 20, borderTop: "1px solid rgba(255,255,255,0.15)", position: "relative", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12, flexWrap: "wrap" }}>
-              <p style={{ fontWeight: 700, fontSize: 14 }}>🎉 All modules complete — you&apos;re ready to sell!</p>
+              <p style={{ fontWeight: 700, fontSize: 14 }}>
+                {completedCount === MODULES.length ? "🎉 All modules complete — you're ready to sell!" : "🔑 Admin access — all modules unlocked."}
+              </p>
               <button
                 onClick={openCert}
                 style={{
