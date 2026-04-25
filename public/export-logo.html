@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Export FSL Logo</title>
+  <style>
+    body { margin: 0; background: #f4f4f8; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; gap: 32px; }
+    h1 { font-size: 20px; font-weight: 800; color: #09090b; letter-spacing: -0.5px; margin: 0; }
+    .preview { background: #fff; border-radius: 20px; padding: 40px 60px; box-shadow: 0 4px 24px rgba(0,0,0,0.08); }
+    .preview-dark { background: #09090b; border-radius: 20px; padding: 40px 60px; }
+    canvas { display: none; }
+    .btns { display: flex; gap: 12px; flex-wrap: wrap; justify-content: center; }
+    button { padding: 14px 28px; border: none; border-radius: 12px; font-size: 14px; font-weight: 700; cursor: pointer; }
+    .btn-light { background: #6366f1; color: #fff; }
+    .btn-dark  { background: #09090b; color: #fff; }
+    .btn-white { background: #fff;    color: #09090b; border: 1.5px solid #e4e4e7; }
+    label { font-size: 12px; font-weight: 600; color: #a1a1aa; letter-spacing: 0.05em; text-transform: uppercase; }
+  </style>
+</head>
+<body>
+
+  <h1>First Sale Lab — Logo Export</h1>
+
+  <div>
+    <label style="display:block;text-align:center;margin-bottom:10px;">Light background</label>
+    <div class="preview">
+      <img id="logoLight" src="/logo.svg" style="height:80px;width:auto;" alt="FSL Logo">
+    </div>
+  </div>
+
+  <div>
+    <label style="display:block;text-align:center;margin-bottom:10px;">Dark background</label>
+    <div class="preview-dark">
+      <img id="logoDark" src="/logo.svg" style="height:80px;width:auto;" alt="FSL Logo">
+    </div>
+  </div>
+
+  <canvas id="canvas"></canvas>
+
+  <div class="btns">
+    <button class="btn-light" onclick="exportPNG('transparent', 2400)">⬇ Download PNG — Transparent (2400px)</button>
+    <button class="btn-dark"  onclick="exportPNG('dark', 2400)">⬇ Download PNG — Dark bg (2400px)</button>
+    <button class="btn-white" onclick="exportPNG('white', 2400)">⬇ Download PNG — White bg (2400px)</button>
+  </div>
+
+  <p style="font-size:12px;color:#a1a1aa;margin:0;">Tip: The SVG file at <code>/logo.svg</code> is infinitely scalable and already used on the site.</p>
+
+<script>
+const svgSrc = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 118" fill="none">
+  <defs>
+    <linearGradient id="g" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%"   stop-color="#3730a3"/>
+      <stop offset="48%"  stop-color="#7c3aed"/>
+      <stop offset="100%" stop-color="#9333ea"/>
+    </linearGradient>
+  </defs>
+  <g stroke="url(#g)" stroke-width="14" stroke-linecap="round" stroke-linejoin="round">
+    <line x1="18"  y1="8"   x2="18"  y2="110"/>
+    <line x1="18"  y1="8"   x2="52"  y2="8"/>
+    <line x1="18"  y1="56"  x2="44"  y2="56"/>
+    <path d="M 102,28 C 102,12 60,12 60,32 C 60,54 102,54 102,74 C 102,96 60,96 60,78"/>
+    <line x1="112" y1="8"   x2="112" y2="110"/>
+    <line x1="112" y1="110" x2="150" y2="110"/>
+    <line x1="172" y1="36"  x2="172" y2="84"/>
+    <polyline points="160,56 172,32 184,56"/>
+  </g>
+</svg>`;
+
+function exportPNG(bg, width) {
+  const aspect = 118 / 200;
+  const height = Math.round(width * aspect);
+  const padding = Math.round(width * 0.08);
+
+  const canvas = document.getElementById('canvas');
+  canvas.width  = width + padding * 2;
+  canvas.height = height + padding * 2;
+  const ctx = canvas.getContext('2d');
+
+  // background
+  if (bg === 'dark') {
+    ctx.fillStyle = '#09090b';
+    ctx.roundRect(0, 0, canvas.width, canvas.height, 48);
+    ctx.fill();
+  } else if (bg === 'white') {
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+  }
+  // transparent: leave empty
+
+  const blob = new Blob([svgSrc], { type: 'image/svg+xml' });
+  const url  = URL.createObjectURL(blob);
+  const img  = new Image(width, height);
+
+  img.onload = () => {
+    ctx.drawImage(img, padding, padding, width, height);
+    URL.revokeObjectURL(url);
+
+    const link = document.createElement('a');
+    link.download = `fsl-logo-${bg}.png`;
+    link.href = canvas.toDataURL('image/png');
+    link.click();
+  };
+  img.src = url;
+}
+</script>
+</body>
+</html>
