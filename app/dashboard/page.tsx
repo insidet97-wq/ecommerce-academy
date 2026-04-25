@@ -55,6 +55,7 @@ function getMilestone(count: number, total: number): string {
 type Profile = {
   track: string | null; start_module: number;
   goal: string | null; first_name: string | null;
+  streak_days: number | null; last_active: string | null;
 };
 
 /* ── Certificate Modal ── */
@@ -115,7 +116,7 @@ export default function DashboardPage() {
   const router = useRouter();
   const [email,      setEmail]      = useState("");
   const [completed,  setCompleted]  = useState<number[]>([]);
-  const [profile,    setProfile]    = useState<Profile>({ track: null, start_module: 1, goal: null, first_name: null });
+  const [profile,    setProfile]    = useState<Profile>({ track: null, start_module: 1, goal: null, first_name: null, streak_days: null, last_active: null });
   const [loading,    setLoading]    = useState(true);
   const [showCert,   setShowCert]   = useState(false);
   const [menuOpen,   setMenuOpen]   = useState(false);
@@ -139,10 +140,10 @@ export default function DashboardPage() {
       setEmail(user.email ?? "");
       const [progressRes, profileRes] = await Promise.all([
         supabase.from("user_progress").select("module_id").eq("user_id", user.id),
-        supabase.from("user_profiles").select("track, start_module, goal, first_name").eq("id", user.id).single(),
+        supabase.from("user_profiles").select("track, start_module, goal, first_name, streak_days, last_active").eq("id", user.id).single(),
       ]);
       setCompleted((progressRes.data ?? []).map((r: { module_id: number }) => r.module_id));
-      if (profileRes.data) setProfile({ track: profileRes.data.track, start_module: profileRes.data.start_module ?? 1, goal: profileRes.data.goal, first_name: profileRes.data.first_name ?? null });
+      if (profileRes.data) setProfile({ track: profileRes.data.track, start_module: profileRes.data.start_module ?? 1, goal: profileRes.data.goal, first_name: profileRes.data.first_name ?? null, streak_days: profileRes.data.streak_days ?? 0, last_active: profileRes.data.last_active ?? null });
       setLoading(false);
     }
     load();
@@ -177,6 +178,11 @@ export default function DashboardPage() {
     ? `${(minutesInvested / 60).toFixed(1)} hrs invested`
     : `${minutesInvested} min invested`;
 
+  // Streak
+  const streak = profile.streak_days ?? 0;
+  const today  = new Date().toISOString().split("T")[0];
+  const streakActiveToday = profile.last_active === today;
+
   return (
     <div className="min-h-screen" style={{ background: "#f8f8fb" }}>
 
@@ -209,6 +215,7 @@ export default function DashboardPage() {
                 {[
                   { href: "/tools",     label: "🛠 Tools"     },
                   { href: "/resources", label: "📚 Resources" },
+                  ...(admin ? [{ href: "/admin", label: "📊 Analytics" }] : []),
                 ].map(item => (
                   <Link key={item.href} href={item.href} onClick={() => setMenuOpen(false)} style={{ display: "block", padding: "9px 12px", borderRadius: 8, fontSize: 13, fontWeight: 500, color: "#3f3f46", textDecoration: "none" }}
                     onMouseEnter={e => (e.currentTarget.style.background = "#f4f4f5")}
@@ -261,7 +268,17 @@ export default function DashboardPage() {
                   <p style={{ fontSize: 12, color: "#a1a1aa", marginTop: 2 }}>{timeLabel}</p>
                 )}
               </div>
-              <span style={{ fontSize: 22, fontWeight: 900, color: trackColor, letterSpacing: "-0.5px" }}>{progressPercent}%</span>
+              <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+                {/* Streak badge */}
+                {streak > 0 && (
+                  <div style={{ display: "flex", alignItems: "center", gap: 5, background: streakActiveToday ? "#fff7ed" : "#f4f4f5", border: `1.5px solid ${streakActiveToday ? "#fed7aa" : "#e4e4e7"}`, borderRadius: 99, padding: "4px 10px" }}>
+                    <span style={{ fontSize: 14 }}>🔥</span>
+                    <span style={{ fontSize: 13, fontWeight: 800, color: streakActiveToday ? "#ea580c" : "#a1a1aa", letterSpacing: "-0.3px" }}>{streak}</span>
+                    <span style={{ fontSize: 11, color: streakActiveToday ? "#fb923c" : "#a1a1aa", fontWeight: 500 }}>{streak === 1 ? "day" : "days"}</span>
+                  </div>
+                )}
+                <span style={{ fontSize: 22, fontWeight: 900, color: trackColor, letterSpacing: "-0.5px" }}>{progressPercent}%</span>
+              </div>
             </div>
             <div style={{ height: 8, borderRadius: 99, background: "#f4f4f5" }}>
               <div style={{ height: 8, borderRadius: 99, background: `linear-gradient(90deg, ${trackColor}, #7c3aed)`, width: `${progressPercent}%`, transition: "width 0.8s cubic-bezier(0.16,1,0.3,1)" }} />

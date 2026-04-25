@@ -5,6 +5,7 @@ import { useParams, useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 import { getModule } from "@/lib/modules";
 import { isAdmin } from "@/lib/admin";
+import { updateStreak } from "@/lib/streak";
 import Link from "next/link";
 
 const MODULE_EMOJIS: Record<number, string> = {
@@ -140,6 +141,7 @@ export default function ModulePage() {
     if (!userId || !mod) return;
     setMarking(true);
     await supabase.from("user_progress").upsert({ user_id: userId, module_id: moduleId });
+    await updateStreak(userId);
     setMarking(false);
 
     // Send completion email (fire and forget)
