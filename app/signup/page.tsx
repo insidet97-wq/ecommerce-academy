@@ -49,16 +49,17 @@ export default function SignupPage() {
       setLoading(false);
     } else {
       if (data.user) await saveQuizResults(data.user.id, firstName.trim());
-      // Preserve destination so login picks it up after email confirmation
-      const quizRaw = localStorage.getItem("quiz_results");
-      if (quizRaw) {
-        try {
+      const next = localStorage.getItem("ea_next");
+      if (next) { localStorage.removeItem("ea_next"); router.push(next); return; }
+      // Fall back to quiz start module if available
+      try {
+        const quizRaw = localStorage.getItem("quiz_results");
+        if (quizRaw) {
           const q = JSON.parse(quizRaw);
-          if (q.startModule) localStorage.setItem("ea_next", `/modules/${q.startModule}`);
-        } catch {}
-      }
-      setSuccess(true);
-      setLoading(false);
+          if (q.startModule) { router.push(`/modules/${q.startModule}`); return; }
+        }
+      } catch {}
+      router.push("/dashboard");
     }
   }
 
