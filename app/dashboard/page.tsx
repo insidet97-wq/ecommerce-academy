@@ -65,13 +65,13 @@ function ModuleCard({ children, unlocked }: { children: React.ReactNode; unlocke
   );
 }
 
-type Profile = { track: string | null; start_module: number; goal: string | null };
+type Profile = { track: string | null; start_module: number; goal: string | null; first_name: string | null };
 
 export default function DashboardPage() {
   const router = useRouter();
   const [email, setEmail]     = useState("");
   const [completed, setCompleted] = useState<number[]>([]);
-  const [profile, setProfile] = useState<Profile>({ track: null, start_module: 1, goal: null });
+  const [profile, setProfile] = useState<Profile>({ track: null, start_module: 1, goal: null, first_name: null });
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -82,7 +82,7 @@ export default function DashboardPage() {
 
       const [progressRes, profileRes] = await Promise.all([
         supabase.from("user_progress").select("module_id").eq("user_id", user.id),
-        supabase.from("user_profiles").select("track, start_module, goal").eq("id", user.id).single(),
+        supabase.from("user_profiles").select("track, start_module, goal, first_name").eq("id", user.id).single(),
       ]);
       setCompleted((progressRes.data ?? []).map((r: { module_id: number }) => r.module_id));
       if (profileRes.data) {
@@ -90,6 +90,7 @@ export default function DashboardPage() {
           track:        profileRes.data.track,
           start_module: profileRes.data.start_module ?? 1,
           goal:         profileRes.data.goal,
+          first_name:   profileRes.data.first_name ?? null,
         });
       }
       setLoading(false);
@@ -116,7 +117,7 @@ export default function DashboardPage() {
   const completedCount   = completed.length;
   const progressPercent  = Math.round((completedCount / MODULES.length) * 100);
   const startModule      = profile.start_module ?? 1;
-  const firstName        = email.split("@")[0];
+  const firstName        = profile.first_name || email.split("@")[0];
   const trackColor       = profile.track ? (TRACK_COLORS[profile.track] ?? "#4f46e5") : "#4f46e5";
   const isUnlocked       = (id: number) => id <= startModule || completed.includes(id - 1);
   const nextModule       = MODULES.find(m => !completed.includes(m.id) && isUnlocked(m.id));

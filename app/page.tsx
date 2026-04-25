@@ -122,10 +122,16 @@ export default function Home() {
   const [firstName, setFirstName] = useState("");
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
+    supabase.auth.getSession().then(async ({ data: { session } }) => {
       if (session?.user) {
         setLoggedIn(true);
-        setFirstName(session.user.email?.split("@")[0] ?? "");
+        // Try to get their real first name from the profile
+        const { data } = await supabase
+          .from("user_profiles")
+          .select("first_name")
+          .eq("id", session.user.id)
+          .single();
+        setFirstName(data?.first_name || session.user.email?.split("@")[0] || "");
       }
     });
   }, []);

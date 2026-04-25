@@ -1,38 +1,41 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { supabase } from "@/lib/supabase";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
-const heroBg = { background: "linear-gradient(135deg, #1e1b4b 0%, #312e81 40%, #4c1d95 100%)" };
+const HERO_BG = "linear-gradient(135deg, #1e1b4b 0%, #312e81 40%, #4c1d95 100%)";
+const INDIGO  = "#6366f1";
 
-async function saveQuizResults(userId: string) {
+async function saveQuizResults(userId: string, firstName: string) {
   try {
     const raw = localStorage.getItem("quiz_results");
-    if (!raw) return;
-    const quiz = JSON.parse(raw);
+    const quiz = raw ? JSON.parse(raw) : {};
     await supabase.from("user_profiles").upsert({
-      id: userId,
-      experience: quiz.experience,
-      goal: quiz.goal,
+      id:           userId,
+      first_name:   firstName,
+      experience:   quiz.experience,
+      goal:         quiz.goal,
       time_per_week: quiz.time,
-      budget: quiz.budget,
+      budget:       quiz.budget,
       product_idea: quiz.productIdea,
-      track: quiz.track,
+      track:        quiz.track,
       start_module: quiz.startModule ?? 1,
     });
-    localStorage.removeItem("quiz_results");
+    if (raw) localStorage.removeItem("quiz_results");
   } catch {}
 }
 
 export default function SignupPage() {
-  const router = useRouter();
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [error, setError] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [success, setSuccess] = useState(false);
+  const router   = useRouter();
+  const btnRef   = useRef<HTMLButtonElement>(null);
+  const [firstName, setFirstName] = useState("");
+  const [email,     setEmail]     = useState("");
+  const [password,  setPassword]  = useState("");
+  const [error,     setError]     = useState("");
+  const [loading,   setLoading]   = useState(false);
+  const [success,   setSuccess]   = useState(false);
 
   async function handleSignup(e: React.FormEvent) {
     e.preventDefault();
@@ -45,7 +48,7 @@ export default function SignupPage() {
       setError(error.message);
       setLoading(false);
     } else {
-      if (data.user) await saveQuizResults(data.user.id);
+      if (data.user) await saveQuizResults(data.user.id, firstName.trim());
       setSuccess(true);
       setLoading(false);
     }
@@ -53,12 +56,14 @@ export default function SignupPage() {
 
   if (success) {
     return (
-      <div className="min-h-screen flex items-center justify-center px-6" style={heroBg}>
-        <div className="max-w-md w-full bg-white rounded-3xl p-8 text-center shadow-2xl">
-          <div className="text-5xl mb-4">📬</div>
-          <h1 className="text-2xl font-bold text-gray-900 mb-2">Check your email</h1>
-          <p className="text-gray-500 text-sm leading-relaxed">
-            We sent a confirmation link to <strong>{email}</strong>. Click it to activate your account and access your personalized roadmap.
+      <div className="min-h-screen flex items-center justify-center px-6" style={{ background: HERO_BG }}>
+        <div style={{ maxWidth: 420, width: "100%", background: "#fff", borderRadius: 28, padding: "40px 32px", textAlign: "center", boxShadow: "0 24px 64px rgba(0,0,0,0.25)" }}>
+          <div style={{ fontSize: 48, marginBottom: 16 }}>📬</div>
+          <h1 style={{ fontSize: 22, fontWeight: 800, color: "#09090b", marginBottom: 8, letterSpacing: "-0.5px" }}>
+            Check your email, {firstName}!
+          </h1>
+          <p style={{ fontSize: 13, color: "#71717a", lineHeight: 1.65 }}>
+            We sent a confirmation link to <strong style={{ color: "#09090b" }}>{email}</strong>. Click it to activate your account and access your personalised roadmap.
           </p>
         </div>
       </div>
@@ -66,59 +71,115 @@ export default function SignupPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center px-6" style={heroBg}>
-      <div className="max-w-md w-full">
-        <div className="bg-white rounded-3xl p-8 shadow-2xl">
-          <div className="mb-8 text-center">
-            <Link href="/" className="text-lg font-bold text-gray-900">Ecommerce Academy</Link>
-            <h1 className="mt-4 text-2xl font-bold text-gray-900">Create your free account</h1>
-            <p className="mt-2 text-gray-500 text-sm">Your personalized roadmap is waiting.</p>
+    <div className="min-h-screen flex items-center justify-center px-6" style={{ background: HERO_BG }}>
+      <div style={{ maxWidth: 420, width: "100%" }}>
+        <div style={{ background: "#fff", borderRadius: 28, padding: "36px 32px", boxShadow: "0 24px 64px rgba(0,0,0,0.25)" }}>
+
+          <div style={{ textAlign: "center", marginBottom: 28 }}>
+            <Link href="/" style={{ fontWeight: 700, fontSize: 15, color: "#09090b", textDecoration: "none", letterSpacing: "-0.3px" }}>
+              Ecommerce Academy
+            </Link>
+            <h1 style={{ fontSize: 22, fontWeight: 800, color: "#09090b", letterSpacing: "-0.5px", marginTop: 16, marginBottom: 6 }}>
+              Create your free account
+            </h1>
+            <p style={{ fontSize: 13, color: "#71717a" }}>Your personalised roadmap is waiting.</p>
           </div>
 
-          <form onSubmit={handleSignup} className="space-y-4">
+          <form onSubmit={handleSignup} style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+
+            {/* First name */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
+              <label style={{ fontSize: 12, fontWeight: 600, color: "#52525b", display: "block", marginBottom: 6 }}>
+                First name
+              </label>
+              <input
+                type="text"
+                required
+                value={firstName}
+                onChange={e => setFirstName(e.target.value)}
+                placeholder="e.g. Alex"
+                style={{
+                  width: "100%", padding: "11px 14px", fontSize: 14, borderRadius: 12,
+                  outline: "none", border: "1.5px solid #e4e4e7", color: "#09090b",
+                  boxSizing: "border-box",
+                }}
+                onFocus={e => (e.currentTarget.style.borderColor = INDIGO)}
+                onBlur={e  => (e.currentTarget.style.borderColor = "#e4e4e7")}
+              />
+            </div>
+
+            {/* Email */}
+            <div>
+              <label style={{ fontSize: 12, fontWeight: 600, color: "#52525b", display: "block", marginBottom: 6 }}>
+                Email
+              </label>
               <input
                 type="email"
                 required
                 value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                onChange={e => setEmail(e.target.value)}
                 placeholder="you@example.com"
-                className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:border-transparent"
-                style={{ "--tw-ring-color": "#6366f1" } as React.CSSProperties}
+                style={{
+                  width: "100%", padding: "11px 14px", fontSize: 14, borderRadius: 12,
+                  outline: "none", border: "1.5px solid #e4e4e7", color: "#09090b",
+                  boxSizing: "border-box",
+                }}
+                onFocus={e => (e.currentTarget.style.borderColor = INDIGO)}
+                onBlur={e  => (e.currentTarget.style.borderColor = "#e4e4e7")}
               />
             </div>
+
+            {/* Password */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Password</label>
+              <label style={{ fontSize: 12, fontWeight: 600, color: "#52525b", display: "block", marginBottom: 6 }}>
+                Password
+              </label>
               <input
                 type="password"
                 required
                 value={password}
-                onChange={(e) => setPassword(e.target.value)}
+                onChange={e => setPassword(e.target.value)}
                 placeholder="At least 6 characters"
-                className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2"
+                style={{
+                  width: "100%", padding: "11px 14px", fontSize: 14, borderRadius: 12,
+                  outline: "none", border: "1.5px solid #e4e4e7", color: "#09090b",
+                  boxSizing: "border-box",
+                }}
+                onFocus={e => (e.currentTarget.style.borderColor = INDIGO)}
+                onBlur={e  => (e.currentTarget.style.borderColor = "#e4e4e7")}
               />
             </div>
 
             {error && (
-              <div className="bg-red-50 border border-red-100 rounded-xl px-4 py-3">
-                <p className="text-red-600 text-sm">{error}</p>
+              <div style={{ background: "#fff7f7", border: "1px solid #fecaca", borderRadius: 10, padding: "10px 14px" }}>
+                <p style={{ fontSize: 13, color: "#dc2626" }}>{error}</p>
               </div>
             )}
 
             <button
+              ref={btnRef}
               type="submit"
               disabled={loading}
-              className="w-full text-white font-bold py-3 rounded-xl transition-opacity disabled:opacity-50 shadow-lg"
-              style={{ background: "linear-gradient(135deg, #4f46e5, #7c3aed)" }}
+              onMouseEnter={() => { if (btnRef.current && !loading) { btnRef.current.style.boxShadow = "0 8px 28px rgba(99,102,241,0.45)"; btnRef.current.style.transform = "translateY(-1px)"; } }}
+              onMouseLeave={() => { if (btnRef.current) { btnRef.current.style.boxShadow = "0 4px 16px rgba(99,102,241,0.28)"; btnRef.current.style.transform = "translateY(0)"; } }}
+              style={{
+                width: "100%", padding: "13px",
+                background: loading ? "#e4e4e7" : "linear-gradient(135deg, #6366f1, #7c3aed)",
+                color: loading ? "#a1a1aa" : "#fff",
+                fontWeight: 700, fontSize: 14, borderRadius: 14, border: "none",
+                cursor: loading ? "not-allowed" : "pointer",
+                boxShadow: "0 4px 16px rgba(99,102,241,0.28)",
+                transition: "box-shadow 0.2s, transform 0.2s",
+                marginTop: 4,
+              }}
             >
               {loading ? "Creating account…" : "Create my free account →"}
             </button>
           </form>
 
-          <p className="mt-6 text-center text-sm text-gray-500">
+          <p style={{ textAlign: "center", marginTop: 20, fontSize: 13, color: "#a1a1aa" }}>
             Already have an account?{" "}
-            <Link href="/login" className="font-semibold hover:underline" style={{ color: "#6366f1" }}>Log in</Link>
+            <Link href="/login" style={{ color: INDIGO, fontWeight: 600, textDecoration: "none" }}>Log in</Link>
           </p>
         </div>
       </div>
