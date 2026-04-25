@@ -163,6 +163,7 @@ export default function ModulePage() {
 
   const isDone       = completed.includes(moduleId);
   const allChecked   = checked.every(Boolean);
+  const emoji        = MODULE_EMOJIS[moduleId] ?? "📖";
 
   // ── Module intro screen ──
   if (showIntro) {
@@ -250,7 +251,6 @@ export default function ModulePage() {
     );
   }
   const checkedCount = checked.filter(Boolean).length;
-  const emoji        = MODULE_EMOJIS[moduleId] ?? "📖";
   const isLast       = moduleId === 12;
   const nextId       = moduleId + 1;
 
