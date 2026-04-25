@@ -1,4 +1,4 @@
-export type Module = {
+﻿export type Module = {
   id: number;
   title: string;
   duration: string;
@@ -15,7 +15,7 @@ export const modules: Module[] = [
     id: 1,
     title: "The Rules of the Game",
     duration: "~20 min",
-    objective: "Understand how ecommerce actually works before spending €1 — get the mindset and foundation right from day one.",
+    objective: "Understand how ecommerce actually works before spending $1 — get the mindset and foundation right from day one.",
     concepts: [
       { title: "Your business is marketing, not your product", body: "Anyone can find a product. The people who win are the ones who get good at getting attention and converting it into sales." },
       { title: "Niche down, don't go wide", body: '"Fitness" is not a niche. "Home workouts for busy moms over 40" is a niche. The more specific you are, the less competition and the more passionate your buyers.' },
@@ -83,7 +83,7 @@ export const modules: Module[] = [
     duration: "~30 min",
     objective: "Identify and validate one product to sell first — before spending any money on inventory.",
     concepts: [
-      { title: "The 3X Rule is non-negotiable", body: "If your product costs €10 to land (buy + ship to you), you must sell it for at least €30. No exceptions. This covers ads, operations, and profit." },
+      { title: "The 3X Rule is non-negotiable", body: "If your product costs $10 to land (buy + ship to you), you must sell it for at least $30. No exceptions. This covers ads, operations, and profit." },
       { title: "Validate before you buy", body: "Don't order 500 units until you know people want it. Use TikTok, Amazon, and Google to find proof of demand first." },
       { title: "One winning product beats ten average ones", body: "Focus on finding one great product, not building a full catalog. Depth beats breadth at the start." },
       { title: "Best product criteria", body: "Consumable or needs accessories (enables repeat purchases), passion-niche related, not at rock-bottom prices on Amazon, can be private-labeled later." },
@@ -100,7 +100,7 @@ export const modules: Module[] = [
     mistakes: [
       "Falling in love with a product before validating demand",
       "Ignoring the 3X Rule because the product 'seems cool'",
-      "Picking a product that's already a commodity on Amazon at €5",
+      "Picking a product that's already a commodity on Amazon at $5",
     ],
     checklist: [
       "I found at least 5 product candidates in my niche",
@@ -187,7 +187,7 @@ export const modules: Module[] = [
     concepts: [
       { title: "A funnel is a focused path", body: "No navigation menu. No distractions. One product, one decision: buy or leave. Every distraction you remove increases conversion." },
       { title: "The three parts of a basic funnel", body: "Landing page → Order bump at checkout → One upsell after payment. Each step adds revenue without needing more traffic." },
-      { title: "The order bump adds ~21% more revenue", body: "A simple checkbox at checkout offering a complementary product for €5–15. Most people just tick it. It costs you nothing extra." },
+      { title: "The order bump adds ~21% more revenue", body: "A simple checkbox at checkout offering a complementary product for $5–15. Most people just tick it. It costs you nothing extra." },
       { title: "One-click upsell", body: "After they pay, offer a related product. They don't re-enter payment details — one click and it's added. Re-entry of details drops upsell conversion by 30%." },
     ],
     steps: [
@@ -195,7 +195,7 @@ export const modules: Module[] = [
       'Write your headline using this formula: [Specific Result] for [Specific Person] — Without [Common Fear]',
       "Create a landing page in Shopify: hero image or video, 3–5 bullet point benefits, customer reviews, clear Buy Now button",
       "Remove all navigation links from this page",
-      "Set up one order bump: a complementary low-cost product (€5–15) as a checkbox at checkout",
+      "Set up one order bump: a complementary low-cost product ($5–15) as a checkbox at checkout",
       "Set up one upsell offer shown immediately after purchase",
       "Test the full flow yourself — place a test order and go through every step",
     ],
@@ -257,7 +257,7 @@ export const modules: Module[] = [
     objective: "Launch your first small paid advertising campaign to drive targeted traffic to your funnel and get real data fast.",
     concepts: [
       { title: "Paid ads buy you speed and data", body: "Instead of waiting months for organic traffic, you pay to learn what works now. Think of your first ad budget as tuition — you're buying knowledge." },
-      { title: "Start small and specific", body: "€20–30/day on one audience, one ad, one funnel. Do not spread your budget across multiple campaigns or products." },
+      { title: "Start small and specific", body: "$20–30/day on one audience, one ad, one funnel. Do not spread your budget across multiple campaigns or products." },
       { title: "You are buying data first, sales second", body: "Your first campaign teaches you who buys and what message works. The goal is learning, not profit — profit comes after optimization." },
       { title: "Meta and TikTok Ads are the two best starting platforms", body: "Meta (Facebook/Instagram) has better targeting data. TikTok Ads have lower competition and cost. Pick one and start there." },
     ],
@@ -266,15 +266,15 @@ export const modules: Module[] = [
       "Install the pixel/tracking on your Shopify store (5-minute setup inside the platform)",
       "Create your first ad using your best-performing TikTok organic video",
       "Set your audience based on your customer avatar (age, interests, location)",
-      "Set your daily budget: €20–30/day",
+      "Set your daily budget: $20–30/day",
       "Run for 3–5 days without changing anything",
       "After 5 days, evaluate: cost per click, add-to-cart rate, purchase rate",
-      "Turn off ads that spend €20+ with zero add-to-carts. Scale ads that produce purchases.",
+      "Turn off ads that spend $20+ with zero add-to-carts. Scale ads that produce purchases.",
     ],
     mistakes: [
       "Changing the campaign before it has enough data — minimum 3–5 days",
       "Running ads to your store homepage instead of your funnel",
-      "Setting budget too low (under €15/day — not enough data to learn from)",
+      "Setting budget too low (under $15/day — not enough data to learn from)",
       "Using only image ads — video ads outperform by 3× on average",
     ],
     checklist: [
@@ -282,7 +282,7 @@ export const modules: Module[] = [
       "Pixel/tracking installed and verified on Shopify store",
       "First ad created using video content",
       "Audience set based on customer avatar",
-      "Campaign launched at €20–30/day",
+      "Campaign launched at $20–30/day",
       "First 5-day evaluation completed",
     ],
     resources: [

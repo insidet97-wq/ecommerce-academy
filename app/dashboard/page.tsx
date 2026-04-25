@@ -15,12 +15,12 @@ const TRACK_COLORS: Record<string, string> = {
 };
 const GOAL_LABELS: Record<string, string> = {
   first_sale:  "First ever sale",
-  side_income: "€500–2k/month side income",
+  side_income: "$500–2k/month side income",
   full_time:   "Replace full-time income",
   learn:       "Learn how ecommerce works",
 };
 const MODULES = [
-  { id: 1,  emoji: "🎮", title: "The Rules of the Game",         duration: "~20 min", description: "Understand how ecommerce works before spending €1." },
+  { id: 1,  emoji: "🎮", title: "The Rules of the Game",         duration: "~20 min", description: "Understand how ecommerce works before spending $1." },
   { id: 2,  emoji: "🎯", title: "Find Your Niche",               duration: "~25 min", description: "Choose a specific, passionate, profitable niche." },
   { id: 3,  emoji: "🏆", title: "Find Your Winning Product",     duration: "~30 min", description: "Validate one product with the 3X margin rule." },
   { id: 4,  emoji: "🧠", title: "Know Your Customer",            duration: "~25 min", description: "Build a detailed customer avatar." },

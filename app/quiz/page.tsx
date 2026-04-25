@@ -30,7 +30,7 @@ const questions = [
     microcopy: "This shapes which modules we prioritize for you.",
     options: [
       { label: "Making my first ever sale — proving to myself it's possible", value: "first_sale" },
-      { label: "Earning a reliable €500–2,000/month on the side", value: "side_income" },
+      { label: "Earning a reliable $500–2,000/month on the side", value: "side_income" },
       { label: "Replacing my job income — full financial freedom", value: "full_time" },
       { label: "Understanding how ecommerce works — knowledge first", value: "learn" },
     ],
@@ -53,10 +53,10 @@ const questions = [
     question: "What budget are you working with to start?",
     microcopy: "We'll show you how to get the most out of whatever you have.",
     options: [
-      { label: "Under €100 — I need to start as lean as possible", value: "minimal" },
-      { label: "€100–500 — I have a small budget to invest", value: "small" },
-      { label: "€500–2,000 — I'm ready to invest to move faster", value: "medium" },
-      { label: "€2,000+ — I want to scale quickly", value: "large" },
+      { label: "Under $100 — I need to start as lean as possible", value: "minimal" },
+      { label: "$100–500 — I have a small budget to invest", value: "small" },
+      { label: "$500–2,000 — I'm ready to invest to move faster", value: "medium" },
+      { label: "$2,000+ — I want to scale quickly", value: "large" },
     ],
   },
   {
@@ -79,9 +79,9 @@ function computeResult(a: Answers) {
   return { track: "Beginner Fast-Start", emoji: "🚀", tagline: "From zero to first sale — step by step.", description: "You're starting from scratch — perfectly fine. We'll guide you through every step, from picking a product to making your first real sale.", startModule: 1 };
 }
 
-const goalLabels: Record<string, string>       = { first_sale: "First ever sale", side_income: "€500–2k/month side income", full_time: "Replace full-time income", learn: "Learn how ecommerce works" };
+const goalLabels: Record<string, string>       = { first_sale: "First ever sale", side_income: "$500–2k/month side income", full_time: "Replace full-time income", learn: "Learn how ecommerce works" };
 const timeLabels: Record<string, string>        = { low: "1–5 hrs/week", medium: "5–10 hrs/week", high: "10–20 hrs/week", full: "20+ hrs/week" };
-const budgetLabels: Record<string, string>      = { minimal: "Under €100", small: "€100–500", medium: "€500–2,000", large: "€2,000+" };
+const budgetLabels: Record<string, string>      = { minimal: "Under $100", small: "$100–500", medium: "$500–2,000", large: "$2,000+" };
 const experienceLabels: Record<string, string>  = { beginner: "Complete beginner", intermediate: "Some experience", advanced: "Already have a store" };
 const ideaLabels: Record<string, string>        = { no_idea: "No idea yet", rough_idea: "Rough idea", ready: "Ready to go" };
 

@@ -4,7 +4,7 @@ import { NextResponse } from "next/server";
 const resend = new Resend(process.env.RESEND_API_KEY);
 
 const MODULES: Record<number, { emoji: string; title: string; duration: string; description: string }> = {
-  1:  { emoji: "🎮", title: "The Rules of the Game",         duration: "~20 min", description: "Understand how ecommerce works before spending €1." },
+  1:  { emoji: "🎮", title: "The Rules of the Game",         duration: "~20 min", description: "Understand how ecommerce works before spending $1." },
   2:  { emoji: "🎯", title: "Find Your Niche",               duration: "~25 min", description: "Choose a specific, passionate, profitable niche." },
   3:  { emoji: "🏆", title: "Find Your Winning Product",     duration: "~30 min", description: "Validate one product with the 3X margin rule." },
   4:  { emoji: "🧠", title: "Know Your Customer",            duration: "~25 min", description: "Build a detailed customer avatar." },

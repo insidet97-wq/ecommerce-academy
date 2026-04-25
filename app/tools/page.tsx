@@ -21,7 +21,7 @@ function Label({ children }: { children: React.ReactNode }) {
   );
 }
 
-function NumInput({ label, prefix = "€", value, onChange, placeholder = "0" }: {
+function NumInput({ label, prefix = "$", value, onChange, placeholder = "0" }: {
   label: string; prefix?: string; value: string;
   onChange: (v: string) => void; placeholder?: string;
 }) {
@@ -166,12 +166,12 @@ function ProfitCalculator() {
 
       {result && (
         <div style={{ marginTop: 20, background: "#f8f8fb", borderRadius: 16, padding: "18px 20px" }}>
-          <ResultRow label="Revenue per unit" value={`€${result.revenue.toFixed(2)}`} />
-          <ResultRow label="Profit per unit" value={`€${result.profit.toFixed(2)}`} highlight positive={result.profit > 0} negative={result.profit <= 0} />
+          <ResultRow label="Revenue per unit" value={`$${result.revenue.toFixed(2)}`} />
+          <ResultRow label="Profit per unit" value={`$${result.profit.toFixed(2)}`} highlight positive={result.profit > 0} negative={result.profit <= 0} />
           <ResultRow label="Profit margin" value={`${result.margin.toFixed(1)}%`} positive={result.margin >= 30} negative={result.margin < 15} />
           <ResultRow label="3X markup rule" value={result.passes3x ? "✅ Passes" : "❌ Fails"} positive={result.passes3x} negative={!result.passes3x} />
           {result.monthly !== null && (
-            <ResultRow label="Monthly profit estimate" value={`€${result.monthly.toFixed(0)}`} highlight positive={result.monthly > 0} negative={result.monthly <= 0} />
+            <ResultRow label="Monthly profit estimate" value={`$${result.monthly.toFixed(0)}`} highlight positive={result.monthly > 0} negative={result.monthly <= 0} />
           )}
           {result.passes3x && result.margin >= 25 ? (
             <Verdict bg="#ecfdf5" border="#a7f3d0" color="#065f46">
@@ -383,7 +383,7 @@ function ROASCalculator() {
 
       {result && (
         <div style={{ marginTop: 20, background: "#f8f8fb", borderRadius: 16, padding: "18px 20px" }}>
-          <ResultRow label="Profit per order (before ads)" value={`€${result.profitPerOrder.toFixed(2)}`} positive={result.profitPerOrder > 0} negative={result.profitPerOrder <= 0} />
+          <ResultRow label="Profit per order (before ads)" value={`$${result.profitPerOrder.toFixed(2)}`} positive={result.profitPerOrder > 0} negative={result.profitPerOrder <= 0} />
           <ResultRow label="Profit margin" value={`${result.margin.toFixed(1)}%`} />
           <ResultRow label="Break-even ROAS" value={result.beRoas === Infinity ? "N/A" : `${result.beRoas.toFixed(2)}×`} highlight />
           <ResultRow label="Target ROAS (30% above break-even)" value={result.targetRoas === Infinity ? "N/A" : `${result.targetRoas.toFixed(2)}×`} positive />

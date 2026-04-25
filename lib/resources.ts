@@ -1,4 +1,4 @@
-export type Resource = {
+﻿export type Resource = {
   id: string;
   category: string;
   name: string;
@@ -168,7 +168,7 @@ export const resources: Resource[] = [
     id: "meta-ads-manager",
     category: "Marketing & Ads",
     name: "Meta Ads Manager",
-    description: "Run ads on Facebook and Instagram. The most powerful targeting platform for ecommerce. Start with €5–10/day.",
+    description: "Run ads on Facebook and Instagram. The most powerful targeting platform for ecommerce. Start with $5–10/day.",
     url: "https://adsmanager.facebook.com",
     emoji: "📣",
     free: true,

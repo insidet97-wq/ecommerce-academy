@@ -300,7 +300,7 @@ export default function Home() {
                 {[
                   "6-hour courses you never finish",
                   "10 YouTube videos that all contradict each other",
-                  "€997 for a PDF and a Facebook group",
+                  "$997 for a PDF and a Facebook group",
                   "No clear next step — ever",
                   "Months pass. Zero sales.",
                 ].map((item) => (
