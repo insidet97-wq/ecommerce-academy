@@ -49,6 +49,14 @@ export default function SignupPage() {
       setLoading(false);
     } else {
       if (data.user) await saveQuizResults(data.user.id, firstName.trim());
+      // Preserve destination so login picks it up after email confirmation
+      const quizRaw = localStorage.getItem("quiz_results");
+      if (quizRaw) {
+        try {
+          const q = JSON.parse(quizRaw);
+          if (q.startModule) localStorage.setItem("ea_next", `/modules/${q.startModule}`);
+        } catch {}
+      }
       setSuccess(true);
       setLoading(false);
     }

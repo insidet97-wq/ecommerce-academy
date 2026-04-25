@@ -45,7 +45,9 @@ export default function LoginPage() {
       setLoading(false);
     } else {
       if (data.user) await saveQuizResults(data.user.id);
-      router.push("/dashboard");
+      const next = localStorage.getItem("ea_next");
+      if (next) { localStorage.removeItem("ea_next"); router.push(next); }
+      else router.push("/dashboard");
     }
   }
 

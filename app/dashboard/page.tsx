@@ -6,104 +6,6 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { isAdmin } from "@/lib/admin";
 
-/* ── Completion Certificate Modal ── */
-function CertificateModal({ name, onClose }: { name: string; onClose: () => void }) {
-  const date = new Date().toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" });
-  const [copied, setCopied] = useState(false);
-
-  function share() {
-    const text = `🎉 I just completed all 12 modules of Ecommerce Academy!\n\nI now know how to find a winning product, build a Shopify store, run ads, and grow an ecommerce business from scratch.\n\nStart your free roadmap → https://ecommerce-academy.vercel.app`;
-    navigator.clipboard.writeText(text).then(() => {
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2500);
-    });
-  }
-
-  return (
-    <div
-      style={{
-        position: "fixed", inset: 0, zIndex: 100,
-        background: "rgba(0,0,0,0.7)", backdropFilter: "blur(6px)",
-        display: "flex", alignItems: "center", justifyContent: "center",
-        padding: 24,
-      }}
-      onClick={e => { if (e.target === e.currentTarget) onClose(); }}
-    >
-      <div style={{
-        background: "#fff", borderRadius: 28, maxWidth: 480, width: "100%",
-        overflow: "hidden",
-        boxShadow: "0 32px 80px rgba(0,0,0,0.4)",
-        animation: "fadeUp 0.4s cubic-bezier(0.16,1,0.3,1) both",
-      }}>
-        {/* Gradient header */}
-        <div style={{
-          background: "linear-gradient(135deg, #1e1b4b 0%, #312e81 40%, #4c1d95 100%)",
-          padding: "36px 32px 28px", textAlign: "center", position: "relative", overflow: "hidden",
-        }}>
-          <div className="dot-grid" style={{ position: "absolute", inset: 0, pointerEvents: "none" }} />
-          <div style={{ position: "absolute", inset: 0, pointerEvents: "none", background: "radial-gradient(ellipse 80% 60% at 50% 0%, rgba(139,92,246,0.4) 0%, transparent 70%)" }} />
-          <div style={{ position: "relative" }}>
-            <div style={{ fontSize: 52, marginBottom: 12 }}>🏆</div>
-            <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.15em", color: "rgba(255,255,255,0.45)", marginBottom: 6, textTransform: "uppercase" }}>
-              Certificate of Completion
-            </p>
-            <h2 style={{ fontSize: 26, fontWeight: 900, color: "#fff", letterSpacing: "-0.6px", lineHeight: 1.15 }}>
-              Ecommerce Academy
-            </h2>
-          </div>
-        </div>
-
-        {/* Certificate body */}
-        <div style={{ padding: "28px 32px 32px", textAlign: "center" }}>
-          <p style={{ fontSize: 13, color: "#a1a1aa", marginBottom: 6 }}>This certifies that</p>
-          <p style={{
-            fontSize: 28, fontWeight: 900, letterSpacing: "-0.8px", marginBottom: 6,
-            background: "linear-gradient(135deg, #6366f1, #7c3aed)",
-            WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent",
-          }}>
-            {name}
-          </p>
-          <p style={{ fontSize: 13, color: "#71717a", lineHeight: 1.65, marginBottom: 4 }}>
-            has successfully completed all <strong style={{ color: "#09090b" }}>12 modules</strong> of
-          </p>
-          <p style={{ fontSize: 14, fontWeight: 700, color: "#09090b", marginBottom: 16 }}>
-            Ecommerce Academy — From Zero to First Sale
-          </p>
-
-          {/* Divider */}
-          <div style={{ height: 1, background: "linear-gradient(90deg, transparent, #e4e4e7, transparent)", margin: "16px 0" }} />
-
-          <p style={{ fontSize: 12, color: "#a1a1aa", marginBottom: 24 }}>Completed on {date}</p>
-
-          {/* Buttons */}
-          <div style={{ display: "flex", gap: 10, justifyContent: "center", flexWrap: "wrap" }}>
-            <button
-              onClick={share}
-              style={{
-                background: "linear-gradient(135deg, #6366f1, #7c3aed)",
-                color: "#fff", fontWeight: 700, fontSize: 13,
-                padding: "11px 24px", borderRadius: 12, border: "none", cursor: "pointer",
-                boxShadow: "0 4px 16px rgba(99,102,241,0.3)",
-              }}
-            >
-              {copied ? "✓ Copied!" : "Share achievement 🎉"}
-            </button>
-            <button
-              onClick={onClose}
-              style={{
-                background: "#f4f4f5", color: "#52525b", fontWeight: 600, fontSize: 13,
-                padding: "11px 24px", borderRadius: 12, border: "none", cursor: "pointer",
-              }}
-            >
-              Back to dashboard
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-}
-
 /* ── Design tokens ── */
 const TRACK_COLORS: Record<string, string> = {
   "Beginner Fast-Start": "#4f46e5",
@@ -139,358 +41,343 @@ function getGreeting() {
   return "Good evening";
 }
 
-/* ── Reusable hover-card wrapper ── */
-function ModuleCard({ children, unlocked }: { children: React.ReactNode; unlocked: boolean }) {
-  const ref = useRef<HTMLDivElement>(null);
-  function enter() {
-    if (!unlocked || !ref.current) return;
-    ref.current.style.transform = "translateY(-1px)";
-    ref.current.style.boxShadow = "0 8px 24px rgba(0,0,0,0.07)";
-  }
-  function leave() {
-    if (!ref.current) return;
-    ref.current.style.transform = "translateY(0)";
-    ref.current.style.boxShadow = "0 1px 3px rgba(0,0,0,0.04)";
+function getMilestone(count: number, total: number): string {
+  if (count === 0)       return "Your journey to your first sale starts here.";
+  if (count === 1)       return "Strong start. Keep the momentum going.";
+  if (count === 3)       return "You already know more than most people who try this.";
+  if (count === 6)       return "Halfway there. You're ahead of 90% of beginners.";
+  if (count === 9)       return "Three modules from your first sale. Don't stop now.";
+  if (count === 11)      return "One more. You're this close.";
+  if (count === total)   return "You've completed the entire course. Time to sell.";
+  return "Keep going — you're building real momentum.";
+}
+
+type Profile = {
+  track: string | null; start_module: number;
+  goal: string | null; first_name: string | null;
+};
+
+/* ── Certificate Modal ── */
+function CertificateModal({ name, onClose }: { name: string; onClose: () => void }) {
+  const date = new Date().toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" });
+  const [copied, setCopied] = useState(false);
+  function share() {
+    const text = `🎉 I just completed all 12 modules of Ecommerce Academy!\n\nI now know how to find a winning product, build a Shopify store, run ads, and scale an ecommerce business from scratch.\n\nStart your free roadmap → https://ecommerce-academy.vercel.app`;
+    navigator.clipboard.writeText(text).then(() => { setCopied(true); setTimeout(() => setCopied(false), 2500); });
   }
   return (
-    <div
-      ref={ref}
-      onMouseEnter={enter}
-      onMouseLeave={leave}
-      style={{ boxShadow: "0 1px 3px rgba(0,0,0,0.04)", transition: "transform 0.2s, box-shadow 0.2s" }}
-    >
-      {children}
+    <div style={{ position: "fixed", inset: 0, zIndex: 100, background: "rgba(0,0,0,0.7)", backdropFilter: "blur(6px)", display: "flex", alignItems: "center", justifyContent: "center", padding: 24 }}
+      onClick={e => { if (e.target === e.currentTarget) onClose(); }}>
+      <div style={{ background: "#fff", borderRadius: 28, maxWidth: 480, width: "100%", overflow: "hidden", boxShadow: "0 32px 80px rgba(0,0,0,0.4)", animation: "fadeUp 0.4s cubic-bezier(0.16,1,0.3,1) both" }}>
+        <div style={{ background: "linear-gradient(135deg, #1e1b4b 0%, #312e81 40%, #4c1d95 100%)", padding: "36px 32px 28px", textAlign: "center", position: "relative", overflow: "hidden" }}>
+          <div className="dot-grid" style={{ position: "absolute", inset: 0, pointerEvents: "none" }} />
+          <div style={{ position: "absolute", inset: 0, pointerEvents: "none", background: "radial-gradient(ellipse 80% 60% at 50% 0%, rgba(139,92,246,0.4) 0%, transparent 70%)" }} />
+          <div style={{ position: "relative" }}>
+            <div style={{ fontSize: 52, marginBottom: 12 }}>🏆</div>
+            <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.15em", color: "rgba(255,255,255,0.45)", marginBottom: 6, textTransform: "uppercase" }}>Certificate of Completion</p>
+            <h2 style={{ fontSize: 26, fontWeight: 900, color: "#fff", letterSpacing: "-0.6px" }}>Ecommerce Academy</h2>
+          </div>
+        </div>
+        <div style={{ padding: "28px 32px 32px", textAlign: "center" }}>
+          <p style={{ fontSize: 13, color: "#a1a1aa", marginBottom: 6 }}>This certifies that</p>
+          <p style={{ fontSize: 28, fontWeight: 900, letterSpacing: "-0.8px", marginBottom: 6, background: "linear-gradient(135deg, #6366f1, #7c3aed)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>{name}</p>
+          <p style={{ fontSize: 13, color: "#71717a", lineHeight: 1.65, marginBottom: 4 }}>has successfully completed all <strong style={{ color: "#09090b" }}>12 modules</strong> of</p>
+          <p style={{ fontSize: 14, fontWeight: 700, color: "#09090b", marginBottom: 16 }}>Ecommerce Academy — From Zero to First Sale</p>
+          <div style={{ height: 1, background: "linear-gradient(90deg, transparent, #e4e4e7, transparent)", margin: "16px 0" }} />
+          <p style={{ fontSize: 12, color: "#a1a1aa", marginBottom: 24 }}>Completed on {date}</p>
+          <div style={{ display: "flex", gap: 10, justifyContent: "center", flexWrap: "wrap" }}>
+            <button onClick={share} style={{ background: "linear-gradient(135deg, #6366f1, #7c3aed)", color: "#fff", fontWeight: 700, fontSize: 13, padding: "11px 24px", borderRadius: 12, border: "none", cursor: "pointer", boxShadow: "0 4px 16px rgba(99,102,241,0.3)" }}>
+              {copied ? "✓ Copied!" : "Share achievement 🎉"}
+            </button>
+            <button onClick={onClose} style={{ background: "#f4f4f5", color: "#52525b", fontWeight: 600, fontSize: 13, padding: "11px 24px", borderRadius: 12, border: "none", cursor: "pointer" }}>
+              Back to dashboard
+            </button>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }
 
-type Profile = { track: string | null; start_module: number; goal: string | null; first_name: string | null };
+/* ── Hover card ── */
+function ModuleCard({ children, unlocked }: { children: React.ReactNode; unlocked: boolean }) {
+  const ref = useRef<HTMLDivElement>(null);
+  return (
+    <div ref={ref}
+      onMouseEnter={() => { if (!unlocked || !ref.current) return; ref.current.style.transform = "translateY(-1px)"; ref.current.style.boxShadow = "0 8px 24px rgba(0,0,0,0.07)"; }}
+      onMouseLeave={() => { if (!ref.current) return; ref.current.style.transform = "translateY(0)"; ref.current.style.boxShadow = "0 1px 3px rgba(0,0,0,0.04)"; }}
+      style={{ boxShadow: "0 1px 3px rgba(0,0,0,0.04)", transition: "transform 0.2s, box-shadow 0.2s" }}
+    >{children}</div>
+  );
+}
 
 export default function DashboardPage() {
   const router = useRouter();
-  const [email, setEmail]     = useState("");
-  const [completed, setCompleted] = useState<number[]>([]);
-  const [profile, setProfile] = useState<Profile>({ track: null, start_module: 1, goal: null, first_name: null });
-  const [loading,  setLoading]  = useState(true);
-  const [showCert, setShowCert] = useState(false);
+  const [email,      setEmail]      = useState("");
+  const [completed,  setCompleted]  = useState<number[]>([]);
+  const [profile,    setProfile]    = useState<Profile>({ track: null, start_module: 1, goal: null, first_name: null });
+  const [loading,    setLoading]    = useState(true);
+  const [showCert,   setShowCert]   = useState(false);
+  const [showModules, setShowModules] = useState(false);
+  const [menuOpen,   setMenuOpen]   = useState(false);
+  const menuRef = useRef<HTMLDivElement>(null);
 
   const openCert  = useCallback(() => setShowCert(true),  []);
   const closeCert = useCallback(() => setShowCert(false), []);
+
+  useEffect(() => {
+    function handleClick(e: MouseEvent) {
+      if (menuRef.current && !menuRef.current.contains(e.target as Node)) setMenuOpen(false);
+    }
+    document.addEventListener("mousedown", handleClick);
+    return () => document.removeEventListener("mousedown", handleClick);
+  }, []);
 
   useEffect(() => {
     async function load() {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) { router.push("/login"); return; }
       setEmail(user.email ?? "");
-
       const [progressRes, profileRes] = await Promise.all([
         supabase.from("user_progress").select("module_id").eq("user_id", user.id),
         supabase.from("user_profiles").select("track, start_module, goal, first_name").eq("id", user.id).single(),
       ]);
       setCompleted((progressRes.data ?? []).map((r: { module_id: number }) => r.module_id));
-      if (profileRes.data) {
-        setProfile({
-          track:        profileRes.data.track,
-          start_module: profileRes.data.start_module ?? 1,
-          goal:         profileRes.data.goal,
-          first_name:   profileRes.data.first_name ?? null,
-        });
-      }
+      if (profileRes.data) setProfile({ track: profileRes.data.track, start_module: profileRes.data.start_module ?? 1, goal: profileRes.data.goal, first_name: profileRes.data.first_name ?? null });
       setLoading(false);
     }
     load();
   }, [router]);
 
-  async function handleLogout() {
-    await supabase.auth.signOut();
-    router.push("/");
-  }
+  async function handleLogout() { await supabase.auth.signOut(); router.push("/"); }
 
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center" style={{ background: "#f8f8fb" }}>
-        <div className="text-center">
-          <div className="spinner mx-auto mb-3" />
-          <p style={{ color: "#a1a1aa", fontSize: 14 }}>Loading your dashboard…</p>
-        </div>
+        <div className="text-center"><div className="spinner mx-auto mb-3" /><p style={{ color: "#a1a1aa", fontSize: 14 }}>Loading…</p></div>
       </div>
     );
   }
 
-  const admin            = isAdmin(email);
-  const completedCount   = completed.length;
-  const progressPercent  = Math.round((completedCount / MODULES.length) * 100);
-  const startModule      = profile.start_module ?? 1;
-  const firstName        = profile.first_name || email.split("@")[0];
-  const trackColor       = profile.track ? (TRACK_COLORS[profile.track] ?? "#4f46e5") : "#4f46e5";
-  const isUnlocked       = (id: number) => admin || id <= startModule || completed.includes(id - 1);
-  const nextModule       = MODULES.find(m => !completed.includes(m.id) && isUnlocked(m.id));
+  const admin           = isAdmin(email);
+  const completedCount  = completed.length;
+  const progressPercent = Math.round((completedCount / MODULES.length) * 100);
+  const startModule     = profile.start_module ?? 1;
+  const firstName       = profile.first_name || email.split("@")[0];
+  const trackColor      = profile.track ? (TRACK_COLORS[profile.track] ?? "#4f46e5") : "#4f46e5";
+  const isUnlocked      = (id: number) => admin || id <= startModule || completed.includes(id - 1);
+  const nextModule      = MODULES.find(m => !completed.includes(m.id) && isUnlocked(m.id));
+  const allDone         = completedCount === MODULES.length;
+
+  // Time invested
+  const minutesInvested = completed.reduce((t, id) => {
+    const m = MODULES.find(m => m.id === id);
+    return t + (m ? parseInt(m.duration.replace(/\D/g, "")) : 0);
+  }, 0);
+  const timeLabel = minutesInvested >= 60
+    ? `${(minutesInvested / 60).toFixed(1)} hrs invested`
+    : `${minutesInvested} min invested`;
 
   return (
     <div className="min-h-screen" style={{ background: "#f8f8fb" }}>
 
-      {/* ── Certificate modal ── */}
-      {showCert && (
-        <CertificateModal name={firstName} onClose={closeCert} />
-      )}
+      {showCert && <CertificateModal name={firstName} onClose={closeCert} />}
 
       {/* ── Nav ── */}
-      <nav style={{
-        background: "rgba(255,255,255,0.85)",
-        backdropFilter: "blur(12px)",
-        borderBottom: "1px solid rgba(0,0,0,0.06)",
-        position: "sticky", top: 0, zIndex: 40,
-      }}>
-        <div style={{ maxWidth: 760, margin: "0 auto", padding: "0 24px", height: 60, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+      <nav style={{ background: "rgba(255,255,255,0.85)", backdropFilter: "blur(12px)", borderBottom: "1px solid rgba(0,0,0,0.06)", position: "sticky", top: 0, zIndex: 40 }}>
+        <div style={{ maxWidth: 680, margin: "0 auto", padding: "0 24px", height: 60, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
           <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
             <Link href="/" style={{ fontWeight: 700, fontSize: 15, color: "#09090b", textDecoration: "none", letterSpacing: "-0.3px" }}>
               Ecommerce Academy
             </Link>
             {admin && (
-              <span style={{
-                fontSize: 10, fontWeight: 700, padding: "2px 7px", borderRadius: 99,
-                background: "linear-gradient(135deg, #6366f1, #7c3aed)", color: "#fff",
-                letterSpacing: "0.1em", textTransform: "uppercase",
-              }}>
+              <span style={{ fontSize: 10, fontWeight: 700, padding: "2px 7px", borderRadius: 99, background: "linear-gradient(135deg, #6366f1, #7c3aed)", color: "#fff", letterSpacing: "0.1em", textTransform: "uppercase" }}>
                 Admin
               </span>
             )}
           </div>
-          <div style={{ display: "flex", alignItems: "center", gap: 20 }}>
-            <Link href="/tools" style={{ fontSize: 13, fontWeight: 500, color: "#6366f1", textDecoration: "none" }}
-              onMouseEnter={e => (e.currentTarget.style.color = "#4338ca")}
-              onMouseLeave={e => (e.currentTarget.style.color = "#6366f1")}
-            >
-              🛠 Tools
-            </Link>
-            <Link href="/resources" style={{ fontSize: 13, fontWeight: 500, color: "#6366f1", textDecoration: "none" }}
-              onMouseEnter={e => (e.currentTarget.style.color = "#4338ca")}
-              onMouseLeave={e => (e.currentTarget.style.color = "#6366f1")}
-            >
-              📚 Resources
-            </Link>
-            <span style={{ fontSize: 13, color: "#a1a1aa" }} className="hidden sm:block">{email}</span>
+
+          {/* ··· menu */}
+          <div ref={menuRef} style={{ position: "relative" }}>
             <button
-              onClick={handleLogout}
-              style={{ fontSize: 13, color: "#a1a1aa", fontWeight: 500, background: "none", border: "none", cursor: "pointer" }}
-              onMouseEnter={e => (e.currentTarget.style.color = "#ef4444")}
-              onMouseLeave={e => (e.currentTarget.style.color = "#a1a1aa")}
+              onClick={() => setMenuOpen(p => !p)}
+              style={{ width: 36, height: 36, borderRadius: 10, border: "1.5px solid rgba(0,0,0,0.08)", background: menuOpen ? "#f4f4f5" : "#fff", cursor: "pointer", fontSize: 16, display: "flex", alignItems: "center", justifyContent: "center", color: "#52525b" }}
             >
-              Log out
+              ···
             </button>
+            {menuOpen && (
+              <div style={{ position: "absolute", right: 0, top: "calc(100% + 8px)", background: "#fff", borderRadius: 14, border: "1.5px solid rgba(0,0,0,0.07)", boxShadow: "0 12px 32px rgba(0,0,0,0.12)", padding: "6px", minWidth: 160, zIndex: 50 }}>
+                {[
+                  { href: "/tools",     label: "🛠 Tools"     },
+                  { href: "/resources", label: "📚 Resources" },
+                ].map(item => (
+                  <Link key={item.href} href={item.href} onClick={() => setMenuOpen(false)} style={{ display: "block", padding: "9px 12px", borderRadius: 8, fontSize: 13, fontWeight: 500, color: "#3f3f46", textDecoration: "none" }}
+                    onMouseEnter={e => (e.currentTarget.style.background = "#f4f4f5")}
+                    onMouseLeave={e => (e.currentTarget.style.background = "transparent")}
+                  >{item.label}</Link>
+                ))}
+                <div style={{ height: 1, background: "#f4f4f5", margin: "4px 0" }} />
+                <button onClick={handleLogout} style={{ width: "100%", textAlign: "left", padding: "9px 12px", borderRadius: 8, fontSize: 13, fontWeight: 500, color: "#ef4444", background: "none", border: "none", cursor: "pointer" }}
+                  onMouseEnter={e => (e.currentTarget.style.background = "#fff7f7")}
+                  onMouseLeave={e => (e.currentTarget.style.background = "transparent")}
+                >
+                  Log out
+                </button>
+              </div>
+            )}
           </div>
         </div>
       </nav>
 
-      <main style={{ maxWidth: 760, margin: "0 auto", padding: "40px 24px 80px" }}>
+      <main style={{ maxWidth: 680, margin: "0 auto", padding: "36px 24px 80px" }}>
 
         {/* ── Welcome ── */}
-        <div className="fade-up" style={{ marginBottom: 32 }}>
+        <div className="fade-up" style={{ marginBottom: 24 }}>
           <p style={{ fontSize: 13, fontWeight: 600, color: trackColor, marginBottom: 4 }}>
             {getGreeting()}, {firstName} 👋
           </p>
-          <h1 style={{ fontSize: 26, fontWeight: 800, color: "#09090b", letterSpacing: "-0.6px", marginBottom: 10 }}>
-            Your Learning Dashboard
-          </h1>
-          {profile.track ? (
-            <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
-              <span style={{
-                fontSize: 11, fontWeight: 700, padding: "3px 10px", borderRadius: 99,
-                background: trackColor, color: "#fff", letterSpacing: "0.2px",
-              }}>
-                {profile.track}
-              </span>
-              {profile.goal && (
-                <span style={{ fontSize: 12, color: "#a1a1aa" }}>
-                  · Goal: {GOAL_LABELS[profile.goal] ?? profile.goal}
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 8 }}>
+            <div>
+              {profile.track && (
+                <span style={{ fontSize: 11, fontWeight: 700, padding: "3px 10px", borderRadius: 99, background: trackColor, color: "#fff" }}>
+                  {profile.track}
                 </span>
               )}
+              {profile.goal && (
+                <span style={{ fontSize: 12, color: "#a1a1aa", marginLeft: 8 }}>· {GOAL_LABELS[profile.goal] ?? profile.goal}</span>
+              )}
             </div>
-          ) : (
-            <p style={{ fontSize: 13, color: "#a1a1aa" }}>
-              Complete each module in order to unlock the next.{" "}
-              <Link href="/quiz" style={{ color: "#6366f1", textDecoration: "underline" }}>Take the quiz</Link> to personalise your roadmap.
-            </p>
-          )}
+          </div>
         </div>
 
-        {/* ── Progress card ── */}
-        <div
-          className="fade-up-d1"
-          style={{
-            borderRadius: 24,
-            padding: "28px 28px 24px",
-            marginBottom: 32,
-            color: "#fff",
-            background: `linear-gradient(135deg, ${trackColor} 0%, #7c3aed 100%)`,
-            boxShadow: `0 20px 60px ${trackColor}40`,
-            position: "relative",
-            overflow: "hidden",
-          }}
-        >
-          {/* Subtle inner glow */}
-          <div style={{
-            position: "absolute", inset: 0,
-            background: "radial-gradient(circle at 70% 30%, rgba(255,255,255,0.12) 0%, transparent 60%)",
-            pointerEvents: "none",
-          }} />
-
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 20, position: "relative" }}>
-            <div>
-              <p style={{ fontSize: 12, fontWeight: 500, color: "rgba(255,255,255,0.65)", marginBottom: 4 }}>Overall Progress</p>
-              <p style={{ fontSize: 32, fontWeight: 800, letterSpacing: "-1px" }}>
-                {completedCount}
-                <span style={{ fontSize: 16, fontWeight: 400, color: "rgba(255,255,255,0.5)", marginLeft: 4 }}>/ {MODULES.length} modules</span>
-              </p>
-            </div>
-            <div style={{ textAlign: "right" }}>
-              <p style={{ fontSize: 38, fontWeight: 800, letterSpacing: "-1.5px" }}>{progressPercent}%</p>
-              <p style={{ fontSize: 11, color: "rgba(255,255,255,0.55)" }}>completed</p>
-            </div>
+        {/* ── Progress strip ── */}
+        <div className="fade-up-d1" style={{ marginBottom: 28 }}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
+            <span style={{ fontSize: 13, color: "#71717a" }}>
+              <strong style={{ color: "#09090b" }}>{completedCount}</strong> of {MODULES.length} modules complete
+              {minutesInvested > 0 && <span style={{ marginLeft: 10, color: "#a1a1aa" }}>· {timeLabel}</span>}
+            </span>
+            <span style={{ fontSize: 13, fontWeight: 800, color: trackColor, letterSpacing: "-0.3px" }}>{progressPercent}%</span>
           </div>
-
-          {/* Progress bar */}
-          <div style={{ height: 6, borderRadius: 99, background: "rgba(255,255,255,0.2)", position: "relative" }}>
-            <div style={{
-              height: 6, borderRadius: 99, background: "#fff",
-              width: `${progressPercent}%`,
-              transition: "width 0.8s cubic-bezier(0.16,1,0.3,1)",
-            }} />
+          <div style={{ height: 6, borderRadius: 99, background: "#e4e4e7" }}>
+            <div style={{ height: 6, borderRadius: 99, background: `linear-gradient(90deg, ${trackColor}, #7c3aed)`, width: `${progressPercent}%`, transition: "width 0.8s cubic-bezier(0.16,1,0.3,1)" }} />
           </div>
+        </div>
 
-          {/* Up next row */}
-          {nextModule && (
-            <div style={{
-              marginTop: 20, paddingTop: 20,
-              borderTop: "1px solid rgba(255,255,255,0.15)",
-              display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12,
-              position: "relative",
-            }}>
-              <div>
-                <p style={{ fontSize: 11, color: "rgba(255,255,255,0.55)", marginBottom: 3 }}>Up next · {nextModule.duration}</p>
-                <p style={{ fontSize: 14, fontWeight: 600 }}>{nextModule.emoji} {nextModule.title}</p>
+        {/* ── UP NEXT — dominant card ── */}
+        <div className="fade-up-d2" style={{ marginBottom: 12 }}>
+          {nextModule ? (
+            <div style={{ background: "#fff", borderRadius: 24, border: `2px solid ${trackColor}30`, padding: "28px 28px 24px", boxShadow: `0 8px 40px ${trackColor}18` }}>
+              {/* Top row */}
+              <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 16 }}>
+                <span style={{ fontSize: 10, fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", color: trackColor }}>Up next</span>
+                <span style={{ fontSize: 10, color: "#d4d4d8" }}>·</span>
+                <span style={{ fontSize: 11, color: "#a1a1aa" }}>Module {nextModule.id} of {MODULES.length}</span>
+                <span style={{ fontSize: 10, color: "#d4d4d8" }}>·</span>
+                <span style={{ fontSize: 11, color: "#a1a1aa" }}>{nextModule.duration}</span>
               </div>
+
+              <div style={{ display: "flex", alignItems: "flex-start", gap: 16, marginBottom: 20 }}>
+                <div style={{ width: 52, height: 52, borderRadius: 16, background: `${trackColor}15`, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 24, flexShrink: 0 }}>
+                  {nextModule.emoji}
+                </div>
+                <div>
+                  <h2 style={{ fontSize: 20, fontWeight: 800, color: "#09090b", letterSpacing: "-0.5px", marginBottom: 4 }}>
+                    {nextModule.title}
+                  </h2>
+                  <p style={{ fontSize: 13, color: "#71717a", lineHeight: 1.5 }}>{nextModule.description}</p>
+                </div>
+              </div>
+
+              {/* Milestone */}
+              <p style={{ fontSize: 12, color: "#a1a1aa", marginBottom: 16, fontStyle: "italic" }}>
+                {getMilestone(completedCount, MODULES.length)}
+              </p>
+
+              {/* Primary CTA */}
               <Link
                 href={`/modules/${nextModule.id}`}
                 style={{
-                  background: "#fff", color: trackColor, fontWeight: 700, fontSize: 12,
-                  padding: "8px 18px", borderRadius: 12, textDecoration: "none",
-                  whiteSpace: "nowrap", flexShrink: 0,
+                  display: "block", textAlign: "center", color: "#fff", fontWeight: 800,
+                  fontSize: 15, padding: "15px", borderRadius: 16, textDecoration: "none",
+                  background: `linear-gradient(135deg, ${trackColor}, #7c3aed)`,
+                  boxShadow: `0 4px 20px ${trackColor}40`,
+                  letterSpacing: "-0.2px",
                 }}
+                onMouseEnter={e => { e.currentTarget.style.transform = "translateY(-1px)"; e.currentTarget.style.boxShadow = `0 8px 32px ${trackColor}55`; }}
+                onMouseLeave={e => { e.currentTarget.style.transform = "translateY(0)"; e.currentTarget.style.boxShadow = `0 4px 20px ${trackColor}40`; }}
               >
-                Continue →
+                {completedCount === 0 ? `Start Module ${nextModule.id} →` : `Continue → ${nextModule.title}`}
               </Link>
             </div>
-          )}
-
-          {(completedCount === MODULES.length || admin) && (
-            <div style={{ marginTop: 20, paddingTop: 20, borderTop: "1px solid rgba(255,255,255,0.15)", position: "relative", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12, flexWrap: "wrap" }}>
-              <p style={{ fontWeight: 700, fontSize: 14 }}>
-                {completedCount === MODULES.length ? "🎉 All modules complete — you're ready to sell!" : "🔑 Admin access — all modules unlocked."}
-              </p>
-              <button
-                onClick={openCert}
-                style={{
-                  background: "#fff", fontWeight: 700, fontSize: 12,
-                  padding: "7px 16px", borderRadius: 10, border: "none", cursor: "pointer",
-                  color: trackColor, flexShrink: 0,
-                }}
-              >
-                View Certificate 🏆
+          ) : (allDone || admin) ? (
+            <div style={{ background: "#fff", borderRadius: 24, border: "2px solid #a7f3d0", padding: "28px", textAlign: "center", boxShadow: "0 8px 40px rgba(16,185,129,0.1)" }}>
+              <div style={{ fontSize: 40, marginBottom: 12 }}>🎉</div>
+              <h2 style={{ fontSize: 20, fontWeight: 800, color: "#09090b", letterSpacing: "-0.5px", marginBottom: 6 }}>Course Complete!</h2>
+              <p style={{ fontSize: 13, color: "#71717a", marginBottom: 20 }}>You&apos;ve finished all 12 modules. You have everything you need to sell.</p>
+              <button onClick={openCert} style={{ background: "linear-gradient(135deg, #059669, #047857)", color: "#fff", fontWeight: 700, fontSize: 14, padding: "13px 32px", borderRadius: 14, border: "none", cursor: "pointer", boxShadow: "0 4px 16px rgba(5,150,105,0.3)" }}>
+                View Your Certificate 🏆
               </button>
             </div>
-          )}
-
-          {startModule > 1 && completedCount === 0 && (
-            <div style={{ marginTop: 20, paddingTop: 20, borderTop: "1px solid rgba(255,255,255,0.15)", position: "relative" }}>
-              <p style={{ fontSize: 11, color: "rgba(255,255,255,0.65)" }}>
-                ✨ Based on your quiz, modules 1–{startModule - 1} are pre-unlocked. Jump straight to where you need to be.
-              </p>
-            </div>
-          )}
+          ) : null}
         </div>
 
-        {/* ── Module list ── */}
-        <div className="fade-up-d2" style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+        {/* Admin cert shortcut */}
+        {admin && nextModule && (
+          <div style={{ textAlign: "center", marginBottom: 20 }}>
+            <button onClick={openCert} style={{ fontSize: 12, color: "#a1a1aa", background: "none", border: "none", cursor: "pointer", textDecoration: "underline" }}>
+              View certificate
+            </button>
+          </div>
+        )}
 
-          {MODULES.map((mod) => {
-            const isDone    = completed.includes(mod.id);
-            const unlocked  = isUnlocked(mod.id);
-            const isNext    = nextModule?.id === mod.id;
-            const isSkipped = mod.id < startModule && !isDone;
+        {/* ── Module list toggle ── */}
+        <div className="fade-up-d3">
+          <button
+            onClick={() => setShowModules(p => !p)}
+            style={{ width: "100%", background: "#fff", border: "1.5px solid rgba(0,0,0,0.06)", borderRadius: 14, padding: "13px 18px", display: "flex", alignItems: "center", justifyContent: "space-between", cursor: "pointer", marginBottom: showModules ? 10 : 0 }}
+          >
+            <span style={{ fontSize: 13, fontWeight: 600, color: "#09090b" }}>All modules</span>
+            <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+              <span style={{ fontSize: 12, color: "#a1a1aa" }}>{completedCount}/{MODULES.length} complete</span>
+              <span style={{ fontSize: 12, color: "#a1a1aa", transition: "transform 0.2s", display: "inline-block", transform: showModules ? "rotate(180deg)" : "rotate(0deg)" }}>▼</span>
+            </div>
+          </button>
 
-            return (
-              <ModuleCard key={mod.id} unlocked={unlocked}>
-                <div style={{
-                  background: "#fff",
-                  borderRadius: 18,
-                  border: `1.5px solid ${isNext ? "#c7d2fe" : isDone ? "#d1fae5" : "rgba(0,0,0,0.06)"}`,
-                  padding: "14px 16px",
-                  display: "flex",
-                  alignItems: "center",
-                  gap: 14,
-                  opacity: unlocked ? 1 : 0.45,
-                }}>
-                  {/* Icon blob */}
-                  <div style={{
-                    width: 44, height: 44, borderRadius: 14, flexShrink: 0,
-                    display: "flex", alignItems: "center", justifyContent: "center", fontSize: 20,
-                    background: isDone ? "#ecfdf5" : isNext ? "#eef2ff" : "#f4f4f5",
-                  }}>
-                    {isDone ? "✅" : mod.emoji}
-                  </div>
-
-                  {/* Text */}
-                  <div style={{ flex: 1, minWidth: 0 }}>
-                    <div style={{ display: "flex", alignItems: "center", gap: 6, flexWrap: "wrap", marginBottom: 2 }}>
-                      <span style={{
-                        fontSize: 13, fontWeight: 600,
-                        color: isDone ? "#a1a1aa" : "#09090b",
-                        textDecoration: isDone ? "line-through" : "none",
-                      }}>
-                        {mod.title}
-                      </span>
-                      {isNext && (
-                        <span style={{
-                          fontSize: 10, fontWeight: 700, padding: "2px 7px", borderRadius: 99,
-                          background: trackColor, color: "#fff", letterSpacing: "0.2px",
-                        }}>
-                          Up next
-                        </span>
-                      )}
-                      {isSkipped && (
-                        <span style={{
-                          fontSize: 10, fontWeight: 600, padding: "2px 7px", borderRadius: 99,
-                          background: "#fffbeb", color: "#d97706", border: "1px solid #fde68a",
-                        }}>
-                          Pre-unlocked
-                        </span>
+          {showModules && (
+            <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+              {MODULES.map(mod => {
+                const isDone   = completed.includes(mod.id);
+                const unlocked = isUnlocked(mod.id);
+                const isNext   = nextModule?.id === mod.id;
+                const isSkipped = mod.id < startModule && !isDone;
+                return (
+                  <ModuleCard key={mod.id} unlocked={unlocked}>
+                    <div style={{ background: "#fff", borderRadius: 18, border: `1.5px solid ${isNext ? "#c7d2fe" : isDone ? "#d1fae5" : "rgba(0,0,0,0.06)"}`, padding: "14px 16px", display: "flex", alignItems: "center", gap: 14, opacity: unlocked ? 1 : 0.45 }}>
+                      <div style={{ width: 44, height: 44, borderRadius: 14, flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 20, background: isDone ? "#ecfdf5" : isNext ? "#eef2ff" : "#f4f4f5" }}>
+                        {isDone ? "✅" : mod.emoji}
+                      </div>
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <div style={{ display: "flex", alignItems: "center", gap: 6, flexWrap: "wrap", marginBottom: 2 }}>
+                          <span style={{ fontSize: 13, fontWeight: 600, color: isDone ? "#a1a1aa" : "#09090b", textDecoration: isDone ? "line-through" : "none" }}>{mod.title}</span>
+                          {isNext && <span style={{ fontSize: 10, fontWeight: 700, padding: "2px 7px", borderRadius: 99, background: trackColor, color: "#fff" }}>Up next</span>}
+                          {isSkipped && <span style={{ fontSize: 10, fontWeight: 600, padding: "2px 7px", borderRadius: 99, background: "#fffbeb", color: "#d97706", border: "1px solid #fde68a" }}>Pre-unlocked</span>}
+                        </div>
+                        <p style={{ fontSize: 12, color: "#a1a1aa" }}>{mod.duration} · {mod.description}</p>
+                      </div>
+                      {!unlocked ? (
+                        <span style={{ fontSize: 16, flexShrink: 0, color: "#d4d4d8" }}>🔒</span>
+                      ) : (
+                        <Link href={`/modules/${mod.id}`} style={{ fontSize: 12, fontWeight: 700, flexShrink: 0, padding: "7px 16px", borderRadius: 10, textDecoration: "none", background: isDone ? "#ecfdf5" : isNext ? trackColor : "#f4f4f5", color: isDone ? "#16a34a" : isNext ? "#fff" : "#52525b" }}>
+                          {isDone ? "Review" : "Start →"}
+                        </Link>
                       )}
                     </div>
-                    <p style={{ fontSize: 12, color: "#a1a1aa" }}>{mod.duration} · {mod.description}</p>
-                  </div>
-
-                  {/* Action */}
-                  {!unlocked ? (
-                    <span style={{ fontSize: 16, flexShrink: 0, color: "#d4d4d8" }}>🔒</span>
-                  ) : (
-                    <Link
-                      href={`/modules/${mod.id}`}
-                      style={{
-                        fontSize: 12, fontWeight: 700, flexShrink: 0,
-                        padding: "7px 16px", borderRadius: 10, textDecoration: "none",
-                        background: isDone ? "#ecfdf5" : isNext ? trackColor : "#f4f4f5",
-                        color: isDone ? "#16a34a" : isNext ? "#fff" : "#52525b",
-                        transition: "opacity 0.15s",
-                      }}
-                    >
-                      {isDone ? "Review" : "Start →"}
-                    </Link>
-                  )}
-                </div>
-              </ModuleCard>
-            );
-          })}
+                  </ModuleCard>
+                );
+              })}
+            </div>
+          )}
         </div>
 
       </main>

@@ -277,8 +277,11 @@ export default function QuizPage() {
                   style={{ background: GRAD_BTN, boxShadow: GLOW_BASE, transition: "transform 200ms, box-shadow 200ms" }}
                   onMouseEnter={e => { const t = e.currentTarget; t.style.transform = "translateY(-2px)"; t.style.boxShadow = GLOW_HOV; }}
                   onMouseLeave={e => { const t = e.currentTarget; t.style.transform = "translateY(0)"; t.style.boxShadow = GLOW_BASE; }}
+                  onClick={() => {
+                    try { localStorage.setItem("ea_next", `/modules/${result.startModule}`); } catch {}
+                  }}
                 >
-                  Create my free account &amp; start →
+                  Start Module {result.startModule} — create free account →
                 </Link>
                 <Link
                   href="/login"
@@ -286,6 +289,9 @@ export default function QuizPage() {
                   style={{ background: "#f7f7fb", color: "#6b7280", border: "1px solid rgba(0,0,0,0.06)" }}
                   onMouseEnter={e => (e.currentTarget.style.background = "#f0f0f8")}
                   onMouseLeave={e => (e.currentTarget.style.background = "#f7f7fb")}
+                  onClick={() => {
+                    try { localStorage.setItem("ea_next", `/modules/${result.startModule}`); } catch {}
+                  }}
                 >
                   I already have an account — log in
                 </Link>

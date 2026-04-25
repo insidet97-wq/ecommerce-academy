@@ -118,21 +118,28 @@ function ProductMockup() {
 
 /* ── Main page ── */
 export default function Home() {
-  const [loggedIn, setLoggedIn] = useState(false);
-  const [firstName, setFirstName] = useState("");
+  const [loggedIn,   setLoggedIn]   = useState(false);
+  const [firstName,  setFirstName]  = useState("");
+  const [nextModId,  setNextModId]  = useState<number | null>(null);
 
   useEffect(() => {
     supabase.auth.getSession().then(async ({ data: { session } }) => {
-      if (session?.user) {
-        setLoggedIn(true);
-        // Try to get their real first name from the profile
-        const { data } = await supabase
-          .from("user_profiles")
-          .select("first_name")
-          .eq("id", session.user.id)
-          .single();
-        setFirstName(data?.first_name || session.user.email?.split("@")[0] || "");
-      }
+      if (!session?.user) return;
+      setLoggedIn(true);
+      const userId = session.user.id;
+
+      const [profileRes, progressRes] = await Promise.all([
+        supabase.from("user_profiles").select("first_name, start_module").eq("id", userId).single(),
+        supabase.from("user_progress").select("module_id").eq("user_id", userId),
+      ]);
+
+      setFirstName(profileRes.data?.first_name || session.user.email?.split("@")[0] || "");
+
+      const done = (progressRes.data ?? []).map((r: { module_id: number }) => r.module_id);
+      const start = profileRes.data?.start_module ?? 1;
+      const allIds = [1,2,3,4,5,6,7,8,9,10,11,12];
+      const next = allIds.find(id => !done.includes(id) && (id <= start || done.includes(id - 1)));
+      setNextModId(next ?? null);
     });
   }, []);
 
@@ -145,17 +152,17 @@ export default function Home() {
         <div className="flex items-center gap-6">
           {loggedIn ? (
             <div className="flex items-center gap-4">
-              <span className="text-sm font-medium" style={{ color: "rgba(255,255,255,0.5)" }}>
+              <span className="text-sm font-medium hidden sm:block" style={{ color: "rgba(255,255,255,0.5)" }}>
                 Hey, <span style={{ color: "rgba(255,255,255,0.85)", fontWeight: 600 }}>{firstName}</span> 👋
               </span>
               <Link
-                href="/dashboard"
+                href={nextModId ? `/modules/${nextModId}` : "/dashboard"}
                 className="text-sm font-semibold px-4 py-2 rounded-lg text-white transition-all duration-200"
                 style={{ border: "1px solid rgba(255,255,255,0.15)", background: "rgba(255,255,255,0.06)" }}
                 onMouseEnter={e => { const t = e.currentTarget; t.style.background = "rgba(255,255,255,0.12)"; t.style.borderColor = "rgba(255,255,255,0.25)"; }}
                 onMouseLeave={e => { const t = e.currentTarget; t.style.background = "rgba(255,255,255,0.06)"; t.style.borderColor = "rgba(255,255,255,0.15)"; }}
               >
-                Dashboard →
+                {nextModId ? "Continue learning →" : "Dashboard →"}
               </Link>
             </div>
           ) : (

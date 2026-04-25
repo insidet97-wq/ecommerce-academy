@@ -94,6 +94,8 @@ export default function ModulePage() {
   const [checked,  setChecked]  = useState<boolean[]>([]);
   const [marking,  setMarking]  = useState(false);
   const [loading,  setLoading]  = useState(true);
+  const [showCompletion, setShowCompletion] = useState(false);
+  const [countdown, setCountdown] = useState(5);
 
   useEffect(() => {
     async function load() {
@@ -123,8 +125,22 @@ export default function ModulePage() {
     if (!userId || !mod) return;
     setMarking(true);
     await supabase.from("user_progress").upsert({ user_id: userId, module_id: moduleId });
-    router.push("/dashboard");
+    setMarking(false);
+    setCountdown(5);
+    setShowCompletion(true);
   }
+
+  // Countdown auto-redirect
+  useEffect(() => {
+    if (!showCompletion) return;
+    if (countdown <= 0) {
+      if (moduleId < 12) router.push(`/modules/${moduleId + 1}`);
+      else router.push("/dashboard");
+      return;
+    }
+    const t = setTimeout(() => setCountdown(c => c - 1), 1000);
+    return () => clearTimeout(t);
+  }, [showCompletion, countdown, moduleId, router]);
 
   function toggleCheck(i: number) {
     setChecked(prev => { const n = [...prev]; n[i] = !n[i]; return n; });
@@ -141,15 +157,83 @@ export default function ModulePage() {
     );
   }
 
-  const isDone      = completed.includes(moduleId);
-  const allChecked  = checked.every(Boolean);
+  const isDone       = completed.includes(moduleId);
+  const allChecked   = checked.every(Boolean);
   const checkedCount = checked.filter(Boolean).length;
-  const emoji       = MODULE_EMOJIS[moduleId] ?? "📖";
-  const isLast      = moduleId === 12;
-  const nextId      = moduleId + 1;
+  const emoji        = MODULE_EMOJIS[moduleId] ?? "📖";
+  const isLast       = moduleId === 12;
+  const nextId       = moduleId + 1;
+
+  const NEXT_TITLES: Record<number, { emoji: string; title: string; duration: string }> = {
+    1:  { emoji: "🎯", title: "Find Your Niche",               duration: "~25 min" },
+    2:  { emoji: "🏆", title: "Find Your Winning Product",     duration: "~30 min" },
+    3:  { emoji: "🧠", title: "Know Your Customer",            duration: "~25 min" },
+    4:  { emoji: "🛒", title: "Build Your Shopify Store",      duration: "~45 min" },
+    5:  { emoji: "⚡", title: "Build Your First Sales Funnel", duration: "~35 min" },
+    6:  { emoji: "📱", title: "Drive Traffic: TikTok Organic", duration: "~30 min" },
+    7:  { emoji: "📣", title: "Run Your First Paid Ad",        duration: "~40 min" },
+    8:  { emoji: "📈", title: "Conversion Optimisation",       duration: "~30 min" },
+    9:  { emoji: "📧", title: "Build Your Email List",         duration: "~35 min" },
+    10: { emoji: "💰", title: "Make Your First Sale",          duration: "~20 min" },
+    11: { emoji: "🚀", title: "Scale and Grow",                duration: "~25 min" },
+  };
+  const nextInfo = NEXT_TITLES[moduleId];
 
   return (
     <div className="min-h-screen" style={{ background: "#f8f8fb" }}>
+
+      {/* ── Completion overlay ── */}
+      {showCompletion && (
+        <div className="slide-up" style={{ position: "fixed", bottom: 0, left: 0, right: 0, zIndex: 50, background: "#fff", borderRadius: "24px 24px 0 0", padding: "28px 24px 44px", boxShadow: "0 -8px 48px rgba(0,0,0,0.14)", borderTop: "1.5px solid rgba(0,0,0,0.06)" }}>
+          <div style={{ maxWidth: 520, margin: "0 auto" }}>
+            {/* Header */}
+            <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 20 }}>
+              <div style={{ width: 44, height: 44, borderRadius: 14, background: "#ecfdf5", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 22, flexShrink: 0 }}>✅</div>
+              <div>
+                <p style={{ fontSize: 16, fontWeight: 800, color: "#09090b", letterSpacing: "-0.3px" }}>Module {moduleId} complete!</p>
+                <p style={{ fontSize: 12, color: "#a1a1aa" }}>{mod?.title}</p>
+              </div>
+            </div>
+
+            {!isLast && nextInfo ? (
+              <>
+                {/* Next module preview */}
+                <div style={{ background: "#f8f8fb", borderRadius: 16, padding: "14px 16px", marginBottom: 16, display: "flex", alignItems: "center", gap: 12 }}>
+                  <span style={{ fontSize: 22 }}>{nextInfo.emoji}</span>
+                  <div style={{ flex: 1 }}>
+                    <p style={{ fontSize: 11, color: "#a1a1aa", marginBottom: 2 }}>Up next · Module {nextId} · {nextInfo.duration}</p>
+                    <p style={{ fontSize: 14, fontWeight: 700, color: "#09090b" }}>{nextInfo.title}</p>
+                  </div>
+                  <span style={{ fontSize: 12, fontWeight: 700, color: "#a1a1aa" }}>{countdown}s</span>
+                </div>
+
+                {/* Countdown bar */}
+                <div style={{ height: 3, borderRadius: 99, background: "#e4e4e7", marginBottom: 16, overflow: "hidden" }}>
+                  <div style={{ height: 3, background: "linear-gradient(90deg, #6366f1, #7c3aed)", width: `${(countdown / 5) * 100}%`, transition: "width 1s linear" }} />
+                </div>
+
+                <div style={{ display: "flex", gap: 10 }}>
+                  <Link href={`/modules/${nextId}`} style={{ flex: 1, display: "block", textAlign: "center", background: "linear-gradient(135deg, #6366f1, #7c3aed)", color: "#fff", fontWeight: 700, fontSize: 14, padding: "13px", borderRadius: 14, textDecoration: "none", boxShadow: "0 4px 16px rgba(99,102,241,0.3)" }}>
+                    Start Module {nextId} →
+                  </Link>
+                  <Link href="/dashboard" style={{ padding: "13px 18px", borderRadius: 14, background: "#f4f4f5", color: "#52525b", fontWeight: 600, fontSize: 13, textDecoration: "none", whiteSpace: "nowrap" }}>
+                    Dashboard
+                  </Link>
+                </div>
+              </>
+            ) : (
+              <>
+                <p style={{ fontSize: 14, color: "#71717a", marginBottom: 20, lineHeight: 1.6 }}>
+                  You&apos;ve completed all 12 modules. You have everything you need to start selling.
+                </p>
+                <Link href="/dashboard" style={{ display: "block", textAlign: "center", background: "linear-gradient(135deg, #059669, #047857)", color: "#fff", fontWeight: 700, fontSize: 14, padding: "13px", borderRadius: 14, textDecoration: "none", boxShadow: "0 4px 16px rgba(5,150,105,0.3)" }}>
+                  View your certificate 🏆
+                </Link>
+              </>
+            )}
+          </div>
+        </div>
+      )}
 
       {/* ── Nav ── */}
       <nav style={{
