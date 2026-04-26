@@ -152,16 +152,366 @@ const MODULES = [
 export default function Home() {
   const [loggedIn,  setLoggedIn]  = useState(false);
   const [firstName, setFirstName] = useState("");
+  const [progress,  setProgress]  = useState<number[]>([]);
+  const [isPro,     setIsPro]     = useState(false);
 
   useEffect(() => {
     supabase.auth.getSession().then(async ({ data: { session } }) => {
       if (!session?.user) return;
       setLoggedIn(true);
-      const { data } = await supabase.from("user_profiles").select("first_name").eq("id", session.user.id).single();
-      setFirstName(data?.first_name || session.user.email?.split("@")[0] || "");
+      const { data: profile } = await supabase
+        .from("user_profiles")
+        .select("first_name, is_pro")
+        .eq("id", session.user.id)
+        .single();
+      setFirstName(profile?.first_name || session.user.email?.split("@")[0] || "");
+      setIsPro(profile?.is_pro ?? false);
+
+      const { data: progressRows } = await supabase
+        .from("user_progress")
+        .select("module_id")
+        .eq("user_id", session.user.id);
+      setProgress(progressRows?.map((r: { module_id: number }) => r.module_id) ?? []);
     });
   }, []);
 
+  /* ── Logged-in dashboard page ── */
+  if (loggedIn) {
+    const completedCount  = progress.length;
+    const progressPercent = Math.round((completedCount / 12) * 100);
+
+    const subtext =
+      completedCount === 0  ? "Your journey to your first sale starts now."
+      : completedCount <= 5 ? "You're building momentum. Keep going."
+      : completedCount === 6 ? "Halfway there — the traffic and ads modules are next."
+      : completedCount <= 11 ? "You're this close to your first sale."
+      : "You've completed the full roadmap. Time to scale.";
+
+    const quoteText =
+      completedCount === 0  ? "\"The best time to start was yesterday. The second best is right now.\""
+      : completedCount <= 5 ? "\"Every module you complete puts you further ahead than 90% of people who 'want to start a business.'\""
+      : completedCount < 12 ? "\"You know more than most people who call themselves ecommerce entrepreneurs. Finish the job.\""
+      : "\"🎉 Course complete. Your first sale is the beginning, not the end.\"";
+
+    function handleLogout() {
+      supabase.auth.signOut().then(() => { window.location.href = "/"; });
+    }
+
+    return (
+      <div className="min-h-screen flex flex-col" style={{ background: "#f7f7fb" }}>
+
+        {/* ── NAV ── */}
+        <nav
+          className="sticky top-0 z-30 px-8 py-4 flex items-center justify-between"
+          style={{
+            background: "rgba(255,255,255,0.85)",
+            backdropFilter: "blur(16px)",
+            borderBottom: "1px solid rgba(0,0,0,0.06)",
+          }}
+        >
+          <div className="flex items-center gap-3">
+            <img src="/logo.png" alt="First Sale Lab" style={{ height: 36, width: "auto" }} />
+            <span className="text-base font-bold text-gray-900" style={{ letterSpacing: "-0.4px" }}>First Sale Lab</span>
+            {isPro ? (
+              <span
+                className="text-xs font-bold px-2.5 py-1 rounded-full"
+                style={{ background: "linear-gradient(135deg, #f59e0b, #d97706)", color: "#fff" }}
+              >
+                ✨ Pro
+              </span>
+            ) : (
+              <Link
+                href="/upgrade"
+                className="text-xs font-bold px-2.5 py-1 rounded-full"
+                style={{ background: "rgba(124,58,237,0.1)", color: "#7c3aed" }}
+                onMouseEnter={e => { e.currentTarget.style.background = "rgba(124,58,237,0.18)"; }}
+                onMouseLeave={e => { e.currentTarget.style.background = "rgba(124,58,237,0.1)"; }}
+              >
+                ✨ Upgrade
+              </Link>
+            )}
+          </div>
+          <div className="flex items-center gap-6">
+            <Link
+              href="/tools"
+              className="text-sm font-medium text-gray-500 hidden sm:block"
+              onMouseEnter={e => (e.currentTarget.style.color = "#111")}
+              onMouseLeave={e => (e.currentTarget.style.color = "#6b7280")}
+            >
+              Tools
+            </Link>
+            <Link
+              href="/resources"
+              className="text-sm font-medium text-gray-500 hidden sm:block"
+              onMouseEnter={e => (e.currentTarget.style.color = "#111")}
+              onMouseLeave={e => (e.currentTarget.style.color = "#6b7280")}
+            >
+              Resources
+            </Link>
+            <Link
+              href="/dashboard"
+              className="text-sm font-semibold"
+              style={{ color: "#6366f1" }}
+              onMouseEnter={e => (e.currentTarget.style.color = "#4f46e5")}
+              onMouseLeave={e => (e.currentTarget.style.color = "#6366f1")}
+            >
+              Dashboard →
+            </Link>
+            <button
+              onClick={handleLogout}
+              className="text-sm font-medium px-4 py-2 rounded-lg"
+              style={{
+                color: "#6b7280",
+                border: "1px solid #e5e7eb",
+                background: "white",
+                cursor: "pointer",
+              }}
+              onMouseEnter={e => { const t = e.currentTarget; t.style.borderColor = "#d1d5db"; t.style.color = "#111"; }}
+              onMouseLeave={e => { const t = e.currentTarget; t.style.borderColor = "#e5e7eb"; t.style.color = "#6b7280"; }}
+            >
+              Log out
+            </button>
+          </div>
+        </nav>
+
+        {/* ── HERO ── */}
+        <section
+          className="relative overflow-hidden dot-grid"
+          style={{ background: HERO_BG, paddingTop: "80px", paddingBottom: "0" }}
+        >
+          {/* Radial glow */}
+          <div className="absolute pointer-events-none" style={{
+            top: "-10%", left: "50%", transform: "translateX(-50%)",
+            width: "900px", height: "600px",
+            background: "radial-gradient(ellipse at center, rgba(99,102,241,0.22) 0%, rgba(139,92,246,0.1) 40%, transparent 70%)",
+          }} />
+          <div className="absolute pointer-events-none" style={{
+            bottom: "10%", right: "15%", width: "400px", height: "400px",
+            background: "radial-gradient(ellipse at center, rgba(139,92,246,0.12) 0%, transparent 70%)",
+          }} />
+
+          <div className="relative z-10 max-w-3xl mx-auto px-8 py-20 text-center">
+            {/* Welcome back label */}
+            <span
+              className="inline-flex items-center gap-2 text-xs font-bold tracking-[0.1em] uppercase px-3 py-1.5 rounded-full mb-6"
+              style={{ background: "rgba(99,102,241,0.15)", border: "1px solid rgba(99,102,241,0.3)", color: "#a78bfa" }}
+            >
+              <span className="w-1.5 h-1.5 rounded-full bg-violet-400 animate-pulse" />
+              Welcome back
+            </span>
+
+            {/* Heading */}
+            <h1
+              className="text-5xl sm:text-6xl font-extrabold text-white mb-5"
+              style={{ lineHeight: "1.05", letterSpacing: "-0.04em" }}
+            >
+              Hey, {firstName}. 👋
+            </h1>
+
+            {/* Dynamic subtext */}
+            <p
+              className="text-base mb-8 leading-relaxed mx-auto"
+              style={{ color: "rgba(255,255,255,0.6)", maxWidth: "480px" }}
+            >
+              {subtext}
+            </p>
+
+            {/* Progress bar */}
+            <div className="mx-auto mb-8" style={{ maxWidth: "400px" }}>
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-xs font-semibold" style={{ color: "rgba(255,255,255,0.5)" }}>
+                  {completedCount} of 12 modules
+                </span>
+                <span className="text-xs font-bold" style={{ color: "#a78bfa" }}>{progressPercent}%</span>
+              </div>
+              <div className="w-full rounded-full h-2" style={{ background: "rgba(255,255,255,0.1)" }}>
+                <div
+                  className="h-2 rounded-full"
+                  style={{
+                    background: GRAD_BTN,
+                    width: `${progressPercent}%`,
+                    transition: "width 600ms ease",
+                    minWidth: completedCount > 0 ? "8px" : "0",
+                  }}
+                />
+              </div>
+            </div>
+
+            {/* CTA buttons */}
+            <div className="flex flex-col sm:flex-row gap-3 items-center justify-center">
+              <GlowButton href="/dashboard">Continue learning →</GlowButton>
+              <Link
+                href="/dashboard"
+                className="text-sm font-medium px-7 py-3.5 rounded-xl"
+                style={{ color: "rgba(255,255,255,0.5)", border: "1px solid rgba(255,255,255,0.1)" }}
+                onMouseEnter={e => { const t = e.currentTarget; t.style.color = "white"; t.style.borderColor = "rgba(255,255,255,0.25)"; t.style.background = "rgba(255,255,255,0.05)"; }}
+                onMouseLeave={e => { const t = e.currentTarget; t.style.color = "rgba(255,255,255,0.5)"; t.style.borderColor = "rgba(255,255,255,0.1)"; t.style.background = "transparent"; }}
+              >
+                Go to Dashboard
+              </Link>
+            </div>
+          </div>
+
+          {/* White wave */}
+          <div className="relative z-10">
+            <svg viewBox="0 0 1440 60" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M0 60L1440 60L1440 30C1440 30 1080 0 720 0C360 0 0 30 0 30L0 60Z" fill="#f7f7fb"/>
+            </svg>
+          </div>
+        </section>
+
+        {/* ── QUICK-ACCESS CARDS ── */}
+        <section className="px-8 py-16" style={{ background: "#f7f7fb" }}>
+          <div className="max-w-4xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-5">
+
+            {/* Card 1 — Progress */}
+            {(() => {
+              const cardRef = { current: null as HTMLDivElement | null };
+              return (
+                <div
+                  ref={(el) => { cardRef.current = el; }}
+                  className="bg-white rounded-2xl border border-gray-100 p-6 flex flex-col cursor-pointer"
+                  style={{ boxShadow: CARD_SHADOW, transition: "transform 250ms, box-shadow 250ms" }}
+                  onMouseEnter={e => { const t = e.currentTarget; t.style.transform = "translateY(-4px)"; t.style.boxShadow = CARD_SHADOW_HOV; }}
+                  onMouseLeave={e => { const t = e.currentTarget; t.style.transform = "translateY(0)"; t.style.boxShadow = CARD_SHADOW; }}
+                  onClick={() => { window.location.href = "/dashboard"; }}
+                >
+                  <div
+                    className="w-11 h-11 rounded-xl flex items-center justify-center text-xl mb-4"
+                    style={{ background: "linear-gradient(135deg, rgba(99,102,241,0.1), rgba(139,92,246,0.1))" }}
+                  >
+                    📊
+                  </div>
+                  <h3 className="text-sm font-bold text-gray-900 mb-2" style={{ letterSpacing: "-0.01em" }}>Your progress</h3>
+                  <p className="text-sm text-gray-500 leading-relaxed flex-1">
+                    {completedCount} of 12 modules complete · {progressPercent}% done
+                  </p>
+                  <span className="mt-4 text-sm font-semibold" style={{ color: "#6366f1" }}>View dashboard →</span>
+                </div>
+              );
+            })()}
+
+            {/* Card 2 — Tools */}
+            <div
+              className="bg-white rounded-2xl border border-gray-100 p-6 flex flex-col cursor-pointer"
+              style={{ boxShadow: CARD_SHADOW, transition: "transform 250ms, box-shadow 250ms" }}
+              onMouseEnter={e => { const t = e.currentTarget; t.style.transform = "translateY(-4px)"; t.style.boxShadow = CARD_SHADOW_HOV; }}
+              onMouseLeave={e => { const t = e.currentTarget; t.style.transform = "translateY(0)"; t.style.boxShadow = CARD_SHADOW; }}
+              onClick={() => { window.location.href = "/tools"; }}
+            >
+              <div
+                className="w-11 h-11 rounded-xl flex items-center justify-center text-xl mb-4"
+                style={{ background: "linear-gradient(135deg, rgba(99,102,241,0.1), rgba(139,92,246,0.1))" }}
+              >
+                🛠️
+              </div>
+              <h3 className="text-sm font-bold text-gray-900 mb-2" style={{ letterSpacing: "-0.01em" }}>Tools &amp; calculators</h3>
+              <p className="text-sm text-gray-500 leading-relaxed flex-1">
+                Profit calculator, product research tools, and more
+              </p>
+              <span className="mt-4 text-sm font-semibold" style={{ color: "#6366f1" }}>Open tools →</span>
+            </div>
+
+            {/* Card 3 — Pro upsell or Resources */}
+            {!isPro ? (
+              <div
+                className="rounded-2xl p-6 flex flex-col cursor-pointer"
+                style={{
+                  background: "linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%)",
+                  boxShadow: GLOW_BASE,
+                  transition: "transform 250ms, box-shadow 250ms",
+                }}
+                onMouseEnter={e => { const t = e.currentTarget; t.style.transform = "translateY(-4px)"; t.style.boxShadow = GLOW_HOV; }}
+                onMouseLeave={e => { const t = e.currentTarget; t.style.transform = "translateY(0)"; t.style.boxShadow = GLOW_BASE; }}
+                onClick={() => { window.location.href = "/upgrade"; }}
+              >
+                <div
+                  className="w-11 h-11 rounded-xl flex items-center justify-center text-xl mb-4"
+                  style={{ background: "rgba(255,255,255,0.15)" }}
+                >
+                  ✨
+                </div>
+                <h3 className="text-sm font-bold text-white mb-2" style={{ letterSpacing: "-0.01em" }}>First Sale Lab Pro</h3>
+                <p className="text-sm leading-relaxed flex-1" style={{ color: "rgba(255,255,255,0.75)" }}>
+                  Modules 7–12 cover traffic, ads, and your first sale. Unlock them for $19/month.
+                </p>
+                <span
+                  className="mt-4 inline-block text-xs font-bold px-4 py-2 rounded-lg self-start"
+                  style={{ background: "linear-gradient(135deg, #f59e0b, #d97706)", color: "#fff" }}
+                >
+                  Upgrade now →
+                </span>
+              </div>
+            ) : (
+              <div
+                className="bg-white rounded-2xl border border-gray-100 p-6 flex flex-col cursor-pointer"
+                style={{ boxShadow: CARD_SHADOW, transition: "transform 250ms, box-shadow 250ms" }}
+                onMouseEnter={e => { const t = e.currentTarget; t.style.transform = "translateY(-4px)"; t.style.boxShadow = CARD_SHADOW_HOV; }}
+                onMouseLeave={e => { const t = e.currentTarget; t.style.transform = "translateY(0)"; t.style.boxShadow = CARD_SHADOW; }}
+                onClick={() => { window.location.href = "/resources"; }}
+              >
+                <div
+                  className="w-11 h-11 rounded-xl flex items-center justify-center text-xl mb-4"
+                  style={{ background: "linear-gradient(135deg, rgba(99,102,241,0.1), rgba(139,92,246,0.1))" }}
+                >
+                  📚
+                </div>
+                <h3 className="text-sm font-bold text-gray-900 mb-2" style={{ letterSpacing: "-0.01em" }}>Resources</h3>
+                <p className="text-sm text-gray-500 leading-relaxed flex-1">
+                  Supplier lists, ad templates, and cheat sheets.
+                </p>
+                <span className="mt-4 text-sm font-semibold" style={{ color: "#6366f1" }}>Browse resources →</span>
+              </div>
+            )}
+          </div>
+        </section>
+
+        {/* ── QUOTE SECTION ── */}
+        <section className="px-8 py-16" style={{ background: "linear-gradient(135deg, #ede9fe 0%, #e0e7ff 100%)" }}>
+          <div className="max-w-2xl mx-auto text-center">
+            <p
+              className="text-lg font-semibold leading-relaxed mb-6"
+              style={{ color: "#3730a3", letterSpacing: "-0.01em" }}
+            >
+              {quoteText}
+            </p>
+            <Link
+              href="/dashboard"
+              className="text-sm font-semibold"
+              style={{ color: "#6366f1" }}
+              onMouseEnter={e => (e.currentTarget.style.color = "#4f46e5")}
+              onMouseLeave={e => (e.currentTarget.style.color = "#6366f1")}
+            >
+              Back to dashboard →
+            </Link>
+          </div>
+        </section>
+
+        {/* ── FOOTER ── */}
+        <footer className="px-8 py-10" style={{ background: "#08080f" }}>
+          <div className="max-w-4xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div className="flex items-center gap-2">
+              <img src="/logo.png" alt="First Sale Lab" style={{ height: 28, width: "auto" }} />
+              <span className="text-sm font-bold text-white" style={{ letterSpacing: "-0.3px" }}>First Sale Lab</span>
+            </div>
+            <p className="text-sm" style={{ color: "rgba(255,255,255,0.35)" }}>© 2026 First Sale Lab</p>
+            <Link
+              href="/dashboard"
+              className="text-xs font-semibold"
+              style={{ color: "#a78bfa" }}
+              onMouseEnter={e => (e.currentTarget.style.color = "#c4b5fd")}
+              onMouseLeave={e => (e.currentTarget.style.color = "#a78bfa")}
+            >
+              Dashboard →
+            </Link>
+          </div>
+        </footer>
+
+      </div>
+    );
+  }
+
+  /* ── Marketing landing page (non-logged-in) ── */
   return (
     <div className="min-h-screen bg-white flex flex-col">
 
@@ -172,43 +522,26 @@ export default function Home() {
           <span className="text-base font-bold text-white tracking-tight" style={{ letterSpacing: "-0.4px" }}>First Sale Lab</span>
         </div>
         <div className="flex items-center gap-6">
-          {loggedIn ? (
-            <div className="flex items-center gap-4">
-              <span className="text-sm font-medium hidden sm:block" style={{ color: "rgba(255,255,255,0.5)" }}>
-                Hey, <span style={{ color: "rgba(255,255,255,0.85)", fontWeight: 600 }}>{firstName}</span> 👋
-              </span>
-              <Link
-                href="/dashboard"
-                className="text-sm font-semibold px-4 py-2 rounded-lg text-white"
-                style={{ border: "1px solid rgba(255,255,255,0.15)", background: "rgba(255,255,255,0.06)" }}
-                onMouseEnter={e => { const t = e.currentTarget; t.style.background = "rgba(255,255,255,0.12)"; t.style.borderColor = "rgba(255,255,255,0.25)"; }}
-                onMouseLeave={e => { const t = e.currentTarget; t.style.background = "rgba(255,255,255,0.06)"; t.style.borderColor = "rgba(255,255,255,0.15)"; }}
-              >
-                Continue learning →
-              </Link>
-            </div>
-          ) : (
-            <>
-              <Link
-                href="/login"
-                className="text-sm font-medium"
-                style={{ color: "rgba(255,255,255,0.55)" }}
-                onMouseEnter={e => (e.currentTarget.style.color = "white")}
-                onMouseLeave={e => (e.currentTarget.style.color = "rgba(255,255,255,0.55)")}
-              >
-                Log in
-              </Link>
-              <Link
-                href="/quiz"
-                className="text-sm font-semibold px-4 py-2 rounded-lg text-white"
-                style={{ border: "1px solid rgba(255,255,255,0.15)", background: "rgba(255,255,255,0.06)" }}
-                onMouseEnter={e => { const t = e.currentTarget; t.style.background = "rgba(255,255,255,0.12)"; t.style.borderColor = "rgba(255,255,255,0.25)"; }}
-                onMouseLeave={e => { const t = e.currentTarget; t.style.background = "rgba(255,255,255,0.06)"; t.style.borderColor = "rgba(255,255,255,0.15)"; }}
-              >
-                Get Started
-              </Link>
-            </>
-          )}
+          <div className="flex items-center gap-4">
+            <Link
+              href="/login"
+              className="text-sm font-medium"
+              style={{ color: "rgba(255,255,255,0.55)" }}
+              onMouseEnter={e => (e.currentTarget.style.color = "white")}
+              onMouseLeave={e => (e.currentTarget.style.color = "rgba(255,255,255,0.55)")}
+            >
+              Log in
+            </Link>
+            <Link
+              href="/quiz"
+              className="text-sm font-semibold px-4 py-2 rounded-lg text-white"
+              style={{ border: "1px solid rgba(255,255,255,0.15)", background: "rgba(255,255,255,0.06)" }}
+              onMouseEnter={e => { const t = e.currentTarget; t.style.background = "rgba(255,255,255,0.12)"; t.style.borderColor = "rgba(255,255,255,0.25)"; }}
+              onMouseLeave={e => { const t = e.currentTarget; t.style.background = "rgba(255,255,255,0.06)"; t.style.borderColor = "rgba(255,255,255,0.15)"; }}
+            >
+              Get Started
+            </Link>
+          </div>
         </div>
       </nav>
 
@@ -235,7 +568,7 @@ export default function Home() {
                 style={{ background: "rgba(99,102,241,0.15)", border: "1px solid rgba(99,102,241,0.3)", color: "#a78bfa" }}
               >
                 <span className="w-1.5 h-1.5 rounded-full bg-violet-400 animate-pulse" />
-                Free for complete beginners
+                Modules 1–6 free · Pro from $19/mo
               </span>
             </div>
 
@@ -257,34 +590,26 @@ export default function Home() {
             </p>
 
             <div className="fade-up-d3 flex flex-col sm:flex-row gap-3 items-start">
-              {loggedIn ? (
-                <GlowButton href="/dashboard">Continue learning →</GlowButton>
-              ) : (
-                <>
-                  <GlowButton href="/quiz">Build my free plan →</GlowButton>
-                  <Link
-                    href="/login"
-                    className="text-sm font-medium px-7 py-3.5 rounded-xl"
-                    style={{ color: "rgba(255,255,255,0.5)", border: "1px solid rgba(255,255,255,0.1)" }}
-                    onMouseEnter={e => { const t = e.currentTarget; t.style.color = "white"; t.style.borderColor = "rgba(255,255,255,0.25)"; t.style.background = "rgba(255,255,255,0.05)"; }}
-                    onMouseLeave={e => { const t = e.currentTarget; t.style.color = "rgba(255,255,255,0.5)"; t.style.borderColor = "rgba(255,255,255,0.1)"; t.style.background = "transparent"; }}
-                  >
-                    Log in
-                  </Link>
-                </>
-              )}
+              <GlowButton href="/quiz">Build my free plan →</GlowButton>
+              <Link
+                href="/login"
+                className="text-sm font-medium px-7 py-3.5 rounded-xl"
+                style={{ color: "rgba(255,255,255,0.5)", border: "1px solid rgba(255,255,255,0.1)" }}
+                onMouseEnter={e => { const t = e.currentTarget; t.style.color = "white"; t.style.borderColor = "rgba(255,255,255,0.25)"; t.style.background = "rgba(255,255,255,0.05)"; }}
+                onMouseLeave={e => { const t = e.currentTarget; t.style.color = "rgba(255,255,255,0.5)"; t.style.borderColor = "rgba(255,255,255,0.1)"; t.style.background = "transparent"; }}
+              >
+                Log in
+              </Link>
             </div>
 
-            {!loggedIn && (
-              <div className="fade-up-d4 flex items-center gap-5 mt-8">
-                {["Free forever", "No credit card", "Takes 2 minutes"].map((t) => (
-                  <div key={t} className="flex items-center gap-1.5">
-                    <span style={{ color: "#818cf8", fontSize: "12px" }}>✓</span>
-                    <span className="text-xs font-medium" style={{ color: "rgba(255,255,255,0.4)" }}>{t}</span>
-                  </div>
-                ))}
-              </div>
-            )}
+            <div className="fade-up-d4 flex items-center gap-5 mt-8">
+              {["Modules 1–6 free", "No card to start", "Takes 2 minutes"].map((t) => (
+                <div key={t} className="flex items-center gap-1.5">
+                  <span style={{ color: "#818cf8", fontSize: "12px" }}>✓</span>
+                  <span className="text-xs font-medium" style={{ color: "rgba(255,255,255,0.4)" }}>{t}</span>
+                </div>
+              ))}
+            </div>
           </div>
 
           <div className="fade-up-d3 hidden lg:flex items-center justify-center flex-shrink-0">
@@ -307,7 +632,7 @@ export default function Home() {
           {[
             { icon: "⭐", text: "Rated 4.9 by early users" },
             { icon: "🌍", text: "Used in 30+ countries" },
-            { icon: "🆓", text: "100% free — no credit card ever" },
+            { icon: "🆓", text: "Modules 1–6 completely free" },
             { icon: "⚡", text: "First module takes 20 minutes" },
           ].map(item => (
             <div key={item.text} className="flex items-center gap-2">
@@ -354,7 +679,7 @@ export default function Home() {
                 {[
                   "12 focused modules, 20–45 min each",
                   "One concrete task per module — then you unlock the next",
-                  "Free forever. No upsells. No hidden fees.",
+                  "Modules 1–6 free. Pro unlocks the full roadmap.",
                   "Always know exactly what your next step is",
                   "Built on frameworks used by 7-figure ecommerce stores",
                 ].map((item) => (
@@ -553,7 +878,7 @@ export default function Home() {
         <div className="max-w-3xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
           {[
             { n: "12",   label: "Focused modules",          sub: "20–45 min each",         color: "#4f46e5" },
-            { n: "Free", label: "Forever",                  sub: "No credit card needed",   color: "#7c3aed" },
+            { n: "Free", label: "To get started",           sub: "Modules 1–6 included",    color: "#7c3aed" },
             { n: "3×",   label: "Minimum margin rule",      sub: "Built into Module 3",     color: "#a855f7" },
             { n: "1st",  label: "Sale is your only goal",   sub: "Not theory — reality",    color: "#6366f1" },
           ].map((s) => (
@@ -577,11 +902,11 @@ export default function Home() {
             {[
               {
                 q: "Is this actually free?",
-                a: "Yes, completely. No credit card, no trial, no premium tier. Every module, every checklist, every resource — free forever. We don't even have a paid plan.",
+                a: "Modules 1–6 are completely free — no credit card, no trial. Modules 7–12 are part of First Sale Lab Pro at $19/month, which covers traffic, ads, conversions, and scaling. You can complete the full beginner foundation before deciding if Pro is right for you.",
               },
               {
                 q: "Do I need experience or money to start?",
-                a: "No experience needed at all — that's the point. For budget, you can start learning and building for $0. When you get to ads (Module 8), a $20–50 test budget is recommended, but you'll be ready by then.",
+                a: "No experience needed at all — that's the point. For budget, you can start learning and building for $0.",
               },
               {
                 q: "How long does the full course take?",
@@ -627,7 +952,7 @@ export default function Home() {
               </p>
               <GlowButton href="/quiz">Build my free ecommerce plan →</GlowButton>
               <p className="mt-5 text-xs" style={{ color: "rgba(255,255,255,0.3)" }}>
-                No credit card · No commitment · Free forever
+                No credit card · Modules 1–6 free · Pro from $19/mo
               </p>
             </div>
           </div>
@@ -641,7 +966,7 @@ export default function Home() {
             <img src="/logo.png" alt="First Sale Lab" style={{ height: 28, width: "auto" }} />
             <span className="text-sm font-bold text-gray-900" style={{ letterSpacing: "-0.3px" }}>First Sale Lab</span>
           </div>
-          <p className="text-sm text-gray-400">© 2026 · Free forever · Built for complete beginners</p>
+          <p className="text-sm text-gray-400">© 2026 · Built for complete beginners</p>
           <div className="flex items-center gap-5">
             <Link href="/login" className="text-xs text-gray-400 hover:text-gray-700">Log in</Link>
             <Link href="/quiz" className="text-xs font-semibold" style={{ color: "#6366f1" }}>Get started →</Link>
