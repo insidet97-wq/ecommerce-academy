@@ -108,10 +108,10 @@ export default function ModulePage() {
       setUserId(user.id);
       setUserEmail(user.email ?? "");
 
-      // Fetch first name for emails
+      // Fetch first name + Pro status
       const { data: profile } = await supabase
         .from("user_profiles")
-        .select("first_name")
+        .select("first_name, is_pro")
         .eq("id", user.id)
         .single();
       setFirstName(profile?.first_name || user.email?.split("@")[0] || "there");
@@ -124,7 +124,16 @@ export default function ModulePage() {
       const doneIds = (data ?? []).map((r: { module_id: number }) => r.module_id);
       setCompleted(doneIds);
 
-      const admin   = isAdmin(user.email);
+      const admin  = isAdmin(user.email);
+      const isPro  = profile?.is_pro ?? false;
+
+      // Pro gate: modules 7–12 require Pro subscription
+      if (moduleId > 6 && !isPro && !admin) {
+        router.push("/upgrade");
+        return;
+      }
+
+      // Sequential unlock check
       const unlocked = admin || moduleId === 1 || doneIds.includes(moduleId - 1);
       if (!unlocked) { router.push("/dashboard"); return; }
 

@@ -56,6 +56,7 @@ type Profile = {
   track: string | null; start_module: number;
   goal: string | null; first_name: string | null;
   streak_days: number | null; last_active: string | null;
+  is_pro: boolean; stripe_customer_id: string | null;
 };
 
 /* ── Certificate Modal ── */
@@ -114,11 +115,14 @@ function ModuleCard({ children, unlocked }: { children: React.ReactNode; unlocke
 
 export default function DashboardPage() {
   const router = useRouter();
-  const [email,      setEmail]      = useState("");
-  const [completed,  setCompleted]  = useState<number[]>([]);
-  const [profile,    setProfile]    = useState<Profile>({ track: null, start_module: 1, goal: null, first_name: null, streak_days: null, last_active: null });
-  const [loading,    setLoading]    = useState(true);
-  const [showCert,   setShowCert]   = useState(false);
+  const [email,          setEmail]          = useState("");
+  const [userId,         setUserId]         = useState<string | null>(null);
+  const [completed,      setCompleted]      = useState<number[]>([]);
+  const [profile,        setProfile]        = useState<Profile>({ track: null, start_module: 1, goal: null, first_name: null, streak_days: null, last_active: null, is_pro: false, stripe_customer_id: null });
+  const [loading,        setLoading]        = useState(true);
+  const [showCert,       setShowCert]       = useState(false);
+  const [upgradedBanner, setUpgradedBanner] = useState(false);
+  const [portalLoading,  setPortalLoading]  = useState(false);
 
   const openCert  = useCallback(() => setShowCert(true),  []);
   const closeCert = useCallback(() => setShowCert(false), []);
@@ -128,16 +132,50 @@ export default function DashboardPage() {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) { router.push("/login"); return; }
       setEmail(user.email ?? "");
+      setUserId(user.id);
+
+      // Check for ?upgraded=true in URL
+      if (typeof window !== "undefined" && new URLSearchParams(window.location.search).get("upgraded") === "true") {
+        setUpgradedBanner(true);
+        // Clean the URL without reload
+        window.history.replaceState({}, "", "/dashboard");
+      }
+
       const [progressRes, profileRes] = await Promise.all([
         supabase.from("user_progress").select("module_id").eq("user_id", user.id),
-        supabase.from("user_profiles").select("track, start_module, goal, first_name, streak_days, last_active").eq("id", user.id).single(),
+        supabase.from("user_profiles").select("track, start_module, goal, first_name, streak_days, last_active, is_pro, stripe_customer_id").eq("id", user.id).single(),
       ]);
       setCompleted((progressRes.data ?? []).map((r: { module_id: number }) => r.module_id));
-      if (profileRes.data) setProfile({ track: profileRes.data.track, start_module: profileRes.data.start_module ?? 1, goal: profileRes.data.goal, first_name: profileRes.data.first_name ?? null, streak_days: profileRes.data.streak_days ?? 0, last_active: profileRes.data.last_active ?? null });
+      if (profileRes.data) setProfile({
+        track:               profileRes.data.track,
+        start_module:        profileRes.data.start_module ?? 1,
+        goal:                profileRes.data.goal,
+        first_name:          profileRes.data.first_name ?? null,
+        streak_days:         profileRes.data.streak_days ?? 0,
+        last_active:         profileRes.data.last_active ?? null,
+        is_pro:              profileRes.data.is_pro ?? false,
+        stripe_customer_id:  profileRes.data.stripe_customer_id ?? null,
+      });
       setLoading(false);
     }
     load();
   }, [router]);
+
+  async function handleManageBilling() {
+    if (!userId) return;
+    setPortalLoading(true);
+    try {
+      const res = await fetch("/api/stripe/portal", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ userId }),
+      });
+      const { url } = await res.json();
+      if (url) window.location.href = url;
+    } finally {
+      setPortalLoading(false);
+    }
+  }
 
   async function handleLogout() { await supabase.auth.signOut(); router.push("/"); }
 
@@ -150,12 +188,17 @@ export default function DashboardPage() {
   }
 
   const admin           = isAdmin(email);
+  const isPro           = profile.is_pro || admin;
   const completedCount  = completed.length;
   const progressPercent = Math.round((completedCount / MODULES.length) * 100);
   const startModule     = profile.start_module ?? 1;
   const firstName       = profile.first_name || email.split("@")[0];
   const trackColor      = profile.track ? (TRACK_COLORS[profile.track] ?? "#4f46e5") : "#4f46e5";
-  const isUnlocked      = (id: number) => admin || id <= startModule || completed.includes(id - 1);
+  const isProGated      = (id: number) => id > 6 && !isPro;
+  const isUnlocked      = (id: number) => {
+    if (isProGated(id)) return false;
+    return admin || id <= startModule || completed.includes(id - 1);
+  };
   const nextModule      = MODULES.find(m => !completed.includes(m.id) && isUnlocked(m.id));
   const allDone         = completedCount === MODULES.length;
 
@@ -178,20 +221,40 @@ export default function DashboardPage() {
 
       {showCert && <CertificateModal name={firstName} onClose={closeCert} />}
 
+      {/* ── Upgraded success banner ── */}
+      {upgradedBanner && (
+        <div style={{ background: "linear-gradient(135deg, #4c1d95, #6d28d9)", padding: "14px 24px", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12, flexWrap: "wrap" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+            <span style={{ fontSize: 20 }}>🎉</span>
+            <div>
+              <p style={{ fontSize: 14, fontWeight: 700, color: "#fff" }}>Welcome to First Sale Lab Pro!</p>
+              <p style={{ fontSize: 12, color: "rgba(255,255,255,0.65)" }}>All 12 modules are now unlocked. Let&apos;s get that first sale.</p>
+            </div>
+          </div>
+          <button onClick={() => setUpgradedBanner(false)} style={{ background: "rgba(255,255,255,0.15)", color: "#fff", border: "none", borderRadius: 8, padding: "6px 14px", fontSize: 12, fontWeight: 600, cursor: "pointer", flexShrink: 0 }}>
+            Dismiss
+          </button>
+        </div>
+      )}
+
       {/* ── Nav ── */}
       <nav style={{ background: "rgba(255,255,255,0.85)", backdropFilter: "blur(12px)", borderBottom: "1px solid rgba(0,0,0,0.06)", position: "sticky", top: 0, zIndex: 40 }}>
         <div style={{ maxWidth: 680, margin: "0 auto", padding: "0 24px", height: 60, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-          {/* Left — logo + admin badge */}
+          {/* Left — logo + admin/pro badge */}
           <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
             <Link href="/" style={{ display: "flex", alignItems: "center", gap: 9, textDecoration: "none" }}>
               <img src="/logo.png" alt="First Sale Lab" style={{ height: 40, width: "auto" }} />
               <span style={{ fontWeight: 800, fontSize: 15, color: "#09090b", letterSpacing: "-0.4px" }}>First Sale Lab</span>
             </Link>
-            {admin && (
+            {admin ? (
               <span style={{ fontSize: 10, fontWeight: 700, padding: "2px 7px", borderRadius: 99, background: "linear-gradient(135deg, #6366f1, #7c3aed)", color: "#fff", letterSpacing: "0.1em", textTransform: "uppercase" }}>
                 Admin
               </span>
-            )}
+            ) : isPro ? (
+              <span style={{ fontSize: 10, fontWeight: 700, padding: "2px 8px", borderRadius: 99, background: "linear-gradient(135deg, #facc15, #f59e0b)", color: "#1c1917", letterSpacing: "0.06em" }}>
+                ✨ Pro
+              </span>
+            ) : null}
           </div>
 
           {/* Right — nav links + logout */}
@@ -207,6 +270,20 @@ export default function DashboardPage() {
                 onMouseLeave={e => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = "#52525b"; }}
               >{item.label}</Link>
             ))}
+            {!isPro && (
+              <Link href="/upgrade"
+                style={{ fontSize: 12, fontWeight: 700, color: "#7c3aed", textDecoration: "none", padding: "5px 12px", borderRadius: 8, border: "1.5px solid #c4b5fd", background: "#f5f3ff" }}
+                onMouseEnter={e => { e.currentTarget.style.background = "#ede9fe"; }}
+                onMouseLeave={e => { e.currentTarget.style.background = "#f5f3ff"; }}
+              >✨ Upgrade</Link>
+            )}
+            {isPro && profile.stripe_customer_id && !admin && (
+              <button onClick={handleManageBilling} disabled={portalLoading}
+                style={{ fontSize: 12, fontWeight: 600, color: "#71717a", background: "none", border: "none", cursor: "pointer", padding: "6px 12px", borderRadius: 8 }}
+                onMouseEnter={e => { e.currentTarget.style.background = "#f4f4f5"; e.currentTarget.style.color = "#09090b"; }}
+                onMouseLeave={e => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = "#71717a"; }}
+              >{portalLoading ? "Loading…" : "Billing"}</button>
+            )}
             <div style={{ width: 1, height: 16, background: "#e4e4e7", margin: "0 4px" }} />
             <button onClick={handleLogout}
               style={{ fontSize: 13, fontWeight: 500, color: "#a1a1aa", background: "none", border: "none", cursor: "pointer", padding: "6px 12px", borderRadius: 8 }}
@@ -337,30 +414,43 @@ export default function DashboardPage() {
 
         {/* ── Module list ── */}
         <div className="fade-up-d3">
-          <p style={{ fontSize: 12, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: "#a1a1aa", marginBottom: 12 }}>
-            All Modules
-          </p>
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 12 }}>
+            <p style={{ fontSize: 12, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: "#a1a1aa" }}>
+              All Modules
+            </p>
+            {!isPro && (
+              <Link href="/upgrade" style={{ fontSize: 11, fontWeight: 700, color: "#7c3aed", textDecoration: "none" }}>
+                ✨ Unlock Modules 7–12
+              </Link>
+            )}
+          </div>
           <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
             {MODULES.map(mod => {
-              const isDone   = completed.includes(mod.id);
-              const unlocked = isUnlocked(mod.id);
-              const isNext   = nextModule?.id === mod.id;
+              const isDone    = completed.includes(mod.id);
+              const proGated  = isProGated(mod.id);
+              const unlocked  = isUnlocked(mod.id);
+              const isNext    = nextModule?.id === mod.id;
               const isSkipped = mod.id < startModule && !isDone;
               return (
                 <ModuleCard key={mod.id} unlocked={unlocked}>
-                  <div style={{ background: "#fff", borderRadius: 18, border: `1.5px solid ${isNext ? "#c7d2fe" : isDone ? "#d1fae5" : "rgba(0,0,0,0.06)"}`, padding: "14px 16px", display: "flex", alignItems: "center", gap: 14, opacity: unlocked ? 1 : 0.45 }}>
-                    <div style={{ width: 44, height: 44, borderRadius: 14, flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 20, background: isDone ? "#ecfdf5" : isNext ? "#eef2ff" : "#f4f4f5" }}>
+                  <div style={{ background: proGated ? "#fafafa" : "#fff", borderRadius: 18, border: `1.5px solid ${proGated ? "rgba(124,58,237,0.12)" : isNext ? "#c7d2fe" : isDone ? "#d1fae5" : "rgba(0,0,0,0.06)"}`, padding: "14px 16px", display: "flex", alignItems: "center", gap: 14, opacity: (!unlocked && !proGated) ? 0.45 : 1 }}>
+                    <div style={{ width: 44, height: 44, borderRadius: 14, flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 20, background: isDone ? "#ecfdf5" : isNext ? "#eef2ff" : proGated ? "#f5f3ff" : "#f4f4f5" }}>
                       {isDone ? "✅" : mod.emoji}
                     </div>
                     <div style={{ flex: 1, minWidth: 0 }}>
                       <div style={{ display: "flex", alignItems: "center", gap: 6, flexWrap: "wrap", marginBottom: 2 }}>
-                        <span style={{ fontSize: 13, fontWeight: 600, color: isDone ? "#a1a1aa" : "#09090b", textDecoration: isDone ? "line-through" : "none" }}>{mod.title}</span>
+                        <span style={{ fontSize: 13, fontWeight: 600, color: isDone ? "#a1a1aa" : proGated ? "#71717a" : "#09090b", textDecoration: isDone ? "line-through" : "none" }}>{mod.title}</span>
                         {isNext && <span style={{ fontSize: 10, fontWeight: 700, padding: "2px 7px", borderRadius: 99, background: trackColor, color: "#fff" }}>Up next</span>}
                         {isSkipped && <span style={{ fontSize: 10, fontWeight: 600, padding: "2px 7px", borderRadius: 99, background: "#fffbeb", color: "#d97706", border: "1px solid #fde68a" }}>Pre-unlocked</span>}
+                        {proGated && <span style={{ fontSize: 10, fontWeight: 700, padding: "2px 7px", borderRadius: 99, background: "linear-gradient(135deg, #6366f1, #7c3aed)", color: "#fff" }}>✨ Pro</span>}
                       </div>
                       <p style={{ fontSize: 12, color: "#a1a1aa" }}>{mod.duration} · {mod.description}</p>
                     </div>
-                    {!unlocked ? (
+                    {proGated ? (
+                      <Link href="/upgrade" style={{ fontSize: 11, fontWeight: 700, flexShrink: 0, padding: "7px 14px", borderRadius: 10, textDecoration: "none", background: "linear-gradient(135deg, #f5f3ff, #ede9fe)", color: "#7c3aed", border: "1px solid #c4b5fd", whiteSpace: "nowrap" }}>
+                        Unlock →
+                      </Link>
+                    ) : !unlocked ? (
                       <span style={{ fontSize: 16, flexShrink: 0, color: "#d4d4d8" }}>🔒</span>
                     ) : (
                       <Link href={`/modules/${mod.id}`} style={{ fontSize: 12, fontWeight: 700, flexShrink: 0, padding: "7px 16px", borderRadius: 10, textDecoration: "none", background: isDone ? "#ecfdf5" : isNext ? trackColor : "#f4f4f5", color: isDone ? "#16a34a" : isNext ? "#fff" : "#52525b" }}>
@@ -372,6 +462,24 @@ export default function DashboardPage() {
               );
             })}
           </div>
+
+          {/* ── Upgrade CTA banner (free users) ── */}
+          {!isPro && (
+            <div style={{ marginTop: 20, background: "linear-gradient(135deg, #1e1b4b, #4c1d95)", borderRadius: 20, padding: "24px 24px", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 16, flexWrap: "wrap", position: "relative", overflow: "hidden" }}>
+              <div className="dot-grid" style={{ position: "absolute", inset: 0, pointerEvents: "none" }} />
+              <div style={{ position: "relative" }}>
+                <p style={{ fontSize: 15, fontWeight: 800, color: "#fff", letterSpacing: "-0.3px", marginBottom: 4 }}>
+                  ✨ Unlock the full roadmap
+                </p>
+                <p style={{ fontSize: 12, color: "rgba(255,255,255,0.55)" }}>
+                  Modules 7–12 cover traffic, ads, conversions & your first sale.
+                </p>
+              </div>
+              <Link href="/upgrade" style={{ flexShrink: 0, background: "linear-gradient(135deg, #facc15, #f59e0b)", color: "#1c1917", fontWeight: 800, fontSize: 13, padding: "11px 22px", borderRadius: 12, textDecoration: "none", boxShadow: "0 4px 16px rgba(250,204,21,0.35)", position: "relative", whiteSpace: "nowrap" }}>
+                Upgrade for $19/mo →
+              </Link>
+            </div>
+          )}
         </div>
 
       </main>
