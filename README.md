@@ -92,10 +92,10 @@ The owner (admin) has an **analytics dashboard** and a **content dashboard** for
 - **Events handled:** `checkout.session.completed`, `customer.subscription.deleted`, `invoice.payment_failed`
 - See [Stripe Pro Subscription](#stripe-pro-subscription) section for full details
 
-### Google Gemini
+### Groq
 - **Purpose:** Generates weekly product picks and monthly briefings automatically
-- **Model:** `gemini-1.5-flash` (free tier — 1,500 requests/day, 15/min)
-- **Cost:** Free — get API key at [aistudio.google.com](https://aistudio.google.com)
+- **Model:** `llama-3.3-70b-versatile` (free tier — 14,400 requests/day)
+- **Cost:** Free — get API key at [console.groq.com](https://console.groq.com)
 - See [Automated Pro Content](#automated-pro-content) section
 
 ### Google AdSense
@@ -474,8 +474,8 @@ STRIPE_SECRET_KEY=sk_live_...
 STRIPE_WEBHOOK_SECRET=whsec_...
 NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=pk_live_...
 
-# Google Gemini (AI content generation — free tier)
-GEMINI_API_KEY=AIza...
+# Groq (AI content generation — free tier, no credit card)
+GROQ_API_KEY=gsk_...
 
 # Vercel Cron security
 CRON_SECRET=<random hex string>
