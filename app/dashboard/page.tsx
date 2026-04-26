@@ -5,6 +5,7 @@ import { supabase } from "@/lib/supabase";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { isAdmin } from "@/lib/admin";
+import AdBanner from "@/components/AdBanner";
 
 /* ── Design tokens ── */
 const TRACK_COLORS: Record<string, string> = {
@@ -420,6 +421,9 @@ export default function DashboardPage() {
             </button>
           </div>
         )}
+
+        {/* ── Ad (free users only) ── */}
+        <AdBanner isPro={isPro} slot="YOUR_SLOT_ID_1" />
 
         {/* ── Module list ── */}
         <div className="fade-up-d3">

@@ -7,6 +7,7 @@ import { getModule } from "@/lib/modules";
 import { isAdmin } from "@/lib/admin";
 import { updateStreak } from "@/lib/streak";
 import Link from "next/link";
+import AdBanner from "@/components/AdBanner";
 
 const MODULE_EMOJIS: Record<number, string> = {
   1: "🎮", 2: "🎯", 3: "🏆", 4: "🧠",  5: "🛒",
@@ -100,6 +101,7 @@ export default function ModulePage() {
   const [showIntro, setShowIntro] = useState(true);
   const [showCompletion, setShowCompletion] = useState(false);
   const [countdown, setCountdown] = useState(5);
+  const [isPro,     setIsPro]     = useState(false);
 
   useEffect(() => {
     async function load() {
@@ -124,11 +126,12 @@ export default function ModulePage() {
       const doneIds = (data ?? []).map((r: { module_id: number }) => r.module_id);
       setCompleted(doneIds);
 
-      const admin  = isAdmin(user.email);
-      const isPro  = profile?.is_pro ?? false;
+      const admin   = isAdmin(user.email);
+      const userPro = (profile?.is_pro ?? false) || admin;
+      setIsPro(userPro);
 
       // Pro gate: modules 7–12 require Pro subscription
-      if (moduleId > 6 && !isPro && !admin) {
+      if (moduleId > 6 && !userPro && !admin) {
         router.push("/upgrade");
         return;
       }
@@ -475,6 +478,9 @@ export default function ModulePage() {
             </div>
           </Card>
         </section>
+
+        {/* ── Ad (free users only) ── */}
+        <AdBanner isPro={isPro} slot="YOUR_SLOT_ID_2" />
 
         {/* ── Common Mistakes ── */}
         <section className="fade-up-d2">
