@@ -31,8 +31,20 @@ body {
   to   { opacity: 0; transform: translateX(-40px);}
 }
 
-.slide-in  { animation: slideInRight 0.35s cubic-bezier(0.16,1,0.3,1) both; }
-.slide-out { animation: slideOutLeft 0.2s cubic-bezier(0.4,0,1,1) both; }
+.slide-in       { animation: slideInRight 0.32s cubic-bezier(0.16,1,0.3,1) both; }
+.slide-out      { animation: slideOutLeft  0.22s cubic-bezier(0.4,0,1,1)    both; }
+
+/* Back-direction variants */
+@keyframes slideInLeft {
+  from { opacity: 0; transform: translateX(-40px); }
+  to   { opacity: 1; transform: translateX(0);     }
+}
+@keyframes slideOutRight {
+  from { opacity: 1; transform: translateX(0);     }
+  to   { opacity: 0; transform: translateX(40px);  }
+}
+.slide-in-left  { animation: slideInLeft   0.32s cubic-bezier(0.16,1,0.3,1) both; }
+.slide-out-right{ animation: slideOutRight 0.22s cubic-bezier(0.4,0,1,1)    both; }
 
 /* ── Slide up (completion overlay) ── */
 @keyframes slideUp {

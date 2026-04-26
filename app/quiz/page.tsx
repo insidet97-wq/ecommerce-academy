@@ -1,11 +1,11 @@
-﻿"use client";
+"use client";
 
-import { useState, useRef } from "react";
+import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
 
 /* ── Tokens ── */
-const HERO_BG  = "linear-gradient(135deg, #08080f 0%, #0f0a2e 55%, #150a2e 100%)";
-const GRAD_BTN = "linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%)";
+const HERO_BG   = "linear-gradient(135deg, #08080f 0%, #0f0a2e 55%, #150a2e 100%)";
+const GRAD_BTN  = "linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%)";
 const GLOW_BASE = "0 0 0 1px rgba(99,102,241,0.35), 0 4px 24px rgba(99,102,241,0.35), 0 8px 40px rgba(139,92,246,0.15)";
 const GLOW_HOV  = "0 0 0 1px rgba(99,102,241,0.55), 0 8px 40px rgba(99,102,241,0.5), 0 16px 60px rgba(139,92,246,0.25)";
 
@@ -18,191 +18,190 @@ const questions = [
     question: "Where are you starting from?",
     microcopy: "No wrong answer — your plan adapts to where you are.",
     options: [
-      { label: "Complete beginner — I've never sold anything online", value: "beginner" },
-      { label: "I've tried before but haven't made consistent sales yet", value: "intermediate" },
-      { label: "I already have a store — I want to optimize and grow", value: "advanced" },
+      { emoji: "🌱", label: "Complete beginner",        sub: "I've never sold anything online",              value: "beginner" },
+      { emoji: "🔄", label: "Some experience",          sub: "I've tried but haven't made consistent sales", value: "intermediate" },
+      { emoji: "🏪", label: "Already have a store",     sub: "I want to optimise and grow what I have",      value: "advanced" },
     ],
   },
   {
     key: "goal" as keyof Answers,
     emoji: "🏆",
     question: "What would make this worth it for you?",
-    microcopy: "This shapes which modules we prioritize for you.",
+    microcopy: "This shapes which modules we prioritise for you.",
     options: [
-      { label: "Making my first ever sale — proving to myself it's possible", value: "first_sale" },
-      { label: "Earning a reliable $500–2,000/month on the side", value: "side_income" },
-      { label: "Replacing my job income — full financial freedom", value: "full_time" },
-      { label: "Understanding how ecommerce works — knowledge first", value: "learn" },
+      { emoji: "🎯", label: "My first ever sale",       sub: "Proving to myself it's possible",              value: "first_sale" },
+      { emoji: "💵", label: "$500–2,000/month",         sub: "A reliable side income alongside my job",      value: "side_income" },
+      { emoji: "💼", label: "Replace my job income",    sub: "Full financial freedom — long term goal",      value: "full_time" },
+      { emoji: "📚", label: "Learn how it works",       sub: "Knowledge first, business later",              value: "learn" },
     ],
   },
   {
     key: "time" as keyof Answers,
     emoji: "⏰",
-    question: "How much time can you realistically dedicate each week?",
-    microcopy: "There's no wrong answer — your plan adapts to your schedule.",
+    question: "How much time can you give each week?",
+    microcopy: "Be honest — your plan will reflect your real schedule.",
     options: [
-      { label: "1–5 hours — I have a busy life and that's okay", value: "low" },
-      { label: "5–10 hours — a few focused evenings per week", value: "medium" },
-      { label: "10–20 hours — I'm treating this seriously", value: "high" },
-      { label: "20+ hours — this is my main priority right now", value: "full" },
+      { emoji: "⏱️", label: "1–5 hours",               sub: "Busy life — making it work around everything", value: "low" },
+      { emoji: "🕐", label: "5–10 hours",               sub: "A few focused evenings per week",              value: "medium" },
+      { emoji: "💪", label: "10–20 hours",              sub: "Treating this seriously",                      value: "high" },
+      { emoji: "🔥", label: "20+ hours",                sub: "This is my main priority right now",           value: "full" },
     ],
   },
   {
     key: "budget" as keyof Answers,
-    emoji: "💶",
-    question: "What budget are you working with to start?",
+    emoji: "💰",
+    question: "What budget are you working with?",
     microcopy: "We'll show you how to get the most out of whatever you have.",
     options: [
-      { label: "Under $100 — I need to start as lean as possible", value: "minimal" },
-      { label: "$100–500 — I have a small budget to invest", value: "small" },
-      { label: "$500–2,000 — I'm ready to invest to move faster", value: "medium" },
-      { label: "$2,000+ — I want to scale quickly", value: "large" },
+      { emoji: "💡", label: "Under $100",               sub: "Starting as lean as possible",                 value: "minimal" },
+      { emoji: "💰", label: "$100–500",                 sub: "A small budget to invest in tools and ads",    value: "small" },
+      { emoji: "📈", label: "$500–2,000",               sub: "Ready to invest to move faster",               value: "medium" },
+      { emoji: "🚀", label: "$2,000+",                  sub: "Want to scale quickly from the start",         value: "large" },
     ],
   },
   {
     key: "productIdea" as keyof Answers,
     emoji: "🛍️",
-    question: "Do you have a product or niche idea yet?",
+    question: "Do you have a product or niche in mind?",
     microcopy: "Most beginners don't — that's what Modules 2 and 3 are for.",
     options: [
-      { label: "Not at all — I need help finding one from scratch", value: "no_idea" },
-      { label: "I have a rough idea, but haven't validated it yet", value: "rough_idea" },
-      { label: "Yes — I know what I want to sell and who to sell it to", value: "ready" },
+      { emoji: "❓", label: "No idea yet",              sub: "I need help finding one from scratch",         value: "no_idea" },
+      { emoji: "💭", label: "Rough idea",               sub: "I have something in mind but haven't validated it", value: "rough_idea" },
+      { emoji: "✅", label: "Ready to go",              sub: "I know what I want to sell and who to sell to", value: "ready" },
     ],
   },
 ];
 
 function computeResult(a: Answers) {
-  if (a.experience === "advanced") return { track: "Optimization Track", emoji: "📈", tagline: "Skip the basics. Scale what works.", description: "You already have experience — let's focus on funnels, conversion, and scaling your ads. Jump straight to the growth modules.", startModule: 6 };
-  if (a.experience === "intermediate" && a.productIdea === "ready") return { track: "Fast-Track Builder", emoji: "⚡", tagline: "You have the idea. Let's execute.", description: "You have a product idea and some experience. Let's validate it, build your funnel, and get consistent traffic. You can move faster than most.", startModule: 3 };
-  if (a.goal === "learn") return { track: "Explorer Track", emoji: "🔍", tagline: "Learn at your own pace. No pressure.", description: "You're here to understand how ecommerce works first — perfect. Go through every module at your own pace.", startModule: 1 };
-  return { track: "Beginner Fast-Start", emoji: "🚀", tagline: "From zero to first sale — step by step.", description: "You're starting from scratch — perfectly fine. We'll guide you through every step, from picking a product to making your first real sale.", startModule: 1 };
+  if (a.experience === "advanced")
+    return { track: "Optimization Track", emoji: "📈", tagline: "Skip the basics. Scale what works.", description: "You already have a store — let's focus on funnels, conversion optimisation, and scaling your ads. Jump straight to the growth modules.", startModule: 6 };
+  if (a.experience === "intermediate" && a.productIdea === "ready")
+    return { track: "Fast-Track Builder", emoji: "⚡", tagline: "You have the idea. Let's execute.", description: "You have experience and a product idea. Let's validate it fast, build your funnel, and get consistent traffic. You can skip ahead of most beginners.", startModule: 3 };
+  if (a.goal === "learn")
+    return { track: "Explorer Track", emoji: "🔍", tagline: "Learn at your own pace. No pressure.", description: "You're here to understand how ecommerce works first — smart move. Go through every module at your own pace with no pressure to launch yet.", startModule: 1 };
+  return { track: "Beginner Fast-Start", emoji: "🚀", tagline: "From zero to first sale — step by step.", description: "You're starting from scratch — and that's perfectly fine. We'll guide you through every step, from picking a product to making your first real sale.", startModule: 1 };
 }
 
-const goalLabels: Record<string, string>       = { first_sale: "First ever sale", side_income: "$500–2k/month side income", full_time: "Replace full-time income", learn: "Learn how ecommerce works" };
-const timeLabels: Record<string, string>        = { low: "1–5 hrs/week", medium: "5–10 hrs/week", high: "10–20 hrs/week", full: "20+ hrs/week" };
-const budgetLabels: Record<string, string>      = { minimal: "Under $100", small: "$100–500", medium: "$500–2,000", large: "$2,000+" };
-const experienceLabels: Record<string, string>  = { beginner: "Complete beginner", intermediate: "Some experience", advanced: "Already have a store" };
-const ideaLabels: Record<string, string>        = { no_idea: "No idea yet", rough_idea: "Rough idea", ready: "Ready to go" };
+const goalLabels: Record<string, string>      = { first_sale: "First ever sale", side_income: "$500–2k/month", full_time: "Replace job income", learn: "Learn how it works" };
+const timeLabels: Record<string, string>       = { low: "1–5 hrs/week", medium: "5–10 hrs/week", high: "10–20 hrs/week", full: "20+ hrs/week" };
+const budgetLabels: Record<string, string>     = { minimal: "Under $100", small: "$100–500", medium: "$500–2,000", large: "$2,000+" };
+const experienceLabels: Record<string, string> = { beginner: "Complete beginner", intermediate: "Some experience", advanced: "Already have a store" };
+const ideaLabels: Record<string, string>       = { no_idea: "No idea yet", rough_idea: "Rough idea", ready: "Ready to go" };
 
 type Screen = "intro" | "quiz" | "result";
 
-/* ── Segmented progress dots ── */
-function ProgressDots({ total, current }: { total: number; current: number }) {
-  return (
-    <div className="flex gap-1.5 justify-center mb-8">
-      {Array.from({ length: total }).map((_, i) => (
-        <div
-          key={i}
-          style={{
-            height: "6px",
-            borderRadius: "3px",
-            background: i < current ? "#6366f1" : i === current ? GRAD_BTN : "rgba(0,0,0,0.1)",
-            width: i === current ? "28px" : "8px",
-            transition: "all 300ms cubic-bezier(0.16,1,0.3,1)",
-          }}
-        />
-      ))}
-    </div>
-  );
-}
-
-/* ── Option card ── */
-function OptionCard({
-  label, value, selected, onSelect,
-}: { label: string; value: string; selected: boolean; onSelect: () => void }) {
-  const ref = useRef<HTMLButtonElement>(null);
-
-  const baseStyle = {
-    background: selected ? "rgba(99,102,241,0.05)" : "white",
-    border: selected ? "2px solid #6366f1" : "1.5px solid rgba(0,0,0,0.08)",
-    boxShadow: selected ? "0 0 0 3px rgba(99,102,241,0.12)" : "0 1px 3px rgba(0,0,0,0.04)",
-    transform: selected ? "scale(1.01)" : "scale(1)",
-    transition: "all 200ms cubic-bezier(0.16,1,0.3,1)",
-    width: "100%",
-    textAlign: "left" as const,
-    padding: "14px 16px",
-    borderRadius: "12px",
-    display: "flex",
-    alignItems: "center",
-    gap: "12px",
-    cursor: "pointer",
-  };
-
-  return (
-    <button
-      ref={ref}
-      onClick={onSelect}
-      style={baseStyle}
-      onMouseEnter={() => { if (!selected && ref.current) { ref.current.style.background = "rgba(0,0,0,0.02)"; ref.current.style.borderColor = "rgba(0,0,0,0.15)"; } }}
-      onMouseLeave={() => { if (!selected && ref.current) { ref.current.style.background = "white"; ref.current.style.borderColor = "rgba(0,0,0,0.08)"; } }}
-    >
-      {/* Radio */}
-      <div style={{
-        width: "18px", height: "18px", borderRadius: "50%", flexShrink: 0,
-        border: selected ? "2px solid #6366f1" : "2px solid rgba(0,0,0,0.15)",
-        background: selected ? "#6366f1" : "white",
-        display: "flex", alignItems: "center", justifyContent: "center",
-        transition: "all 200ms",
-      }}>
-        {selected && <div style={{ width: "6px", height: "6px", borderRadius: "50%", background: "white" }} />}
-      </div>
-      <span style={{ fontSize: "14px", fontWeight: selected ? 600 : 400, color: selected ? "#4338ca" : "#374151", lineHeight: "1.4" }}>
-        {label}
-      </span>
-    </button>
-  );
-}
-
 export default function QuizPage() {
-  const [screen, setScreen] = useState<Screen>("intro");
-  const [current, setCurrent] = useState(0);
-  const [answers, setAnswers] = useState<Partial<Answers>>({});
-  const [selected, setSelected] = useState<string | null>(null);
-  const [isExiting, setIsExiting] = useState(false);
-  const [showError, setShowError] = useState(false);
+  const [screen,    setScreen]    = useState<Screen>("intro");
+  const [current,   setCurrent]   = useState(0);
+  const [answers,   setAnswers]   = useState<Partial<Answers>>({});
+  const [selected,  setSelected]  = useState<string | null>(null);
+  const [direction, setDirection] = useState<"forward" | "back">("forward");
+  const [animating, setAnimating] = useState(false);
 
-  const question  = questions[current];
+  const question     = questions[current];
   const finalAnswers = answers as Answers;
-  const result    = screen === "result" ? computeResult(finalAnswers) : null;
+  const result       = screen === "result" ? computeResult(finalAnswers) : null;
+  const progress     = ((current) / questions.length) * 100;
 
-  function handleNext() {
-    if (!selected) { setShowError(true); return; }
-    setShowError(false);
-
-    const newAnswers = { ...answers, [question.key]: selected };
-    setAnswers(newAnswers);
-
-    setIsExiting(true);
+  /* ── advance to next question ── */
+  const advance = useCallback((newAnswers: Partial<Answers>) => {
+    setAnimating(true);
+    setDirection("forward");
     setTimeout(() => {
-      setIsExiting(false);
+      setAnimating(false);
       if (current < questions.length - 1) {
         setCurrent(c => c + 1);
-        setSelected(null);
+        setSelected(newAnswers[questions[current + 1]?.key] ?? null);
       } else {
         const r = computeResult(newAnswers as Answers);
-        localStorage.setItem("quiz_results", JSON.stringify({
-          ...newAnswers, track: r.track, startModule: r.startModule,
-        }));
+        try {
+          localStorage.setItem("quiz_results", JSON.stringify({
+            ...newAnswers, track: r.track, startModule: r.startModule,
+          }));
+        } catch {}
         setScreen("result");
       }
-    }, 220);
+    }, 260);
+  }, [current]);
+
+  /* ── select an option and auto-advance ── */
+  function handleSelect(value: string) {
+    if (animating) return;
+    setSelected(value);
+    const newAnswers = { ...answers, [question.key]: value };
+    setAnswers(newAnswers);
+    // Auto-advance after brief delay so user sees their selection
+    setTimeout(() => advance(newAnswers), 380);
   }
+
+  /* ── go back ── */
+  function handleBack() {
+    if (animating || current === 0) return;
+    setAnimating(true);
+    setDirection("back");
+    setTimeout(() => {
+      setAnimating(false);
+      setCurrent(c => c - 1);
+      setSelected(answers[questions[current - 1].key] ?? null);
+    }, 260);
+  }
+
+  /* ── keyboard support ── */
+  useEffect(() => {
+    if (screen !== "quiz" || animating) return;
+    function onKey(e: KeyboardEvent) {
+      const n = parseInt(e.key);
+      if (n >= 1 && n <= question.options.length) {
+        handleSelect(question.options[n - 1].value);
+      }
+      if (e.key === "Backspace" && current > 0) handleBack();
+    }
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [screen, current, animating, question]);
 
   /* ── INTRO ── */
   if (screen === "intro") {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center px-6 py-12 dot-grid relative" style={{ background: HERO_BG }}>
         <div className="absolute pointer-events-none" style={{ top: "-10%", left: "50%", transform: "translateX(-50%)", width: "700px", height: "500px", background: "radial-gradient(ellipse, rgba(99,102,241,0.2) 0%, transparent 70%)" }} />
+
+        {/* Nav */}
+        <div className="absolute top-0 left-0 right-0 px-6 py-5 flex items-center justify-between z-20">
+          <Link href="/" className="flex items-center gap-2 no-underline">
+            <img src="/logo.png" alt="First Sale Lab" style={{ height: 36, width: "auto" }} />
+            <span className="text-sm font-bold text-white" style={{ letterSpacing: "-0.3px" }}>First Sale Lab</span>
+          </Link>
+          <Link href="/login" className="text-xs font-medium" style={{ color: "rgba(255,255,255,0.4)" }}
+            onMouseEnter={e => (e.currentTarget.style.color = "rgba(255,255,255,0.8)")}
+            onMouseLeave={e => (e.currentTarget.style.color = "rgba(255,255,255,0.4)")}
+          >Already have an account? Log in</Link>
+        </div>
+
         <div className="relative z-10 max-w-lg w-full text-center fade-up">
           <div className="text-6xl mb-6">🧭</div>
           <h1 className="text-4xl font-extrabold text-white mb-4" style={{ letterSpacing: "-0.035em", lineHeight: "1.1" }}>
-            Let's build your personal<br />ecommerce roadmap.
+            Let&apos;s build your personal<br />ecommerce roadmap.
           </h1>
           <p className="text-base mb-2 leading-relaxed" style={{ color: "rgba(255,255,255,0.55)" }}>
-            Answer 5 quick questions and we'll create a plan matched to your goal, budget, and experience.
+            Answer 5 quick questions and get a plan matched to your goal, budget, and experience level.
           </p>
           <p className="text-sm font-semibold mb-10" style={{ color: "#a78bfa" }}>No generic advice. Just your next step.</p>
+
+          {/* Stats row */}
+          <div className="flex items-center justify-center gap-6 mb-10">
+            {[
+              { n: "5", label: "questions" },
+              { n: "2 min", label: "to complete" },
+              { n: "Free", label: "forever" },
+            ].map(s => (
+              <div key={s.n} className="text-center">
+                <p className="text-xl font-extrabold text-white" style={{ letterSpacing: "-0.04em" }}>{s.n}</p>
+                <p className="text-xs" style={{ color: "rgba(255,255,255,0.35)" }}>{s.label}</p>
+              </div>
+            ))}
+          </div>
 
           <button
             onClick={() => setScreen("quiz")}
@@ -211,14 +210,9 @@ export default function QuizPage() {
             onMouseEnter={e => { const t = e.currentTarget; t.style.transform = "translateY(-2px)"; t.style.boxShadow = GLOW_HOV; }}
             onMouseLeave={e => { const t = e.currentTarget; t.style.transform = "translateY(0)"; t.style.boxShadow = GLOW_BASE; }}
           >
-            Start building my plan →
+            Build my free plan →
           </button>
-
-          <p className="text-xs mb-8" style={{ color: "rgba(255,255,255,0.3)" }}>Takes 2 minutes · No account needed yet</p>
-          <Link href="/" className="text-xs" style={{ color: "rgba(255,255,255,0.3)" }}
-            onMouseEnter={e => (e.currentTarget.style.color = "rgba(255,255,255,0.6)")}
-            onMouseLeave={e => (e.currentTarget.style.color = "rgba(255,255,255,0.3)")}
-          >← Back to home</Link>
+          <p className="text-xs" style={{ color: "rgba(255,255,255,0.25)" }}>No account needed yet · Takes 2 minutes</p>
         </div>
       </div>
     );
@@ -228,23 +222,29 @@ export default function QuizPage() {
   if (screen === "result" && result) {
     return (
       <div className="min-h-screen flex items-center justify-center px-6 py-12 dot-grid relative" style={{ background: HERO_BG }}>
-        <div className="absolute pointer-events-none" style={{ top: 0, left: "50%", transform: "translateX(-50%)", width: "700px", height: "400px", background: "radial-gradient(ellipse, rgba(99,102,241,0.2) 0%, transparent 70%)" }} />
+        <div className="absolute pointer-events-none" style={{ top: 0, left: "50%", transform: "translateX(-50%)", width: "700px", height: "400px", background: "radial-gradient(ellipse, rgba(99,102,241,0.25) 0%, transparent 70%)" }} />
+
         <div className="relative z-10 max-w-md w-full fade-up">
-          <div className="bg-white rounded-3xl overflow-hidden" style={{ boxShadow: "0 32px 80px rgba(0,0,0,0.4), 0 8px 24px rgba(0,0,0,0.2)" }}>
-            {/* Gradient header */}
-            <div className="px-8 pt-8 pb-6" style={{ background: GRAD_BTN }}>
-              <div className="text-4xl mb-3">{result.emoji}</div>
-              <p className="text-white/70 text-xs font-bold uppercase tracking-[0.1em] mb-1">Your personalized track</p>
-              <h2 className="text-2xl font-extrabold text-white" style={{ letterSpacing: "-0.02em" }}>{result.track}</h2>
-              <p className="text-white/70 text-sm mt-1">{result.tagline}</p>
+          {/* Card */}
+          <div className="bg-white rounded-3xl overflow-hidden" style={{ boxShadow: "0 40px 100px rgba(0,0,0,0.5), 0 8px 24px rgba(0,0,0,0.2)" }}>
+
+            {/* Header */}
+            <div className="px-8 pt-8 pb-7 relative overflow-hidden" style={{ background: GRAD_BTN }}>
+              <div className="absolute inset-0 dot-grid opacity-20" />
+              <div className="relative z-10">
+                <div className="text-5xl mb-4">{result.emoji}</div>
+                <p className="text-white/60 text-xs font-bold uppercase tracking-[0.12em] mb-1">Your personalised track</p>
+                <h2 className="text-2xl font-extrabold text-white mb-1" style={{ letterSpacing: "-0.02em" }}>{result.track}</h2>
+                <p className="text-white/70 text-sm italic">&ldquo;{result.tagline}&rdquo;</p>
+              </div>
             </div>
 
-            <div className="px-8 py-6 space-y-4">
+            <div className="px-8 py-6 space-y-5">
               <p className="text-gray-500 text-sm leading-relaxed">{result.description}</p>
 
-              {/* Summary */}
-              <div className="rounded-2xl p-4 space-y-2.5" style={{ background: "#f7f7fb" }}>
-                <p className="text-xs font-bold uppercase tracking-[0.1em] mb-3" style={{ color: "#6366f1" }}>Based on your answers</p>
+              {/* Your answers summary */}
+              <div className="rounded-2xl p-5 space-y-3" style={{ background: "#f7f7fb" }}>
+                <p className="text-xs font-bold uppercase tracking-[0.1em] mb-1" style={{ color: "#6366f1" }}>Your profile</p>
                 {[
                   { label: "Starting point",  value: experienceLabels[finalAnswers.experience] },
                   { label: "Goal",            value: goalLabels[finalAnswers.goal] },
@@ -260,20 +260,28 @@ export default function QuizPage() {
               </div>
 
               {/* First step */}
-              <div className="rounded-xl p-4" style={{ background: "rgba(99,102,241,0.06)", border: "1px solid rgba(99,102,241,0.15)" }}>
-                <p className="text-xs font-bold uppercase tracking-[0.1em] mb-1" style={{ color: "#6366f1" }}>Your first step</p>
-                <p className="text-sm font-semibold text-gray-900">
-                  {result.startModule === 1 ? "🎮 Module 1: The Rules of the Game (~20 min)"
-                   : result.startModule === 3 ? "🏆 Module 3: Find Your Winning Product (~30 min)"
-                   : "⚡ Module 6: Build Your First Sales Funnel (~35 min)"}
-                </p>
+              <div className="rounded-xl p-4 flex items-start gap-3" style={{ background: "rgba(99,102,241,0.06)", border: "1.5px solid rgba(99,102,241,0.15)" }}>
+                <span className="text-2xl flex-shrink-0">
+                  {result.startModule === 1 ? "🎮" : result.startModule === 3 ? "🏆" : "⚡"}
+                </span>
+                <div>
+                  <p className="text-xs font-bold uppercase tracking-[0.08em] mb-0.5" style={{ color: "#6366f1" }}>Your starting module</p>
+                  <p className="text-sm font-semibold text-gray-900">
+                    {result.startModule === 1 ? "Module 1: The Rules of the Game"
+                     : result.startModule === 3 ? "Module 3: Find Your Winning Product"
+                     : "Module 6: Build Your First Sales Funnel"}
+                  </p>
+                  <p className="text-xs text-gray-400 mt-0.5">
+                    {result.startModule === 1 ? "~20 min" : result.startModule === 3 ? "~30 min" : "~35 min"}
+                  </p>
+                </div>
               </div>
 
               {/* CTAs */}
-              <div className="space-y-2.5 pt-1">
+              <div className="space-y-2.5">
                 <Link
                   href="/signup"
-                  className="block w-full text-center text-white font-semibold py-3.5 rounded-xl text-sm"
+                  className="block w-full text-center text-white font-semibold py-4 rounded-xl text-sm"
                   style={{ background: GRAD_BTN, boxShadow: GLOW_BASE, transition: "transform 200ms, box-shadow 200ms" }}
                   onMouseEnter={e => { const t = e.currentTarget; t.style.transform = "translateY(-2px)"; t.style.boxShadow = GLOW_HOV; }}
                   onMouseLeave={e => { const t = e.currentTarget; t.style.transform = "translateY(0)"; t.style.boxShadow = GLOW_BASE; }}
@@ -281,23 +289,36 @@ export default function QuizPage() {
                     try { localStorage.setItem("ea_next", `/modules/${result.startModule}`); } catch {}
                   }}
                 >
-                  Start Module {result.startModule} — create free account →
+                  Create free account → Start Module {result.startModule}
                 </Link>
                 <Link
                   href="/login"
-                  className="block w-full text-center font-medium py-3.5 rounded-xl text-sm transition-colors"
+                  className="block w-full text-center font-medium py-3.5 rounded-xl text-sm"
                   style={{ background: "#f7f7fb", color: "#6b7280", border: "1px solid rgba(0,0,0,0.06)" }}
-                  onMouseEnter={e => (e.currentTarget.style.background = "#f0f0f8")}
+                  onMouseEnter={e => (e.currentTarget.style.background = "#efeffa")}
                   onMouseLeave={e => (e.currentTarget.style.background = "#f7f7fb")}
                   onClick={() => {
                     try { localStorage.setItem("ea_next", `/modules/${result.startModule}`); } catch {}
                   }}
                 >
-                  I already have an account — log in
+                  Already have an account? Log in
                 </Link>
               </div>
-              <p className="text-center text-xs text-gray-400 pt-1">Free forever · No credit card needed</p>
+              <p className="text-center text-xs text-gray-400">Free forever · No credit card needed</p>
             </div>
+          </div>
+
+          {/* Redo */}
+          <div className="text-center mt-5">
+            <button
+              onClick={() => { setScreen("quiz"); setCurrent(0); setAnswers({}); setSelected(null); }}
+              className="text-xs"
+              style={{ color: "rgba(255,255,255,0.3)" }}
+              onMouseEnter={e => (e.currentTarget.style.color = "rgba(255,255,255,0.6)")}
+              onMouseLeave={e => (e.currentTarget.style.color = "rgba(255,255,255,0.3)")}
+            >
+              ← Redo the quiz
+            </button>
           </div>
         </div>
       </div>
@@ -305,71 +326,145 @@ export default function QuizPage() {
   }
 
   /* ── QUIZ ── */
+  const slideClass = animating
+    ? (direction === "forward" ? "slide-out" : "slide-out-right")
+    : (direction === "forward" ? "slide-in" : "slide-in-left");
+
   return (
     <div className="min-h-screen flex flex-col dot-grid relative" style={{ background: HERO_BG }}>
       <div className="absolute pointer-events-none" style={{ top: 0, left: "50%", transform: "translateX(-50%)", width: "700px", height: "400px", background: "radial-gradient(ellipse, rgba(99,102,241,0.18) 0%, transparent 70%)" }} />
 
       {/* Nav */}
       <nav className="relative z-10 px-6 py-5 flex items-center justify-between flex-shrink-0">
-        <Link href="/" className="text-base font-bold text-white tracking-tight">First Sale Lab</Link>
+        <Link href="/" className="flex items-center gap-2 no-underline">
+          <img src="/logo.png" alt="First Sale Lab" style={{ height: 36, width: "auto" }} />
+          <span className="text-sm font-bold text-white" style={{ letterSpacing: "-0.3px" }}>First Sale Lab</span>
+        </Link>
         <span className="text-xs font-semibold px-3 py-1 rounded-full" style={{ background: "rgba(255,255,255,0.08)", color: "rgba(255,255,255,0.5)", border: "1px solid rgba(255,255,255,0.1)" }}>
-          {current + 1} / {questions.length}
+          {current + 1} of {questions.length}
         </span>
       </nav>
 
-      {/* Centered card */}
-      <div className="flex-1 flex items-center justify-center px-6 py-10 relative z-10">
-        <div
-          className="w-full max-w-md bg-white rounded-3xl p-8"
-          style={{ boxShadow: "0 32px 80px rgba(0,0,0,0.4), 0 8px 24px rgba(0,0,0,0.2)" }}
-        >
-          {/* Progress dots */}
-          <ProgressDots total={questions.length} current={current} />
+      {/* Card */}
+      <div className="flex-1 flex items-center justify-center px-6 pb-10 relative z-10">
+        <div className="w-full max-w-md">
 
-          {/* Question content — animated */}
+          {/* Progress bar (outside card, above it) */}
+          <div className="mb-4 px-1">
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-xs font-semibold" style={{ color: "rgba(255,255,255,0.4)" }}>
+                Question {current + 1}
+              </span>
+              <span className="text-xs font-semibold" style={{ color: "rgba(255,255,255,0.4)" }}>
+                {Math.round(((current) / questions.length) * 100)}% done
+              </span>
+            </div>
+            <div className="w-full rounded-full h-1.5" style={{ background: "rgba(255,255,255,0.1)" }}>
+              <div
+                className="h-1.5 rounded-full"
+                style={{ background: GRAD_BTN, width: `${progress}%`, transition: "width 400ms cubic-bezier(0.16,1,0.3,1)" }}
+              />
+            </div>
+          </div>
+
           <div
-            key={current}
-            className={isExiting ? "slide-out" : "slide-in"}
+            className="bg-white rounded-3xl p-7"
+            style={{ boxShadow: "0 32px 80px rgba(0,0,0,0.4), 0 8px 24px rgba(0,0,0,0.2)" }}
           >
-            <div className="text-center mb-6">
-              <div className="text-4xl mb-4">{question.emoji}</div>
-              <h2 className="text-xl font-bold text-gray-900 mb-2" style={{ letterSpacing: "-0.015em", lineHeight: "1.3" }}>
-                {question.question}
-              </h2>
-              <p className="text-xs text-gray-400">{question.microcopy}</p>
+            {/* Animated question */}
+            <div key={current} className={slideClass}>
+              <div className="text-center mb-6">
+                <div className="text-4xl mb-4">{question.emoji}</div>
+                <h2 className="text-xl font-bold text-gray-900 mb-2" style={{ letterSpacing: "-0.015em", lineHeight: "1.3" }}>
+                  {question.question}
+                </h2>
+                <p className="text-xs text-gray-400">{question.microcopy}</p>
+              </div>
+
+              {/* Options */}
+              <div className="space-y-2.5 mb-2">
+                {question.options.map((opt, idx) => {
+                  const isSelected = selected === opt.value;
+                  return (
+                    <button
+                      key={opt.value}
+                      onClick={() => handleSelect(opt.value)}
+                      disabled={animating}
+                      style={{
+                        width: "100%",
+                        textAlign: "left",
+                        padding: "13px 14px",
+                        borderRadius: "14px",
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "12px",
+                        cursor: animating ? "default" : "pointer",
+                        background: isSelected ? "rgba(99,102,241,0.06)" : "white",
+                        border: isSelected ? "2px solid #6366f1" : "1.5px solid rgba(0,0,0,0.08)",
+                        boxShadow: isSelected ? "0 0 0 3px rgba(99,102,241,0.1)" : "0 1px 3px rgba(0,0,0,0.04)",
+                        transform: isSelected ? "scale(1.01)" : "scale(1)",
+                        transition: "all 180ms cubic-bezier(0.16,1,0.3,1)",
+                      }}
+                      onMouseEnter={e => { if (!isSelected && !animating) { e.currentTarget.style.background = "rgba(0,0,0,0.02)"; e.currentTarget.style.borderColor = "rgba(0,0,0,0.15)"; } }}
+                      onMouseLeave={e => { if (!isSelected) { e.currentTarget.style.background = "white"; e.currentTarget.style.borderColor = "rgba(0,0,0,0.08)"; } }}
+                    >
+                      {/* Keyboard hint + emoji */}
+                      <div className="flex items-center gap-2 flex-shrink-0">
+                        <span
+                          className="text-xs font-bold w-5 h-5 rounded flex items-center justify-center flex-shrink-0"
+                          style={{ background: isSelected ? "#6366f1" : "rgba(0,0,0,0.06)", color: isSelected ? "white" : "#9ca3af", transition: "all 180ms" }}
+                        >
+                          {idx + 1}
+                        </span>
+                        <span className="text-lg">{opt.emoji}</span>
+                      </div>
+
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-semibold leading-tight" style={{ color: isSelected ? "#4338ca" : "#111827" }}>{opt.label}</p>
+                        <p className="text-xs mt-0.5 leading-tight" style={{ color: isSelected ? "#6366f1" : "#9ca3af" }}>{opt.sub}</p>
+                      </div>
+
+                      {/* Checkmark */}
+                      <div
+                        className="w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0"
+                        style={{
+                          background: isSelected ? "#6366f1" : "transparent",
+                          border: isSelected ? "none" : "1.5px solid rgba(0,0,0,0.12)",
+                          transition: "all 180ms",
+                        }}
+                      >
+                        {isSelected && (
+                          <svg width="10" height="8" viewBox="0 0 10 8" fill="none">
+                            <path d="M1 4L3.5 6.5L9 1" stroke="white" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
+                          </svg>
+                        )}
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
             </div>
 
-            <div className="space-y-2.5 mb-6">
-              {question.options.map(opt => (
-                <OptionCard
-                  key={opt.value}
-                  label={opt.label}
-                  value={opt.value}
-                  selected={selected === opt.value}
-                  onSelect={() => { setSelected(opt.value); setShowError(false); }}
-                />
-              ))}
-            </div>
-
-            {showError && (
-              <p className="text-center text-xs text-red-500 mb-3">Please select an option to continue</p>
+            {/* Back button */}
+            {current > 0 && (
+              <div className="mt-4 text-center">
+                <button
+                  onClick={handleBack}
+                  disabled={animating}
+                  className="text-xs font-medium"
+                  style={{ color: "#9ca3af" }}
+                  onMouseEnter={e => (e.currentTarget.style.color = "#6366f1")}
+                  onMouseLeave={e => (e.currentTarget.style.color = "#9ca3af")}
+                >
+                  ← Back
+                </button>
+              </div>
             )}
 
-            <button
-              onClick={handleNext}
-              className="w-full font-semibold py-3.5 rounded-xl text-white text-sm"
-              style={{
-                background: selected ? GRAD_BTN : "rgba(0,0,0,0.08)",
-                color: selected ? "white" : "#9ca3af",
-                boxShadow: selected ? GLOW_BASE : "none",
-                cursor: selected ? "pointer" : "not-allowed",
-                transition: "all 200ms cubic-bezier(0.16,1,0.3,1)",
-              }}
-              onMouseEnter={e => { if (selected) { const t = e.currentTarget; t.style.transform = "translateY(-2px)"; t.style.boxShadow = GLOW_HOV; } }}
-              onMouseLeave={e => { const t = e.currentTarget; t.style.transform = "translateY(0)"; t.style.boxShadow = selected ? GLOW_BASE : "none"; }}
-            >
-              {current < questions.length - 1 ? "Next →" : "See my results →"}
-            </button>
+            {/* Keyboard hint */}
+            <p className="text-center text-xs mt-3" style={{ color: "rgba(0,0,0,0.2)" }}>
+              Press <kbd style={{ fontFamily: "monospace", background: "rgba(0,0,0,0.06)", padding: "1px 5px", borderRadius: 4 }}>1</kbd>–<kbd style={{ fontFamily: "monospace", background: "rgba(0,0,0,0.06)", padding: "1px 5px", borderRadius: 4 }}>{question.options.length}</kbd> to select
+            </p>
           </div>
         </div>
       </div>
