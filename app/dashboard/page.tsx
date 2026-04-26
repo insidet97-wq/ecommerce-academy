@@ -127,6 +127,14 @@ export default function DashboardPage() {
   const openCert  = useCallback(() => setShowCert(true),  []);
   const closeCert = useCallback(() => setShowCert(false), []);
 
+  // When the upgraded banner is shown, force is_pro = true immediately
+  // (webhook may still be in flight when the success redirect lands)
+  useEffect(() => {
+    if (upgradedBanner) {
+      setProfile(prev => ({ ...prev, is_pro: true }));
+    }
+  }, [upgradedBanner]);
+
   useEffect(() => {
     async function load() {
       const { data: { user } } = await supabase.auth.getUser();
