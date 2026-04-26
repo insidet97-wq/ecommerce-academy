@@ -30,6 +30,8 @@ const PRO_INCLUDES = [
   "Email list building from scratch",
   "\"Make Your First Sale\" action plan",
   "Full scaling roadmap for Month 2+",
+  "📦 Weekly product picks — 5 AI-researched products every Monday",
+  "📋 Monthly ecom briefing — what's working now on Meta & TikTok",
   "Ad-free experience",
   "Cancel anytime",
 ];

@@ -62,7 +62,7 @@ The owner (admin) has an **analytics dashboard** and a **content dashboard** for
 | AI Content   | Perplexity API (sonar model, real-time web search) |
 | Ads          | Google AdSense (free users only) |
 | Analytics    | Vercel Analytics (passive page tracking) |
-| Scheduling   | Vercel Cron (weekly products + monthly briefings) |
+| Scheduling   | Vercel Cron (products, briefing, reminder, newsletter) |
 | Hosting      | Vercel (auto-deploys from GitHub `main` branch) |
 | Domain       | Namecheap → `firstsalelab.com` |
 | Repository   | GitHub: `insidet97-wq/ecommerce-academy` |
@@ -156,8 +156,10 @@ ecommerce-academy/
 │       │   └── webhook/route.ts      # POST: handles Stripe events (grant/revoke Pro)
 │       │
 │       ├── cron/
-│       │   ├── products/route.ts     # GET: Vercel cron — generates weekly product drop draft
-│       │   └── briefing/route.ts     # GET: Vercel cron — generates monthly briefing draft
+│       │   ├── products/route.ts     # GET: Vercel cron — generates weekly product drop draft (Mon 6am)
+│       │   ├── briefing/route.ts     # GET: Vercel cron — auto-publishes monthly briefing + emails Pro users (1st 7am)
+│       │   ├── reminder/route.ts     # GET: Vercel cron — Saturday reminder email to admin (Sat 9am)
+│       │   └── newsletter/route.ts   # GET: Vercel cron — sends weekly picks email to Pro users (Mon 8am)
 │       │
 │       └── admin/
 │           ├── content/route.ts      # GET: fetch all drops + briefings (admin only)
@@ -176,7 +178,8 @@ ecommerce-academy/
 │   ├── streak.ts               # updateStreak(userId) — daily streak logic
 │   ├── modules.ts              # All 12 module definitions (content, checklist, steps, resources)
 │   ├── resources.ts            # Resources page data
-│   └── perplexity.ts           # Perplexity API helper + types (Product, ProductDrop, Briefing)
+│   ├── perplexity.ts           # Groq API helper + types (Product, ProductDrop, Briefing) — file named perplexity for import compatibility
+│   └── email-helpers.ts        # getProUsers, sendBatch, email HTML generators, getAdminSupabase
 │
 ├── components/
 │   └── AdBanner.tsx            # Google AdSense banner — renders null if isPro === true
@@ -188,7 +191,7 @@ ecommerce-academy/
 │   ├── export-logo.html
 │   └── ads.txt                 # AdSense authorized sellers file
 │
-├── vercel.json                 # Vercel Cron schedule (products: Mon 6am, briefing: 1st 7am UTC)
+├── vercel.json                 # Vercel Cron schedule (4 jobs: see Automated Pro Content section)
 ├── .env.local                  # Local env vars (NOT committed)
 ├── README.md                   # This file — updated after every session
 └── CLAUDE.md / AGENTS.md       # Instructions for the AI coding assistant
@@ -410,18 +413,23 @@ Two types of AI-generated content are created automatically and go through an ad
 
 ### How It Works
 
-1. **Vercel Cron** fires the appropriate API route on schedule (`vercel.json`)
-2. The route calls **Perplexity API** (`sonar` model) with a structured prompt
-3. Result saved to Supabase as `status: 'draft'`
-4. Admin visits `/admin/content`, reviews the draft
-5. Can swap any individual product (regenerates one via AI, excludes existing names)
-6. Clicks "Publish →" → status becomes `'published'`, instantly live for Pro members
+#### Weekly Product Picks
+1. **Monday 6am UTC** — `GET /api/cron/products` generates 5 products via Groq AI, saved as `status: 'draft'`
+2. **Saturday 9am UTC** — `GET /api/cron/reminder` checks for a pending draft and emails the admin reminder
+3. Admin reviews draft at `/admin/content` (swap any product, then publish)
+4. **Monday 8am UTC** — `GET /api/cron/newsletter` sends the latest published drop to all Pro users via email
+
+#### Monthly Briefing
+1. **1st of each month 7am UTC** — `GET /api/cron/briefing` generates and **auto-publishes** the briefing (no manual review)
+2. Immediately emails all Pro users the new briefing newsletter
 
 ### Schedule
-| Content | Cron Route | Schedule |
-|---------|-----------|----------|
-| Weekly products | `GET /api/cron/products` | Every Monday at 06:00 UTC |
-| Monthly briefing | `GET /api/cron/briefing` | 1st of each month at 07:00 UTC |
+| Content | Cron Route | Schedule | Notes |
+|---------|-----------|----------|-------|
+| Weekly products | `GET /api/cron/products` | Every Monday at 06:00 UTC | Saves as draft |
+| Saturday reminder | `GET /api/cron/reminder` | Every Saturday at 09:00 UTC | Emails admin to review/publish |
+| Products newsletter | `GET /api/cron/newsletter` | Every Monday at 08:00 UTC | Emails Pro users |
+| Monthly briefing | `GET /api/cron/briefing` | 1st of each month at 07:00 UTC | Auto-publishes + emails Pro users |
 
 Cron routes are secured with `Authorization: Bearer <CRON_SECRET>` (Vercel sends this automatically).
 
@@ -432,8 +440,8 @@ Admin can also click "⚡ Generate Now" on `/admin/content` at any time — this
 
 These use the admin's Supabase JWT for auth (not the cron secret).
 
-### Perplexity Prompts
-Both prompts instruct the model to return raw JSON only (no markdown, no explanation). The `cleanJSON()` helper in `lib/perplexity.ts` strips any code fences if the model adds them anyway.
+### Groq Prompts
+Both prompts use `response_format: { type: "json_object" }` which enforces valid JSON output from Groq. Prompts wrap responses in a root object (`{ "products": [...] }`) because the JSON object mode requires a root object (not a bare array). Parsers handle both wrapped and unwrapped formats via `parsed.products ?? parsed`.
 
 ---
 
@@ -476,6 +484,9 @@ NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=pk_live_...
 
 # Groq (AI content generation — free tier, no credit card)
 GROQ_API_KEY=gsk_...
+
+# Admin (receives Saturday reminder email)
+ADMIN_EMAIL=hello@firstsalelab.com
 
 # Vercel Cron security
 CRON_SECRET=<random hex string>
@@ -591,15 +602,16 @@ A module unlocks when **any** of these are true:
 4. Otherwise → reset to 1
 5. Save updated values
 
-### Perplexity Content Pipeline
+### AI Content Pipeline (Groq)
 1. Cron fires (or admin clicks Generate)
-2. `lib/perplexity.ts` calls Perplexity API with structured JSON prompt
-3. Response stripped of markdown fences via `cleanJSON()`
-4. Parsed and inserted into Supabase as `draft`
-5. Admin reviews at `/admin/content`
+2. `lib/perplexity.ts` calls Groq API (`llama-3.3-70b-versatile`) with structured JSON prompt
+3. `response_format: { type: "json_object" }` forces valid JSON output
+4. Parsed and inserted into Supabase as `draft` (products) or `published` (briefings — auto-publish)
+5. Admin reviews products at `/admin/content`
 6. "↺ Swap" on a product → `POST /api/admin/products/[id]/regenerate` with `{ index }` → generates one replacement, excluding existing names
 7. "Publish →" → `POST /api/admin/products/[id]/publish` → sets `status: 'published'`
-8. Pro members see it at `/pro/products` or `/pro/briefings`
+8. Monday 8am cron sends published drop to all Pro users via Resend batch email
+9. Pro members also see content at `/pro/products` or `/pro/briefings`
 
 ### Analytics API (`/api/analytics`)
 Uses the Supabase service role key to bypass RLS. No auth check in the route — keep URL private.
@@ -616,7 +628,9 @@ Uses the Supabase service role key to bypass RLS. No auth check in the route —
 
 | Date | What changed |
 |------|-------------|
-| 2026-04-26 | **Automated Pro Content:** Perplexity API integration; weekly product drops + monthly briefings via Vercel Cron; admin content review page (`/admin/content`) with generate, swap, publish flow; Pro-gated display pages (`/pro/products`, `/pro/briefings`); `vercel.json` cron schedule |
+| 2026-04-26 | **Email newsletters:** Saturday admin reminder cron; Monday product picks newsletter to Pro users; monthly briefing auto-published + emailed to Pro users; `lib/email-helpers.ts` with `getProUsers`, `sendBatch`, 3 HTML email generators; upgrade page PRO_INCLUDES updated with Weekly Picks + Monthly Briefing perks |
+| 2026-04-26 | **AI provider:** Switched from Perplexity (paid) → Gemini (quota issues) → Groq (free, working); `GROQ_API_KEY` env var; `llama-3.3-70b-versatile` model with `json_object` response format |
+| 2026-04-26 | **Automated Pro Content:** Groq API integration; weekly product drops + monthly briefings via Vercel Cron; admin content review page (`/admin/content`) with generate, swap, publish flow; Pro-gated display pages (`/pro/products`, `/pro/briefings`); `vercel.json` cron schedule |
 | 2026-04-26 | **Affiliate links:** Shopify (`shopify.pxf.io/3k9Wjr`), ReConvert (`?mref=bfgeliiu`), AutoDS (`?ref=NTI2MjAyMQ==`) wired into `lib/modules.ts` resource arrays |
 | 2026-04-26 | **Module content upgrade:** All 12 modules rewritten with specific tools, exact metrics (CPM < $15, CTR > 1.5%, ROAS > 2.0), frameworks (Pain→Dream→Fear, 3X Rule, 1000-visitor funnel), and 3-month milestone map |
 | 2026-04-26 | **Google AdSense:** Verified via meta tag; `strategy="beforeInteractive"` script in layout; `public/ads.txt`; `AdBanner` component (Pro = no ads); GDPR CMP enabled |

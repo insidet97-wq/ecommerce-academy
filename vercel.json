@@ -7,6 +7,14 @@
     {
       "path": "/api/cron/briefing",
       "schedule": "0 7 1 * *"
+    },
+    {
+      "path": "/api/cron/reminder",
+      "schedule": "0 9 * * 6"
+    },
+    {
+      "path": "/api/cron/newsletter",
+      "schedule": "0 8 * * 1"
     }
   ]
 }

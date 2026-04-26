@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { createClient } from "@supabase/supabase-js";
+import { getAdminSupabase, getProUsers, sendBatch, briefingNewsletterHTML } from "@/lib/email-helpers";
 import { generateBriefing } from "@/lib/perplexity";
 
 export const dynamic = "force-dynamic";
@@ -10,11 +10,7 @@ export async function GET(request: Request) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const supabase = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!,
-    { auth: { autoRefreshToken: false, persistSession: false } }
-  );
+  const supabase = getAdminSupabase();
 
   try {
     const content = await generateBriefing();
@@ -25,15 +21,30 @@ export async function GET(request: Request) {
       .toISOString()
       .split("T")[0];
 
+    // Auto-publish directly (no draft review needed)
     const { error } = await supabase.from("briefings").insert({
       month,
       content,
-      status: "draft",
+      status: "published",
     });
 
     if (error) throw error;
 
-    return NextResponse.json({ success: true, month });
+    // Send to all Pro users immediately
+    const monthLabel = now.toLocaleDateString("en-US", { month: "long", year: "numeric" });
+    const proUsers = await getProUsers(supabase);
+
+    if (proUsers.length > 0) {
+      const emails = proUsers.map(user => ({
+        to: user.email,
+        subject: `📋 Your ${monthLabel} ecom briefing is here`,
+        html: briefingNewsletterHTML(user.firstName, content, monthLabel),
+      }));
+
+      await sendBatch(emails);
+    }
+
+    return NextResponse.json({ success: true, month, sent: proUsers.length });
   } catch (err) {
     console.error("Cron briefing error:", err);
     return NextResponse.json({ error: String(err) }, { status: 500 });
