@@ -873,6 +873,141 @@ export default function Home() {
         </div>
       </section>
 
+      {/* ── FREE VS PRO COMPARISON ── */}
+      <section className="px-8 py-20" style={{ background: "#f7f7fb" }}>
+        <div className="max-w-4xl mx-auto">
+          <div className="text-center mb-12">
+            <p className="text-xs font-bold tracking-[0.12em] uppercase mb-3" style={{ color: "#6366f1" }}>Free vs Pro</p>
+            <h2 className="text-4xl font-bold text-gray-900 mb-4" style={{ letterSpacing: "-0.025em" }}>
+              Start free. Upgrade when you&apos;re ready.
+            </h2>
+            <p className="text-base text-gray-500">
+              No pressure. Modules 1–6 are yours forever. Pro adds the tools that turn learners into sellers.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-5 items-start">
+
+            {/* FREE column */}
+            <div className="rounded-3xl border border-gray-200 bg-white p-8">
+              <p className="text-xs font-bold tracking-[0.1em] uppercase text-gray-400 mb-1">Free</p>
+              <p className="text-3xl font-extrabold text-gray-900 mb-1" style={{ letterSpacing: "-0.04em" }}>$0</p>
+              <p className="text-sm text-gray-400 mb-8">No credit card. Ever.</p>
+              <div className="space-y-4 mb-8">
+                {[
+                  "Module 1–6 — full beginner foundation",
+                  "Niche research + winning product formula",
+                  "Customer avatar framework",
+                  "Shopify store setup walkthrough",
+                  "Your first sales funnel",
+                  "Progress tracking & daily streaks",
+                ].map(item => (
+                  <div key={item} className="flex items-start gap-3">
+                    <span className="text-sm font-bold mt-0.5 flex-shrink-0" style={{ color: "#22c55e" }}>✓</span>
+                    <p className="text-sm text-gray-600 leading-relaxed">{item}</p>
+                  </div>
+                ))}
+                {[
+                  "Modules 7–12 (traffic, ads, scaling)",
+                  "Weekly winning product picks",
+                  "Monthly ad strategy updates",
+                ].map(item => (
+                  <div key={item} className="flex items-start gap-3">
+                    <span className="text-sm font-bold mt-0.5 flex-shrink-0 text-gray-300">✕</span>
+                    <p className="text-sm text-gray-300 leading-relaxed">{item}</p>
+                  </div>
+                ))}
+              </div>
+              <Link
+                href="/quiz"
+                className="block w-full text-center text-sm font-bold py-3.5 rounded-xl"
+                style={{ border: "1.5px solid #e5e7eb", color: "#374151", background: "#f9fafb" }}
+                onMouseEnter={e => { e.currentTarget.style.background = "#f3f4f6"; e.currentTarget.style.borderColor = "#d1d5db"; }}
+                onMouseLeave={e => { e.currentTarget.style.background = "#f9fafb"; e.currentTarget.style.borderColor = "#e5e7eb"; }}
+              >
+                Start for free →
+              </Link>
+            </div>
+
+            {/* PRO column */}
+            <div
+              className="rounded-3xl p-8 relative overflow-hidden"
+              style={{ background: "linear-gradient(160deg, #1e1b4b 0%, #312e81 60%, #4c1d95 100%)", border: "1.5px solid rgba(139,92,246,0.4)" }}
+            >
+              {/* Glow */}
+              <div className="absolute pointer-events-none" style={{ top: "-40%", left: "50%", transform: "translateX(-50%)", width: "400px", height: "300px", background: "radial-gradient(ellipse, rgba(139,92,246,0.35) 0%, transparent 70%)" }} />
+              <div className="relative z-10">
+                <div className="flex items-center gap-2 mb-1">
+                  <p className="text-xs font-bold tracking-[0.1em] uppercase" style={{ color: "rgba(196,181,253,0.7)" }}>Pro</p>
+                  <span className="text-xs font-bold px-2 py-0.5 rounded-full" style={{ background: "rgba(250,204,21,0.15)", color: "#fde68a", border: "1px solid rgba(250,204,21,0.25)" }}>Most popular</span>
+                </div>
+                <p className="text-3xl font-extrabold text-white mb-1" style={{ letterSpacing: "-0.04em" }}>$19<span className="text-base font-medium" style={{ color: "rgba(255,255,255,0.4)" }}>/month</span></p>
+                <p className="text-sm mb-8" style={{ color: "rgba(255,255,255,0.35)" }}>Cancel anytime. No questions asked.</p>
+
+                <div className="space-y-4 mb-8">
+                  {/* Standard items */}
+                  {[
+                    "Everything in Free",
+                    "Modules 7–12 — traffic, ads, conversions & scaling",
+                    "TikTok organic growth playbook",
+                    "Step-by-step paid ads launch guide",
+                    "Email list building from scratch",
+                    "Ad-free experience",
+                  ].map(item => (
+                    <div key={item} className="flex items-start gap-3">
+                      <span className="text-sm font-bold mt-0.5 flex-shrink-0" style={{ color: "#a78bfa" }}>✓</span>
+                      <p className="text-sm leading-relaxed" style={{ color: "rgba(255,255,255,0.75)" }}>{item}</p>
+                    </div>
+                  ))}
+
+                  {/* Divider */}
+                  <div style={{ height: "1px", background: "rgba(255,255,255,0.08)", margin: "8px 0" }} />
+
+                  {/* Weekly picks — hero feature */}
+                  <div className="rounded-2xl p-4" style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(139,92,246,0.35)" }}>
+                    <div className="flex items-start gap-3">
+                      <span className="text-xl flex-shrink-0">📦</span>
+                      <div>
+                        <p className="text-sm font-bold text-white mb-1">This week&apos;s winning products</p>
+                        <p className="text-xs leading-relaxed" style={{ color: "rgba(255,255,255,0.55)" }}>
+                          Every Monday: 5 AI-researched trending products with AliExpress cost, sell price, margin %, target audience, and a ready-to-use ad hook.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Monthly briefing — hero feature */}
+                  <div className="rounded-2xl p-4" style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(139,92,246,0.35)" }}>
+                    <div className="flex items-start gap-3">
+                      <span className="text-xl flex-shrink-0">📋</span>
+                      <div>
+                        <p className="text-sm font-bold text-white mb-1">
+                          {new Date().toLocaleDateString("en-US", { month: "long", year: "numeric" })} Ad Strategy Update
+                        </p>
+                        <p className="text-xs leading-relaxed" style={{ color: "rgba(255,255,255,0.55)" }}>
+                          Every 1st of the month: what&apos;s actually working on Meta &amp; TikTok right now, the trending niche to watch, one tactic to add and one to drop — straight to your inbox.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <Link
+                  href="/quiz"
+                  className="block w-full text-center text-sm font-extrabold py-4 rounded-xl"
+                  style={{ background: "linear-gradient(135deg, #facc15 0%, #f59e0b 100%)", color: "#1c1917", letterSpacing: "-0.01em" }}
+                  onMouseEnter={e => { e.currentTarget.style.opacity = "0.92"; }}
+                  onMouseLeave={e => { e.currentTarget.style.opacity = "1"; }}
+                >
+                  Get started — upgrade after Module 6 →
+                </Link>
+                <p className="text-center text-xs mt-3" style={{ color: "rgba(255,255,255,0.25)" }}>Start free today · Pro unlocks after you&apos;ve built the foundation</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* ── STATS ── */}
       <section className="px-8 py-16" style={{ background: "#f7f7fb" }}>
         <div className="max-w-3xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
@@ -902,7 +1037,7 @@ export default function Home() {
             {[
               {
                 q: "Is this actually free?",
-                a: "Modules 1–6 are completely free — no credit card, no trial. Modules 7–12 are part of First Sale Lab Pro at $19/month, which covers traffic, ads, conversions, and scaling. You can complete the full beginner foundation before deciding if Pro is right for you.",
+                a: "Modules 1–6 are completely free — no credit card, no trial. Modules 7–12 are part of First Sale Lab Pro at $19/month, which covers traffic, ads, conversions, and scaling. Pro members also get weekly winning product picks every Monday and a monthly ad strategy update. You can complete the full beginner foundation before deciding if Pro is right for you.",
               },
               {
                 q: "Do I need experience or money to start?",
