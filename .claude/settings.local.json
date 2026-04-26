@@ -22,7 +22,9 @@
       "Bash(git push *)",
       "Bash(npx tsc *)",
       "Bash(dir \"C:\\\\projects\\\\ecommerce-academy\\\\public\\\\logo.png\")",
-      "Bash(powershell -Command ' *)"
+      "Bash(powershell -Command ' *)",
+      "Bash(node -e \"require\\('stripe'\\); console.log\\('stripe ok'\\)\")",
+      "Bash(not exist *)"
     ]
   }
 }

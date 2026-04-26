@@ -272,7 +272,14 @@ export default function DashboardPage() {
             {[
               { href: "/tools",     label: "Tools"     },
               { href: "/resources", label: "Resources" },
-              ...(admin ? [{ href: "/admin", label: "Analytics" }] : []),
+              ...(isPro && !admin ? [
+                { href: "/pro/products",  label: "📦 Picks"     },
+                { href: "/pro/briefings", label: "📋 Briefings" },
+              ] : []),
+              ...(admin ? [
+                { href: "/admin",         label: "Analytics" },
+                { href: "/admin/content", label: "Content"   },
+              ] : []),
             ].map(item => (
               <Link key={item.href} href={item.href}
                 style={{ fontSize: 13, fontWeight: 500, color: "#52525b", textDecoration: "none", padding: "6px 12px", borderRadius: 8 }}

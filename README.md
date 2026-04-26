@@ -1,6 +1,6 @@
 # First Sale Lab
 
-> A free, 12-module ecommerce course that takes complete beginners from zero to their first online sale.
+> A freemium 12-module ecommerce course — modules 1–6 free, modules 7–12 behind a Pro subscription ($19/month).
 > Live at: **[firstsalelab.com](https://firstsalelab.com)**
 
 ---
@@ -14,28 +14,37 @@
 5. [Pages & Features](#pages--features)
 6. [Database (Supabase)](#database-supabase)
 7. [Email System (Resend)](#email-system-resend)
-8. [Environment Variables](#environment-variables)
-9. [Running Locally](#running-locally)
-10. [Deployment](#deployment)
-11. [Branding & Logo](#branding--logo)
-12. [Admin Access](#admin-access)
-13. [How Key Things Work](#how-key-things-work)
-14. [Changelog](#changelog)
+8. [Stripe Pro Subscription](#stripe-pro-subscription)
+9. [Google AdSense](#google-adsense)
+10. [Automated Pro Content](#automated-pro-content)
+11. [Affiliate Links](#affiliate-links)
+12. [Environment Variables](#environment-variables)
+13. [Running Locally](#running-locally)
+14. [Deployment](#deployment)
+15. [Branding & Logo](#branding--logo)
+16. [Admin Access](#admin-access)
+17. [How Key Things Work](#how-key-things-work)
+18. [Changelog](#changelog)
 
 ---
 
 ## What This Project Is
 
-First Sale Lab is a free self-paced ecommerce course built as a Next.js web app. Users:
+First Sale Lab is a freemium self-paced ecommerce course built as a Next.js web app. Users:
 
 1. Take a **quiz** that profiles their experience level and goals
 2. Get a **personalised roadmap** (which module to start from)
-3. Work through **12 sequential modules** (each with content, a checklist, and action steps)
+3. Work through **12 sequential modules** — modules 1–6 are free, 7–12 require a Pro subscription
 4. Receive **emails** after signup and after completing each module
 5. Build a **daily streak** by completing modules on consecutive days
 6. Earn a **certificate** upon completing all 12 modules
 
-The owner (admin) has an **analytics dashboard** showing user counts, drop-off per module, streaks, and more.
+**Pro members** additionally get:
+- Ad-free experience (Google AdSense ads hidden for Pro users)
+- **Weekly Product Picks** — 5 AI-researched trending products with margin math and ad hooks
+- **Monthly Ecom Briefing** — what's working on Meta/TikTok, trending niche, tactics to add/drop
+
+The owner (admin) has an **analytics dashboard** and a **content dashboard** for reviewing and publishing AI-generated drafts.
 
 ---
 
@@ -49,7 +58,11 @@ The owner (admin) has an **analytics dashboard** showing user counts, drop-off p
 | Database     | Supabase (PostgreSQL) |
 | Auth         | Supabase Auth (email/password, no email confirmation) |
 | Email        | Resend (transactional emails) |
+| Payments     | Stripe (subscriptions, webhooks, billing portal) |
+| AI Content   | Perplexity API (sonar model, real-time web search) |
+| Ads          | Google AdSense (free users only) |
 | Analytics    | Vercel Analytics (passive page tracking) |
+| Scheduling   | Vercel Cron (weekly products + monthly briefings) |
 | Hosting      | Vercel (auto-deploys from GitHub `main` branch) |
 | Domain       | Namecheap → `firstsalelab.com` |
 | Repository   | GitHub: `insidet97-wq/ecommerce-academy` |
@@ -61,27 +74,45 @@ The owner (admin) has an **analytics dashboard** showing user counts, drop-off p
 ### Supabase
 - **URL:** `https://gkoobuzqmtupftkvkomo.supabase.co`
 - **Purpose:** Database, authentication, row-level security
-- **Custom SMTP:** Configured to send auth emails (confirm signup, reset password, change email) via Resend using `hello@firstsalelab.com`
-- **Auth templates:** All Supabase email templates have been replaced with custom branded HTML — solid colours only (no CSS gradients, which email clients don't support)
-- **Email confirmation is OFF** — users are redirected straight after signup, no confirm-your-email step
+- **Custom SMTP:** Configured to send auth emails via Resend using `hello@firstsalelab.com`
+- **Auth templates:** All Supabase email templates replaced with custom branded HTML — solid colours only (no CSS gradients)
+- **Email confirmation is OFF** — users redirect straight after signup
 
 ### Resend
-- **Purpose:** Sends the welcome email and module completion emails
+- **Purpose:** Sends welcome email and module completion emails
 - **From address:** `hello@firstsalelab.com`
-- **Domain verified:** `firstsalelab.com` is verified in Resend so emails can be sent to any recipient
-- **API routes that send emails:**
+- **Domain verified:** `firstsalelab.com` verified in Resend
+- **API routes:**
   - `POST /api/send-welcome` — fires after signup
   - `POST /api/send-completion` — fires after each module is marked complete
 
+### Stripe
+- **Purpose:** Pro subscription ($19/month), webhooks, billing portal
+- **Webhook URL:** `https://www.firstsalelab.com/api/stripe/webhook`
+- **Events handled:** `checkout.session.completed`, `customer.subscription.deleted`, `invoice.payment_failed`
+- See [Stripe Pro Subscription](#stripe-pro-subscription) section for full details
+
+### Google Gemini
+- **Purpose:** Generates weekly product picks and monthly briefings automatically
+- **Model:** `gemini-1.5-flash` (free tier — 1,500 requests/day, 15/min)
+- **Cost:** Free — get API key at [aistudio.google.com](https://aistudio.google.com)
+- See [Automated Pro Content](#automated-pro-content) section
+
+### Google AdSense
+- **Publisher ID:** `ca-pub-1382028135058819`
+- **Verified via:** Meta tag method (`metadata.other["google-adsense-account"]`)
+- **ads.txt:** `public/ads.txt` contains the authorized sellers line
+- **GDPR:** Google's built-in CMP selected
+- See [Google AdSense](#google-adsense) section
+
 ### Vercel
-- **Auto-deploy:** Every push to `main` on GitHub triggers a Vercel deploy (~60 seconds)
-- **Environment variables** are set in Vercel dashboard (not just `.env.local`)
-- **Analytics:** `<Analytics />` component from `@vercel/analytics/react` is in `app/layout.tsx`
+- **Auto-deploy:** Every push to `main` triggers a Vercel deploy (~60 seconds)
+- **Crons:** Defined in `vercel.json` — weekly products Monday 6am UTC, monthly briefing 1st of month 7am UTC
+- **Environment variables:** Set in Vercel dashboard
 
 ### Namecheap
-- **Domain:** `firstsalelab.com` registered here
-- **Professional email:** `hello@firstsalelab.com` inbox through Namecheap Pro Email (3 inboxes available)
-- **DNS records:** Configured to point to Vercel (website) and Resend (email sending/verification)
+- **Domain:** `firstsalelab.com`
+- **Professional email:** `hello@firstsalelab.com` via Namecheap Pro Email
 
 ---
 
@@ -90,63 +121,75 @@ The owner (admin) has an **analytics dashboard** showing user counts, drop-off p
 ```
 ecommerce-academy/
 ├── app/
-│   ├── layout.tsx              # Root layout: fonts, metadata, favicon, Vercel Analytics
-│   ├── page.tsx                # Landing page (dark hero, comparison, timeline, CTA)
-│   ├── not-found.tsx           # 404 page
-│   ├── globals.css             # Global styles, Tailwind, custom keyframes
+│   ├── layout.tsx                    # Root layout: fonts, metadata, AdSense script, Vercel Analytics
+│   ├── page.tsx                      # Landing page (logged-out: freemium copy; logged-in: personalised)
+│   ├── not-found.tsx                 # 404 page
+│   ├── globals.css                   # Global styles, Tailwind, custom keyframes
 │   │
-│   ├── quiz/
-│   │   └── page.tsx            # Multi-step quiz → builds personalised roadmap
+│   ├── quiz/page.tsx                 # Multi-step quiz → builds personalised roadmap
+│   ├── login/page.tsx                # Login page
+│   ├── signup/page.tsx               # Signup → fires welcome email → redirects to first module
+│   ├── forgot-password/page.tsx      # Sends password reset email
+│   ├── reset-password/page.tsx       # Handles reset link from email
+│   ├── dashboard/page.tsx            # Main dashboard: progress, streak, modules, Pro/upgrade CTAs
+│   ├── upgrade/page.tsx              # Paywall page (dark hero, pricing, Pro vs Free comparison)
+│   ├── modules/[id]/page.tsx         # Individual module (intro → lesson → complete), Pro-gated 7-12
+│   ├── tools/page.tsx                # Curated tools page
+│   ├── resources/page.tsx            # Curated resources page
 │   │
-│   ├── login/
-│   │   └── page.tsx            # Login page (email + password)
-│   │
-│   ├── signup/
-│   │   └── page.tsx            # Signup → fires welcome email → redirects to first module
-│   │
-│   ├── forgot-password/
-│   │   └── page.tsx            # Sends password reset email via Supabase
-│   │
-│   ├── reset-password/
-│   │   └── page.tsx            # Handles the reset link from email
-│   │
-│   ├── dashboard/
-│   │   └── page.tsx            # Main dashboard: progress, streak, all 12 modules
-│   │
-│   ├── modules/[id]/
-│   │   └── page.tsx            # Individual module (intro screen → lesson → complete)
-│   │
-│   ├── tools/
-│   │   └── page.tsx            # Curated tools page (Shopify, Canva, etc.)
-│   │
-│   ├── resources/
-│   │   └── page.tsx            # Curated resources page (books, communities, etc.)
+│   ├── pro/
+│   │   ├── products/page.tsx         # Weekly Product Picks (Pro-gated)
+│   │   └── briefings/page.tsx        # Monthly Ecom Briefings (Pro-gated)
 │   │
 │   ├── admin/
-│   │   └── page.tsx            # Admin-only analytics dashboard
+│   │   ├── page.tsx                  # Admin analytics dashboard
+│   │   └── content/page.tsx          # Admin content review: generate, swap, publish drops/briefings
 │   │
 │   └── api/
-│       ├── send-welcome/
-│       │   └── route.ts        # POST: sends welcome email via Resend
-│       ├── send-completion/
-│       │   └── route.ts        # POST: sends module completion email via Resend
-│       └── analytics/
-│           └── route.ts        # GET: aggregate stats (uses service role key to bypass RLS)
+│       ├── send-welcome/route.ts
+│       ├── send-completion/route.ts
+│       ├── analytics/route.ts
+│       │
+│       ├── stripe/
+│       │   ├── checkout/route.ts     # POST: creates Stripe Checkout session
+│       │   ├── portal/route.ts       # POST: creates Stripe Billing Portal session
+│       │   └── webhook/route.ts      # POST: handles Stripe events (grant/revoke Pro)
+│       │
+│       ├── cron/
+│       │   ├── products/route.ts     # GET: Vercel cron — generates weekly product drop draft
+│       │   └── briefing/route.ts     # GET: Vercel cron — generates monthly briefing draft
+│       │
+│       └── admin/
+│           ├── content/route.ts      # GET: fetch all drops + briefings (admin only)
+│           ├── generate/
+│           │   ├── products/route.ts # POST: manual trigger — generate products draft
+│           │   └── briefing/route.ts # POST: manual trigger — generate briefing draft
+│           ├── products/[id]/
+│           │   ├── regenerate/route.ts # POST: swap one product in a draft
+│           │   └── publish/route.ts    # POST: publish a product drop
+│           └── briefing/[id]/
+│               └── publish/route.ts    # POST: publish a briefing
 │
 ├── lib/
 │   ├── supabase.ts             # Supabase client (anon key, browser-safe)
 │   ├── admin.ts                # isAdmin(email) — hardcoded admin email list
 │   ├── streak.ts               # updateStreak(userId) — daily streak logic
-│   ├── modules.ts              # All 12 module definitions (content, checklist, steps)
-│   └── resources.ts            # Resources page data
+│   ├── modules.ts              # All 12 module definitions (content, checklist, steps, resources)
+│   ├── resources.ts            # Resources page data
+│   └── perplexity.ts           # Perplexity API helper + types (Product, ProductDrop, Briefing)
+│
+├── components/
+│   └── AdBanner.tsx            # Google AdSense banner — renders null if isPro === true
 │
 ├── public/
-│   ├── logo.png                # Main logo — FSL monogram, transparent background
-│   ├── logo.svg                # SVG version of the logo mark (backup/export use)
-│   ├── icon.svg                # Square favicon (dark purple bg + FSL mark)
-│   └── export-logo.html        # Open in browser → download 2400px PNG logo
+│   ├── logo.png
+│   ├── logo.svg
+│   ├── icon.svg
+│   ├── export-logo.html
+│   └── ads.txt                 # AdSense authorized sellers file
 │
-├── .env.local                  # Local environment variables (NOT committed to GitHub)
+├── vercel.json                 # Vercel Cron schedule (products: Mon 6am, briefing: 1st 7am UTC)
+├── .env.local                  # Local env vars (NOT committed)
 ├── README.md                   # This file — updated after every session
 └── CLAUDE.md / AGENTS.md       # Instructions for the AI coding assistant
 ```
@@ -156,51 +199,59 @@ ecommerce-academy/
 ## Pages & Features
 
 ### Landing Page (`/`)
-- Dark hero with gradient background
-- Conditionally shows different content based on login state:
-  - **Logged out:** "Build my free plan →" + "Log in" buttons, trust badges
-  - **Logged in:** "Continue learning →" button only, no trust badges
-- Comparison section, step-by-step timeline, FAQ, footer
+- **Logged out:** Dark hero, "Stop learning. Start selling." copy, freemium badge ("Modules 1–6 free · Pro from $19/mo"), comparison section, FAQ, CTA
+- **Logged in:** Personalised hero ("Hey {name} 👋"), progress bar (X/12), quick-access cards, motivational quote based on progress
 
 ### Quiz (`/quiz`)
-- Multi-step questionnaire: experience level, time available, goal, budget
-- Saves results to `localStorage` as `quiz_results`
-- If logged in → goes to dashboard; if not → goes to signup
-
-### Signup (`/signup`)
-- Creates Supabase account
-- Reads quiz results from `localStorage` and writes to `user_profiles`
-- Fires welcome email (fire-and-forget, doesn't block redirect)
-- Redirects to the module the quiz recommended
-
-### Login (`/login`)
-- Standard email/password login
-- Redirects to `/dashboard` or a stored `ea_next` path from localStorage
+- Multi-step: experience level, time available, goal, budget
+- Results saved to `localStorage` as `quiz_results`
+- Determines `startModule` and `track` name
+- Auto-advances on selection; back button; keyboard shortcuts (1–4 / Backspace)
 
 ### Dashboard (`/dashboard`)
 - Protected (redirects to `/login` if not authenticated)
-- Shows: greeting with time of day, personalised track name, goal, streak badge, progress bar (% complete)
-- Lists all 12 modules with locked/unlocked/complete states
-- Admin users see an "Admin" badge and an "Analytics" link in the nav
-- Certificate modal appears when all 12 modules are complete (with shareable text)
+- Progress card, streak badge, "Up next" dominant card
+- Module list: modules 7–12 show "✨ Pro" badge and "Unlock →" button if free user
+- Upgrade CTA banner at bottom for free users
+- Pro users see "📦 Picks" and "📋 Briefings" in nav
+- Admin users see "Analytics" and "Content" in nav
+- `?upgraded=true` param triggers green "Welcome to Pro!" banner
 
-### Module Pages (`/modules/1` through `/modules/12`)
-- Protected + sequential unlock (must complete N-1 to access N)
-- Admins bypass the unlock requirement
-- **Intro screen** (first visit only): module overview, what you'll learn, action steps preview, "Start Module →" button. Already-completed modules skip the intro.
-- **Lesson screen:** full module content, interactive checklist
-- **On complete:** updates `user_progress`, calls `updateStreak()`, fires completion email, shows 5-second countdown then auto-navigates to the next module
+### Upgrade Page (`/upgrade`)
+- Dark hero, $19/month pricing card
+- Free vs Pro comparison table
+- Pro module previews (7–12)
+- Redirects to `/dashboard` if user is already Pro
+- Checkout button → calls `/api/stripe/checkout` → redirects to Stripe
 
-### Tools (`/tools`)
-Curated list of recommended tools with descriptions and external links.
+### Module Pages (`/modules/1–12`)
+- Modules 1–6: free (sequential unlock)
+- Modules 7–12: redirect to `/upgrade` if not Pro
+- Intro screen (first visit) → lesson + checklist → complete
+- AdBanner shown between action steps and mistakes (free users only)
 
-### Resources (`/resources`)
-Curated list of books, communities, and learning resources.
+### Pro: Weekly Products (`/pro/products`)
+- Pro-gated (redirects to `/upgrade` if not Pro)
+- Shows latest published product drop + archive (collapsed)
+- Each product: name, category, why trending, cost/sell/margin stats, ad hook, target audience, AliExpress search link
 
-### Admin Analytics (`/admin`)
+### Pro: Monthly Briefings (`/pro/briefings`)
+- Pro-gated
+- Shows latest published briefing + archive
+- Sections: summary, Meta Ads, TikTok Ads, Trending Niche, Add This Month, Drop This Month, Platform Changes
+
+### Admin: Analytics (`/admin`)
 - Redirects non-admins to `/dashboard`
-- Shows: total users, active today, active this week, new signups this week, total completions, longest streak
-- Module funnel: horizontal bars showing completions per module 1–12, drop-off % in red
+- Total users, active today/this week, new signups, max streak, total completions
+- Module funnel: bar chart with drop-off % per module
+
+### Admin: Content (`/admin/content`)
+- Tabs: Products | Briefings (with pending draft counts)
+- "⚡ Generate Now" button for manual on-demand generation
+- Product drafts: review 5 products, click "↺ Swap" to regenerate any individual product via AI
+- "Publish →" button makes the drop live for Pro members
+- Same flow for briefings (no per-item swap — publish whole briefing)
+- Published history shown below drafts
 
 ---
 
@@ -209,76 +260,228 @@ Curated list of books, communities, and learning resources.
 ### Tables
 
 #### `user_profiles`
-Created during signup from quiz results. Also stores streak data.
-
 | Column | Type | Notes |
 |--------|------|-------|
-| `id` | uuid | Matches `auth.users.id` (primary key) |
+| `id` | uuid | Matches `auth.users.id` |
 | `first_name` | text | From signup form |
 | `track` | text | e.g. `"Beginner Fast-Start"` |
 | `goal` | text | e.g. `"first_sale"` |
 | `start_module` | int | Module the quiz recommended |
 | `streak_days` | int | Current consecutive-day streak |
-| `last_active` | date | Date (YYYY-MM-DD) of last module completion |
+| `last_active` | date | Date of last module completion |
+| `is_pro` | boolean | Set by Stripe webhook; revoked on cancellation/payment failure |
+| `stripe_customer_id` | text | Stripe customer ID (set on first checkout) |
+| `stripe_subscription_id` | text | Active Stripe subscription ID |
 
 #### `user_progress`
-One row per completed module per user.
-
 | Column | Type | Notes |
 |--------|------|-------|
 | `user_id` | uuid | FK → `auth.users.id` |
 | `module_id` | int | 1–12 |
 | `completed_at` | timestamp | Auto-set on insert |
 
-### Row Level Security (RLS)
-RLS is enabled on both tables. Users can only read/write their own rows.
-The `/api/analytics` route uses the **service role key** (server-side only) to bypass RLS for aggregate queries.
+#### `product_drops`
+| Column | Type | Notes |
+|--------|------|-------|
+| `id` | uuid | Primary key |
+| `week_start` | date | Monday of the relevant week |
+| `products` | jsonb | Array of 5 product objects |
+| `status` | text | `'draft'` or `'published'` |
+| `created_at` | timestamptz | Auto-set |
+
+Product object shape:
+```json
+{
+  "name": "string",
+  "category": "string",
+  "why_trending": "string",
+  "aliexpress_cost": "$X–Y",
+  "sell_price": "$XX.XX",
+  "margin_pct": 75,
+  "target_audience": "string",
+  "ad_hook": "string",
+  "aliexpress_search": "string"
+}
+```
+
+#### `briefings`
+| Column | Type | Notes |
+|--------|------|-------|
+| `id` | uuid | Primary key |
+| `month` | date | First day of the relevant month |
+| `content` | jsonb | Briefing content object |
+| `status` | text | `'draft'` or `'published'` |
+| `created_at` | timestamptz | Auto-set |
+
+Briefing content shape:
+```json
+{
+  "meta_ads": "string",
+  "tiktok_ads": "string",
+  "trending_niche": { "name": "string", "why": "string", "signals": "string" },
+  "add_tactic": "string",
+  "drop_tactic": "string",
+  "platform_changes": "string",
+  "summary": "string"
+}
+```
+
+### RLS Policies
+- `user_profiles` and `user_progress`: users can only read/write their own rows
+- `product_drops` and `briefings`: authenticated users can read rows where `status = 'published'`; service role key used for all writes
 
 ---
 
 ## Email System (Resend)
 
 ### Welcome Email
-- **Trigger:** After successful signup in `app/signup/page.tsx`
+- **Trigger:** After successful signup
 - **Route:** `POST /api/send-welcome`
 - **Payload:** `{ firstName, email, startModule }`
-- **Shows:** Personalised greeting, starting module, what to expect list, CTA button
 
 ### Module Completion Email
-- **Trigger:** User clicks "Mark as Complete" on a module
+- **Trigger:** User clicks "Mark as Complete"
 - **Route:** `POST /api/send-completion`
 - **Payload:** `{ firstName, email, completedModuleId }`
-- **Shows:**
-  - Module N complete confirmation + motivational milestone quote
-  - Progress bar showing % complete
-  - Preview card of the next module with a direct link
-  - Special "Course complete!" version for module 12 with a certificate link
+- Special "Course complete!" version for module 12
 
 ### Critical Email HTML Rules
-Always follow these when editing email templates — email clients like Gmail are very limited:
-- ✅ Use **solid background colours** only (e.g. `background:#6366f1`)
-- ❌ No CSS `linear-gradient` — Gmail strips it, leaving white/invisible backgrounds
-- ❌ No `box-shadow` on buttons — not supported
-- ✅ Use table-based layouts for maximum compatibility
-- ✅ All styles must be **inline** (`style=""`) — no external CSS
+- ✅ **Solid background colours only** (e.g. `background:#6366f1`)
+- ❌ No CSS `linear-gradient` — Gmail strips it
+- ❌ No `box-shadow` on buttons
+- ✅ All styles must be **inline**
+- ✅ Table-based layouts for compatibility
 
-Emails are sent **fire-and-forget** (`fetch()` without `await`) so they never block the user's experience if Resend is slow.
+Emails are sent **fire-and-forget** (no `await`) so they never block the user.
+
+---
+
+## Stripe Pro Subscription
+
+### Flow
+1. Free user clicks "Upgrade" → lands on `/upgrade`
+2. Clicks "Get Pro" → `POST /api/stripe/checkout` creates a Checkout session with `metadata.userId`
+3. User completes payment on Stripe's hosted page
+4. Stripe redirects to `firstsalelab.com/dashboard?upgraded=true`
+5. Simultaneously, Stripe fires `checkout.session.completed` webhook → `/api/stripe/webhook`
+6. Webhook upserts `user_profiles`: sets `is_pro = true`, `stripe_customer_id`, `stripe_subscription_id`
+7. Dashboard detects `?upgraded=true`, shows green banner, forces Pro UI optimistically (race condition handled)
+
+### Webhook
+- **URL:** `https://www.firstsalelab.com/api/stripe/webhook` (must use `www` subdomain — the apex redirects and Stripe won't follow 307s)
+- **Verified with:** `stripe.webhooks.constructEvent(body, sig, STRIPE_WEBHOOK_SECRET)`
+- **Events handled:**
+  - `checkout.session.completed` → grant Pro
+  - `customer.subscription.deleted` → revoke Pro
+  - `invoice.payment_failed` → revoke Pro
+- Uses **upsert** (not update) so it works even if the user has no profile row yet
+
+### Billing Portal
+- Pro users with a `stripe_customer_id` see a "Billing" button in the dashboard nav
+- Calls `POST /api/stripe/portal` → creates a Stripe Billing Portal session → redirects user
+
+### TypeScript Note
+The correct Stripe SDK type is `Stripe.Checkout.Session` (not `Stripe.CheckoutSession` — that was renamed in a breaking change).
+
+---
+
+## Google AdSense
+
+- **Publisher ID:** `ca-pub-1382028135058819`
+- **Verified via:** `metadata.other["google-adsense-account"]` meta tag in `app/layout.tsx` (visible to Google's crawler)
+- **Script:** Loaded in `app/layout.tsx` with `strategy="beforeInteractive"`
+- **ads.txt:** `public/ads.txt` → `google.com, pub-1382028135058819, DIRECT, f08c47fec0942fa0`
+- **GDPR:** Google's built-in Consent Management Platform (CMP) selected in AdSense settings
+
+### AdBanner Component (`components/AdBanner.tsx`)
+- Client component — renders `null` if `isPro === true` (Pro members are ad-free)
+- Takes `isPro`, `slot`, `format`, `style` props
+- Calls `window.adsbygoogle.push({})` on mount
+- `data-ad-client="ca-pub-1382028135058819"`
+- Currently used in: dashboard (`slot="YOUR_SLOT_ID_1"`) and module pages (`slot="YOUR_SLOT_ID_2"`)
+
+> **TODO:** Replace `YOUR_SLOT_ID_1` and `YOUR_SLOT_ID_2` with real ad unit slot IDs once Google approves the account (1–14 days from verification).
+
+---
+
+## Automated Pro Content
+
+Two types of AI-generated content are created automatically and go through an admin review + publish flow before reaching Pro members.
+
+### How It Works
+
+1. **Vercel Cron** fires the appropriate API route on schedule (`vercel.json`)
+2. The route calls **Perplexity API** (`sonar` model) with a structured prompt
+3. Result saved to Supabase as `status: 'draft'`
+4. Admin visits `/admin/content`, reviews the draft
+5. Can swap any individual product (regenerates one via AI, excludes existing names)
+6. Clicks "Publish →" → status becomes `'published'`, instantly live for Pro members
+
+### Schedule
+| Content | Cron Route | Schedule |
+|---------|-----------|----------|
+| Weekly products | `GET /api/cron/products` | Every Monday at 06:00 UTC |
+| Monthly briefing | `GET /api/cron/briefing` | 1st of each month at 07:00 UTC |
+
+Cron routes are secured with `Authorization: Bearer <CRON_SECRET>` (Vercel sends this automatically).
+
+### Manual Generation
+Admin can also click "⚡ Generate Now" on `/admin/content` at any time — this calls:
+- `POST /api/admin/generate/products`
+- `POST /api/admin/generate/briefing`
+
+These use the admin's Supabase JWT for auth (not the cron secret).
+
+### Perplexity Prompts
+Both prompts instruct the model to return raw JSON only (no markdown, no explanation). The `cleanJSON()` helper in `lib/perplexity.ts` strips any code fences if the model adds them anyway.
+
+---
+
+## Affiliate Links
+
+Affiliate/referral links are used in `lib/modules.ts` resource arrays. Current active links:
+
+| Tool | Module | Link |
+|------|--------|------|
+| Shopify | 5 | `https://shopify.pxf.io/3k9Wjr` |
+| ReConvert | 6 | `https://apps.shopify.com/reconvert-upsell-cross-sell?mref=bfgeliiu` |
+| AutoDS | 3 | `https://platform.autods.com/register?ref=NTI2MjAyMQ==` |
+
+Pending (application submitted or program unavailable): Klaviyo, Jungle Scout, Triple Whale, Canva, Loox, Zipify Pages, AdSpy, Privy.
+
+When a new affiliate link is received, update the matching resource URL in `lib/modules.ts`.
 
 ---
 
 ## Environment Variables
 
-Set in **both** `.env.local` (local development) and the **Vercel dashboard** (production).
+Set in **both** `.env.local` (local) and the **Vercel dashboard** (production).
 
 ```env
+# Supabase
 NEXT_PUBLIC_SUPABASE_URL=https://gkoobuzqmtupftkvkomo.supabase.co
-NEXT_PUBLIC_SUPABASE_ANON_KEY=sb_publishable_...   # Supabase → Project Settings → API → anon key
-SUPABASE_SERVICE_ROLE_KEY=sb_secret_...            # Supabase → Project Settings → API → service_role key
+NEXT_PUBLIC_SUPABASE_ANON_KEY=sb_publishable_...
+SUPABASE_SERVICE_ROLE_KEY=sb_secret_...
+
+# App
 NEXT_PUBLIC_SITE_URL=https://firstsalelab.com
-RESEND_API_KEY=re_...                              # Resend → API Keys page
+
+# Resend (email)
+RESEND_API_KEY=re_...
+
+# Stripe (payments)
+STRIPE_SECRET_KEY=sk_live_...
+STRIPE_WEBHOOK_SECRET=whsec_...
+NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=pk_live_...
+
+# Google Gemini (AI content generation — free tier)
+GEMINI_API_KEY=AIza...
+
+# Vercel Cron security
+CRON_SECRET=<random hex string>
 ```
 
-> ⚠️ `RESEND_API_KEY` and `SUPABASE_SERVICE_ROLE_KEY` are **server-side secrets**. Never expose them in client-side code or commit them to GitHub.
+> ⚠️ All keys without `NEXT_PUBLIC_` prefix are **server-side secrets**. Never expose them in client code or commit them to GitHub.
 
 ---
 
@@ -292,7 +495,7 @@ cd ecommerce-academy
 # 2. Install dependencies
 npm install
 
-# 3. Create .env.local and fill in the variables above
+# 3. Create .env.local with the variables above
 
 # 4. Start the dev server
 npm run dev
@@ -304,19 +507,17 @@ npm run dev
 
 ## Deployment
 
-Every push to the `main` branch on GitHub automatically triggers a Vercel deploy.
+Every push to `main` auto-deploys to Vercel.
 
 ```bash
-# Standard deploy workflow
 git add -A
 git commit -m "Description of what changed"
 git push
-# Vercel picks it up automatically — live in ~60 seconds
 ```
 
-- **Vercel project:** Connected to `insidet97-wq/ecommerce-academy` on GitHub
-- **Production domain:** `firstsalelab.com` (and `www.firstsalelab.com`)
-- **TypeScript check before pushing:** Run `npx tsc --noEmit` to catch errors before they fail the Vercel build
+- **TypeScript check before pushing:** `npx tsc --noEmit`
+- **Production domain:** `firstsalelab.com` and `www.firstsalelab.com`
+- **Stripe webhook:** must point to `www.firstsalelab.com/api/stripe/webhook` (not apex — it 307 redirects)
 
 ---
 
@@ -326,7 +527,7 @@ git push
 | Use | Hex |
 |-----|-----|
 | Primary indigo | `#6366f1` |
-| Deep indigo (darker) | `#4f46e5` |
+| Deep indigo | `#4f46e5` |
 | Purple | `#7c3aed` |
 | Violet | `#9333ea` |
 | Near-black text | `#09090b` |
@@ -336,70 +537,78 @@ git push
 ### Logo Files
 | File | Purpose |
 |------|---------|
-| `public/logo.png` | Main logo — FSL monogram PNG, transparent background, used in all navs at 40px height |
-| `public/logo.svg` | SVG version of the mark (backup / used in export page) |
-| `public/icon.svg` | Square favicon — dark purple rounded square with FSL mark in light purple |
-| `public/export-logo.html` | Navigate to `/export-logo.html` to download the logo as a 2400px PNG in 3 variants |
+| `public/logo.png` | Main logo — FSL monogram PNG, used in navs at 40px height |
+| `public/logo.svg` | SVG version |
+| `public/icon.svg` | Square favicon — dark purple with FSL mark |
+| `public/export-logo.html` | Navigate to `/export-logo.html` to download logo as 2400px PNG |
 
 ### Fonts
-- **UI font:** Geist Sans (via `next/font/google`)
-- **Mono font:** Geist Mono (via `next/font/google`)
+- **UI:** Geist Sans (`next/font/google`)
+- **Mono:** Geist Mono (`next/font/google`)
 
 ---
 
 ## Admin Access
 
-Controlled by a hardcoded list in `lib/admin.ts`:
+Controlled by `lib/admin.ts`:
 
 ```ts
 const ADMIN_EMAILS = ["insidet97@gmail.com"];
 ```
 
-To add another admin: add their email to the array and push to GitHub (Vercel auto-deploys).
-
 Admin privileges:
-- "Admin" badge visible in dashboard nav
-- "Analytics" link appears in nav
-- Full access to `/admin` analytics page
-- Can open any module regardless of progress/unlock state
+- "Admin" badge in nav
+- "Analytics" + "Content" links in nav
+- Bypasses all Pro gating (can access modules 7–12 for free)
+- Access to `/admin` (analytics) and `/admin/content` (content management)
 
 ---
 
 ## How Key Things Work
 
+### Freemium Gating
+- `isProGated = (id: number) => id > 6 && !isPro`
+- Module pages: if `moduleId > 6 && !userPro && !admin` → redirect to `/upgrade`
+- `isPro = profile.is_pro || admin` (admins always bypass)
+
+### Stripe Race Condition Fix
+Stripe redirects the user back before the webhook fires. To avoid the dashboard showing locked modules on the success redirect:
+1. Dashboard detects `?upgraded=true` in URL
+2. Sets `upgradedBanner = true` and forces `is_pro: true` in local state immediately
+3. A `useEffect` watching `upgradedBanner` calls `setProfile(prev => ({ ...prev, is_pro: true }))`
+4. Webhook updates the DB in the background — next page load reads the real value
+
 ### Module Unlock Logic
 A module unlocks when **any** of these are true:
-- It's module 1 (always open)
-- The previous module ID exists in the user's `user_progress` table
-- The current user is an admin
+- `id <= startModule` (quiz pre-unlocked this module)
+- `completed.includes(id - 1)` (previous module completed)
+- `admin === true`
 
 ### Streak Logic (`lib/streak.ts`)
-Called automatically on every module completion:
-1. Fetch `last_active` and `streak_days` from `user_profiles`
-2. If `last_active` equals today → return existing streak (already counted today)
-3. If `last_active` equals yesterday → increment streak by 1
-4. Any other date → reset streak to 1
-5. Save updated `last_active` and `streak_days`
+1. Fetch `last_active` and `streak_days`
+2. If `last_active` = today → no change (already counted)
+3. If `last_active` = yesterday → increment streak
+4. Otherwise → reset to 1
+5. Save updated values
 
-The streak badge in the dashboard shows **orange** if the streak was maintained today, **grey** if not yet active today.
-
-### Quiz → Roadmap Flow
-1. User answers 4 questions in the quiz
-2. Results saved to `localStorage` as `quiz_results`
-3. Quiz determines a `startModule` (1–12) and a `track` name
-4. On signup, the app reads `localStorage` and writes everything to `user_profiles`
-5. The dashboard reads `start_module` to determine which module to highlight
+### Perplexity Content Pipeline
+1. Cron fires (or admin clicks Generate)
+2. `lib/perplexity.ts` calls Perplexity API with structured JSON prompt
+3. Response stripped of markdown fences via `cleanJSON()`
+4. Parsed and inserted into Supabase as `draft`
+5. Admin reviews at `/admin/content`
+6. "↺ Swap" on a product → `POST /api/admin/products/[id]/regenerate` with `{ index }` → generates one replacement, excluding existing names
+7. "Publish →" → `POST /api/admin/products/[id]/publish` → sets `status: 'published'`
+8. Pro members see it at `/pro/products` or `/pro/briefings`
 
 ### Analytics API (`/api/analytics`)
-- Uses the **Supabase service role key** to bypass RLS (can read all users' data)
-- Returns: `totalUsers`, `activeToday`, `activeThisWeek`, `signupsThisWeek`, `maxStreak`, `totalCompletions`, `perModule` (array of completion counts for modules 1–12)
-- Only called from the admin page — there's no auth check in the route itself, just keep the URL private
+Uses the Supabase service role key to bypass RLS. No auth check in the route — keep URL private.
 
-### localStorage Keys Used
+### localStorage Keys
 | Key | Purpose |
 |-----|---------|
-| `quiz_results` | Stores quiz answers during the quiz → read on signup |
-| `ea_next` | Stores a redirect path after login (e.g. deep link to a specific module) |
+| `quiz_results` | Stores quiz answers → read on signup |
+| `ea_next` | Stores redirect path after login |
 
 ---
 
@@ -407,20 +616,25 @@ The streak badge in the dashboard shows **orange** if the streak was maintained 
 
 | Date | What changed |
 |------|-------------|
-| 2026-04-26 | **Quiz redesign:** Auto-advance on selection, back button, emoji+subtitle options, keyboard shortcuts (1–4 / Backspace), logo in nav, linear progress bar, directional slide animations, improved result screen |
-| 2026-04-26 | **Landing page:** Social proof bar, full curriculum grid (all 12 modules), "What you'll build" outcome cards, testimonials, upgraded stats cards, FAQ accordion (6 questions), improved footer |
-| 2026-04-26 | **Logo:** PNG logo added to all navs (40px); square favicon updated to dark purple with FSL mark; logo export page at `/export-logo.html` |
-| 2026-04-25 | **Rebrand:** "Ecommerce Academy" → "First Sale Lab" everywhere; all `€` → `$`; domain moved to `firstsalelab.com` |
-| 2026-04-25 | **Email system:** Resend integrated; welcome email on signup; completion email after each module; `firstsalelab.com` domain verified in Resend |
-| 2026-04-25 | **Supabase auth emails:** Custom SMTP via Resend; branded HTML templates for confirm signup, reset password, change email |
-| 2026-04-25 | **Streaks:** `streak_days` + `last_active` columns added; `updateStreak()` called on module completion; streak badge in dashboard |
-| 2026-04-25 | **Admin analytics:** `/admin` page + `/api/analytics` route; module funnel with drop-off %, user stats cards |
-| 2026-04-25 | **Vercel Analytics:** `<Analytics />` added to root layout |
-| 2026-04-25 | **Nav redesign:** Tools, Resources, Analytics as direct links; removed `···` dropdown |
-| 2026-04-25 | **Module intro screen:** First-time visitors see a cover page before lesson content; returning users skip straight to review |
-| 2026-04-25 | **Dashboard:** Module list always visible (no dropdown); card-style progress bar with streak badge |
-| 2026-04-25 | **Landing page:** Hero buttons adapt to login state (quiz/login when logged out; continue learning when logged in) |
+| 2026-04-26 | **Automated Pro Content:** Perplexity API integration; weekly product drops + monthly briefings via Vercel Cron; admin content review page (`/admin/content`) with generate, swap, publish flow; Pro-gated display pages (`/pro/products`, `/pro/briefings`); `vercel.json` cron schedule |
+| 2026-04-26 | **Affiliate links:** Shopify (`shopify.pxf.io/3k9Wjr`), ReConvert (`?mref=bfgeliiu`), AutoDS (`?ref=NTI2MjAyMQ==`) wired into `lib/modules.ts` resource arrays |
+| 2026-04-26 | **Module content upgrade:** All 12 modules rewritten with specific tools, exact metrics (CPM < $15, CTR > 1.5%, ROAS > 2.0), frameworks (Pain→Dream→Fear, 3X Rule, 1000-visitor funnel), and 3-month milestone map |
+| 2026-04-26 | **Google AdSense:** Verified via meta tag; `strategy="beforeInteractive"` script in layout; `public/ads.txt`; `AdBanner` component (Pro = no ads); GDPR CMP enabled |
+| 2026-04-26 | **Stripe Pro subscription:** Checkout, webhook (upsert fix, correct `Stripe.Checkout.Session` type), billing portal; `is_pro` / `stripe_customer_id` / `stripe_subscription_id` columns in `user_profiles`; race condition fix with `upgradedBanner` + `useEffect` |
+| 2026-04-26 | **Upgrade page (`/upgrade`):** Dark hero, $19/month pricing, Free vs Pro comparison table, Pro module previews |
+| 2026-04-26 | **Dashboard Pro UI:** Pro/Upgrade badge in nav, Pro module lock badges, upgrade CTA banner, billing button, welcome banner on `?upgraded=true` |
+| 2026-04-26 | **Personalised landing page (logged-in):** Different hero for logged-in users with name, progress bar, quick-access cards |
+| 2026-04-26 | **Landing page freemium copy:** Removed "free forever" claims; freemium badge; updated FAQ, comparison, CTAs |
+| 2026-04-26 | **Quiz redesign:** Auto-advance, back button, keyboard shortcuts, slide animations, linear progress bar |
+| 2026-04-26 | **Landing page v2:** Social proof bar, full curriculum grid, outcome cards, testimonials, FAQ accordion, improved footer |
+| 2026-04-26 | **Logo:** PNG logo in all navs; square favicon; logo export page |
+| 2026-04-25 | **Rebrand:** "Ecommerce Academy" → "First Sale Lab"; `€` → `$`; domain to `firstsalelab.com` |
+| 2026-04-25 | **Email system:** Resend; welcome + completion emails; domain verified |
+| 2026-04-25 | **Supabase auth emails:** Custom SMTP via Resend; branded HTML templates |
+| 2026-04-25 | **Streaks:** `streak_days` + `last_active`; `updateStreak()`; streak badge |
+| 2026-04-25 | **Admin analytics:** `/admin` page + `/api/analytics`; module funnel; user stats |
+| 2026-04-25 | **Vercel Analytics:** `<Analytics />` in root layout |
 
 ---
 
-*This README is maintained by the AI coding assistant and updated at the end of every working session. If you need a change made to the site, share this file at the start of a new session so the assistant has full context.*
+*This README is maintained by the AI coding assistant and updated after every working session. If starting a new session, share this file for full context.*

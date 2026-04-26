@@ -195,7 +195,7 @@ export const modules: Module[] = [
     resources: [
       { label: "AliExpress — sort by Orders", url: "https://www.aliexpress.com" },
       { label: "TikTok Shop Bestsellers", url: "https://shop.tiktok.com" },
-      { label: "AutoDS — product research tool", url: "https://www.autods.com" },
+      { label: "AutoDS — product research tool", url: "https://platform.autods.com/register?ref=NTI2MjAyMQ==" },
     ],
   },
 
@@ -312,7 +312,7 @@ export const modules: Module[] = [
       "Test order completed on mobile in under 2 minutes",
     ],
     resources: [
-      { label: "Start Shopify free trial", url: "https://www.shopify.com" },
+      { label: "Start Shopify free trial", url: "https://shopify.pxf.io/3k9Wjr" },
       { label: "Canva — free logo and graphics", url: "https://www.canva.com" },
       { label: "DSers — dropshipping fulfillment", url: "https://www.dsers.com" },
       { label: "Judge.me — product reviews app", url: "https://judge.me" },
@@ -377,7 +377,7 @@ export const modules: Module[] = [
     ],
     resources: [
       { label: "Zipify Pages — funnel builder for Shopify", url: "https://zipify.com/apps/pages" },
-      { label: "ReConvert — upsells and order bumps", url: "https://reconvert.io" },
+      { label: "ReConvert — upsells and order bumps", url: "https://apps.shopify.com/reconvert-upsell-cross-sell?mref=bfgeliiu" },
       { label: "Canva — graphics and banners", url: "https://www.canva.com" },
     ],
   },
