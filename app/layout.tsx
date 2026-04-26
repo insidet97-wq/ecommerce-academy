@@ -20,8 +20,11 @@ export const metadata: Metadata = {
     template: "%s | First Sale Lab",
   },
   description:
-    "12 focused modules, real tools, and a personalised roadmap that gets complete beginners to their first online sale. Free forever.",
+    "12 focused modules, real tools, and a personalised roadmap that gets complete beginners to their first online sale.",
   metadataBase: new URL("https://firstsalelab.com"),
+  other: {
+    "google-adsense-account": "ca-pub-1382028135058819",
+  },
   openGraph: {
     siteName:    "First Sale Lab",
     type:        "website",
