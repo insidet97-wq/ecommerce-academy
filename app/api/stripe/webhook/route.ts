@@ -30,7 +30,7 @@ export async function POST(req: Request) {
 
       /* ── Payment succeeded → grant Pro ── */
       case "checkout.session.completed": {
-        const session    = event.data.object as Stripe.CheckoutSession;
+        const session    = event.data.object as Stripe.Checkout.Session;
         const userId     = session.metadata?.userId;
         const customerId = session.customer as string;
         const subId      = session.subscription as string;
