@@ -154,16 +154,16 @@ export default function DashboardPage() {
         supabase.from("user_profiles").select("track, start_module, goal, first_name, streak_days, last_active, is_pro, stripe_customer_id").eq("id", user.id).single(),
       ]);
       setCompleted((progressRes.data ?? []).map((r: { module_id: number }) => r.module_id));
-      if (profileRes.data) setProfile({
-        track:               profileRes.data.track,
-        start_module:        profileRes.data.start_module ?? 1,
-        goal:                profileRes.data.goal,
-        first_name:          profileRes.data.first_name ?? null,
-        streak_days:         profileRes.data.streak_days ?? 0,
-        last_active:         profileRes.data.last_active ?? null,
-        // If they just came from checkout, treat as Pro even if webhook hasn't fired yet
-        is_pro:              profileRes.data.is_pro || justUpgraded,
-        stripe_customer_id:  profileRes.data.stripe_customer_id ?? null,
+      // Always call setProfile — even if no row exists, use safe defaults
+      setProfile({
+        track:               profileRes.data?.track               ?? null,
+        start_module:        profileRes.data?.start_module        ?? 1,
+        goal:                profileRes.data?.goal                ?? null,
+        first_name:          profileRes.data?.first_name          ?? null,
+        streak_days:         profileRes.data?.streak_days         ?? 0,
+        last_active:         profileRes.data?.last_active         ?? null,
+        is_pro:              (profileRes.data?.is_pro ?? false)   || justUpgraded,
+        stripe_customer_id:  profileRes.data?.stripe_customer_id ?? null,
       });
       setLoading(false);
     }

@@ -35,11 +35,12 @@ export async function POST(req: Request) {
         const customerId = session.customer as string;
         const subId      = session.subscription as string;
         if (userId) {
-          await supabase.from("user_profiles").update({
-            is_pro: true,
+          await supabase.from("user_profiles").upsert({
+            id:                      userId,
+            is_pro:                  true,
             stripe_customer_id:      customerId,
             stripe_subscription_id:  subId,
-          }).eq("id", userId);
+          }, { onConflict: "id" });
         }
         break;
       }
