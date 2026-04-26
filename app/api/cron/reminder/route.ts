@@ -26,11 +26,15 @@ export async function GET(request: Request) {
       .eq("status", "draft")
       .maybeSingle();
 
-    const adminEmail = process.env.ADMIN_EMAIL ?? "hello@firstsalelab.com";
+    // Send to all admin addresses (comma-separated ADMIN_EMAILS, or fallback)
+    const adminEmails = (process.env.ADMIN_EMAILS ?? "hello@firstsalelab.com")
+      .split(",")
+      .map(e => e.trim())
+      .filter(Boolean);
 
     await resend.emails.send({
       from: "First Sale Lab <hello@firstsalelab.com>",
-      to: adminEmail,
+      to: adminEmails,
       subject: `⏰ Review this week's product drop before Monday`,
       html: reminderEmailHTML(!!draft),
     });
