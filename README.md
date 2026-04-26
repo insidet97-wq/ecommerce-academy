@@ -202,7 +202,7 @@ ecommerce-academy/
 ## Pages & Features
 
 ### Landing Page (`/`)
-- **Logged out:** Dark hero, "Stop learning. Start selling." copy, freemium badge ("Modules 1–6 free · Pro from $19/mo"), comparison section, FAQ, CTA
+- **Logged out:** Dark hero, "Stop learning. Start selling." copy, freemium badge ("Modules 1–6 free · Pro from $19/mo"), why-different comparison, curriculum grid, how-it-works timeline, what you'll build, testimonials, **Free vs Pro comparison section** (dynamic monthly briefing label, weekly picks feature cards), stats, FAQ, CTA banner
 - **Logged in:** Personalised hero ("Hey {name} 👋"), progress bar (X/12), quick-access cards, motivational quote based on progress
 
 ### Quiz (`/quiz`)
@@ -628,7 +628,8 @@ Uses the Supabase service role key to bypass RLS. No auth check in the route —
 
 | Date | What changed |
 |------|-------------|
-| 2026-04-26 | **Email newsletters:** Saturday admin reminder cron; Monday product picks newsletter to Pro users; monthly briefing auto-published + emailed to Pro users; `lib/email-helpers.ts` with `getProUsers`, `sendBatch`, 3 HTML email generators; upgrade page PRO_INCLUDES updated with Weekly Picks + Monthly Briefing perks |
+| 2026-04-26 | **Landing page Free vs Pro section:** New comparison section after testimonials — dark purple Pro card with dynamic "April 2026 Ad Strategy Update" label (auto-updates monthly), weekly winning products feature card, Free column with locked greyed-out Pro items; FAQ updated to mention weekly picks + briefing |
+| 2026-04-26 | **Email newsletters:** Saturday admin reminder cron (supports multiple addresses via `ADMIN_EMAILS` env var); Monday product picks newsletter to Pro users; monthly briefing auto-published + emailed to Pro users; `lib/email-helpers.ts` with `getProUsers`, `sendBatch`, 3 HTML email generators; upgrade page PRO_INCLUDES updated with Weekly Picks + Monthly Briefing perks |
 | 2026-04-26 | **AI provider:** Switched from Perplexity (paid) → Gemini (quota issues) → Groq (free, working); `GROQ_API_KEY` env var; `llama-3.3-70b-versatile` model with `json_object` response format |
 | 2026-04-26 | **Automated Pro Content:** Groq API integration; weekly product drops + monthly briefings via Vercel Cron; admin content review page (`/admin/content`) with generate, swap, publish flow; Pro-gated display pages (`/pro/products`, `/pro/briefings`); `vercel.json` cron schedule |
 | 2026-04-26 | **Affiliate links:** Shopify (`shopify.pxf.io/3k9Wjr`), ReConvert (`?mref=bfgeliiu`), AutoDS (`?ref=NTI2MjAyMQ==`) wired into `lib/modules.ts` resource arrays |
