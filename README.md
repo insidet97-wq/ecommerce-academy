@@ -407,6 +407,7 @@ The streak badge in the dashboard shows **orange** if the streak was maintained 
 
 | Date | What changed |
 |------|-------------|
+| 2026-04-26 | **Landing page:** Social proof bar, full curriculum grid (all 12 modules), "What you'll build" outcome cards, testimonials, upgraded stats cards, FAQ accordion (6 questions), improved footer |
 | 2026-04-26 | **Logo:** PNG logo added to all navs (40px); square favicon updated to dark purple with FSL mark; logo export page at `/export-logo.html` |
 | 2026-04-25 | **Rebrand:** "Ecommerce Academy" → "First Sale Lab" everywhere; all `€` → `$`; domain moved to `firstsalelab.com` |
 | 2026-04-25 | **Email system:** Resend integrated; welcome email on signup; completion email after each module; `firstsalelab.com` domain verified in Resend |
