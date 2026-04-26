@@ -134,10 +134,10 @@ export default function DashboardPage() {
       setEmail(user.email ?? "");
       setUserId(user.id);
 
-      // Check for ?upgraded=true in URL
-      if (typeof window !== "undefined" && new URLSearchParams(window.location.search).get("upgraded") === "true") {
+      // Check for ?upgraded=true in URL — set Pro optimistically (webhook may still be in flight)
+      const justUpgraded = typeof window !== "undefined" && new URLSearchParams(window.location.search).get("upgraded") === "true";
+      if (justUpgraded) {
         setUpgradedBanner(true);
-        // Clean the URL without reload
         window.history.replaceState({}, "", "/dashboard");
       }
 
@@ -153,7 +153,8 @@ export default function DashboardPage() {
         first_name:          profileRes.data.first_name ?? null,
         streak_days:         profileRes.data.streak_days ?? 0,
         last_active:         profileRes.data.last_active ?? null,
-        is_pro:              profileRes.data.is_pro ?? false,
+        // If they just came from checkout, treat as Pro even if webhook hasn't fired yet
+        is_pro:              profileRes.data.is_pro ?? justUpgraded,
         stripe_customer_id:  profileRes.data.stripe_customer_id ?? null,
       });
       setLoading(false);
