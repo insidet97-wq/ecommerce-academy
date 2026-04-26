@@ -154,7 +154,7 @@ export default function DashboardPage() {
         streak_days:         profileRes.data.streak_days ?? 0,
         last_active:         profileRes.data.last_active ?? null,
         // If they just came from checkout, treat as Pro even if webhook hasn't fired yet
-        is_pro:              profileRes.data.is_pro ?? justUpgraded,
+        is_pro:              profileRes.data.is_pro || justUpgraded,
         stripe_customer_id:  profileRes.data.stripe_customer_id ?? null,
       });
       setLoading(false);
