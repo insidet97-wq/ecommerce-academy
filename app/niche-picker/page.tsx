@@ -192,7 +192,22 @@ export default function NichePickerPage() {
                 onChange={e => setEmail(e.target.value)}
                 placeholder="you@example.com"
                 required
-                style={{ width: "100%", padding: "12px 14px", borderRadius: 12, border: "none", fontSize: 14, color: "#09090b", outline: "none", boxSizing: "border-box", marginBottom: 12 }}
+                style={{
+                  width: "100%",
+                  padding: "13px 16px",
+                  borderRadius: 12,
+                  border: "2px solid rgba(255,255,255,0.25)",
+                  background: "#fff",
+                  fontSize: 15,
+                  color: "#09090b",
+                  fontWeight: 500,
+                  outline: "none",
+                  boxSizing: "border-box",
+                  marginBottom: 12,
+                  boxShadow: "0 2px 12px rgba(0,0,0,0.2)",
+                }}
+                onFocus={e => { e.currentTarget.style.borderColor = "#facc15"; e.currentTarget.style.boxShadow = "0 0 0 3px rgba(250,204,21,0.3), 0 2px 12px rgba(0,0,0,0.2)"; }}
+                onBlur={e => { e.currentTarget.style.borderColor = "rgba(255,255,255,0.25)"; e.currentTarget.style.boxShadow = "0 2px 12px rgba(0,0,0,0.2)"; }}
               />
               <button
                 type="submit"

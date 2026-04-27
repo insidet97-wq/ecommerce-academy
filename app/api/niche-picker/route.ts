@@ -1,8 +1,17 @@
 import { NextResponse } from "next/server";
+import { Resend } from "resend";
 import { generateNiches, type NichePickerInput } from "@/lib/perplexity";
-import { getAdminSupabase } from "@/lib/email-helpers";
+import { getAdminSupabase, nichePickerDay0HTML } from "@/lib/email-helpers";
 
 export const dynamic = "force-dynamic";
+
+/* Pull a friendly first name from the local part of the email address.
+   "abdellah.smith@gmail.com" → "Abdellah" */
+function nameFromEmail(email: string): string {
+  const local = email.split("@")[0] || "there";
+  const cleaned = local.split(/[._+-]/)[0] || local;
+  return cleaned.charAt(0).toUpperCase() + cleaned.slice(1);
+}
 
 /**
  * POST /api/niche-picker
@@ -46,19 +55,35 @@ export async function POST(req: Request) {
     };
 
     const niches = await generateNiches(cleaned);
+    const cleanedEmail = email.toLowerCase().trim();
+    const firstName = nameFromEmail(cleanedEmail);
 
-    // Capture lead — fire and forget, don't block the response if Supabase has issues
+    // Capture lead with drip_stage = 1 (day-0 email being sent right now)
     const supabase = getAdminSupabase();
     supabase.from("niche_leads").insert({
-      email: email.toLowerCase().trim(),
+      email: cleanedEmail,
       interests:  cleaned.interests,
       budget:     cleaned.budget,
       experience: cleaned.experience,
       audience:   cleaned.audience,
       niches,
+      drip_stage: 1,
     }).then(({ error }) => {
       if (error) console.error("niche_leads insert error:", error);
     });
+
+    // Send Day-0 email with the niches — fire and forget so we don't block the UI
+    const resend = new Resend(process.env.RESEND_API_KEY);
+    resend.emails.send({
+      from: "First Sale Lab <hello@firstsalelab.com>",
+      to: cleanedEmail,
+      subject: `${firstName}, here are your 3 ecommerce niches 🎯`,
+      html: nichePickerDay0HTML(firstName, niches),
+      tags: [
+        { name: "type",      value: "niche_day0" },
+        { name: "drip_stage", value: "0" },
+      ],
+    }).catch(err => console.error("Niche day-0 email error:", err));
 
     return NextResponse.json({ niches });
   } catch (err) {

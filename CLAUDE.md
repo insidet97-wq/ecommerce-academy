@@ -198,7 +198,7 @@ CRON_SECRET
   CREATE INDEX email_events_email_type_idx ON email_events (email_type);
   CREATE INDEX email_events_event_type_idx ON email_events (event_type);
 
-  -- Niche Picker lead capture (used by /api/niche-picker)
+  -- Niche Picker lead capture (used by /api/niche-picker + drip cron)
   CREATE TABLE niche_leads (
     id          uuid PRIMARY KEY DEFAULT gen_random_uuid(),
     email       text NOT NULL,
@@ -207,9 +207,14 @@ CRON_SECRET
     experience  text,
     audience    text,
     niches      jsonb,
+    drip_stage  int NOT NULL DEFAULT 0,
     created_at  timestamptz NOT NULL DEFAULT now()
   );
-  CREATE INDEX niche_leads_email_idx ON niche_leads (email);
+  CREATE INDEX niche_leads_email_idx      ON niche_leads (email);
+  CREATE INDEX niche_leads_drip_stage_idx ON niche_leads (drip_stage);
+
+  -- If niche_leads already exists from earlier migration, run this instead:
+  -- ALTER TABLE niche_leads ADD COLUMN IF NOT EXISTS drip_stage int NOT NULL DEFAULT 0;
 
   -- Blog posts (used by /api/cron/blog and admin /admin/blog)
   CREATE TABLE blog_posts (
