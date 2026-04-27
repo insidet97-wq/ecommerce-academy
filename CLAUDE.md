@@ -177,8 +177,10 @@ CRON_SECRET
 
 ## Pending / known issues
 
-- Google AdSense: pending approval — slots activate via env vars, no code changes needed
-- Stripe: currently in **test mode** — switch to live keys when ready to accept real payments
+- **Google AdSense:** site approval still pending (status "Getting ready" as of last check). All three slot IDs ARE configured in Vercel (`NEXT_PUBLIC_ADSENSE_SLOT_DASHBOARD`, `_MODULE`, `_CONTENT`) — separate ad units in AdSense for per-placement reporting. Once site flips to "Ready", ads will fill automatically; no code changes needed. Verify in incognito (not as admin — admins are ad-free)
+- **AdSense `ads.txt`:** showed "Not found" in the dashboard despite the file being correctly served at `https://www.firstsalelab.com/ads.txt`. The apex (`firstsalelab.com`) returns a 307 → www redirect; AdSense crawlers usually follow but the status can lag 24–72h. If still "Not found" 48h after first noticing, register `www.firstsalelab.com` as a separate site in AdSense
+- **Stripe:** currently in **test mode** — switch to live keys when ready to accept real payments
+- **Resend webhook:** Vercel env var `RESEND_WEBHOOK_SECRET` set, webhook endpoint configured in Resend dashboard
 - Sitemap submitted to Google Search Console — may take days to index
 - `support@firstsalelab.com` needs to be set up in Namecheap Pro Email
 - **SQL migrations needed** — run all of these once in the Supabase SQL editor:
