@@ -119,7 +119,7 @@ export default function UpgradePage() {
             <span style={{ fontSize: 14 }}>✨</span>
             <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", color: "#fde68a" }}>First Sale Lab Pro</span>
           </div>
-          <h1 style={{ fontSize: 36, fontWeight: 900, color: "#fff", letterSpacing: "-1px", lineHeight: 1.1, marginBottom: 16, maxWidth: 520, margin: "0 auto 16px" }}>
+          <h1 style={{ fontSize: "clamp(26px, 5vw, 36px)", fontWeight: 900, color: "#fff", letterSpacing: "-1px", lineHeight: 1.1, marginBottom: 16, maxWidth: 520, margin: "0 auto 16px" }}>
             Unlock the complete roadmap to your first sale
           </h1>
           <p style={{ fontSize: 15, color: "rgba(255,255,255,0.65)", maxWidth: 440, margin: "0 auto 32px", lineHeight: 1.65 }}>
@@ -140,7 +140,7 @@ export default function UpgradePage() {
             <button
               onClick={handleUpgrade}
               disabled={checking}
-              style={{ background: checking ? "rgba(255,255,255,0.15)" : "linear-gradient(135deg, #facc15 0%, #f59e0b 100%)", color: checking ? "rgba(255,255,255,0.4)" : "#1c1917", fontWeight: 800, fontSize: 16, padding: "16px 44px", borderRadius: 16, border: "none", cursor: checking ? "not-allowed" : "pointer", boxShadow: checking ? "none" : "0 4px 24px rgba(250,204,21,0.4)", letterSpacing: "-0.3px", transition: "transform 0.2s, box-shadow 0.2s" }}
+              style={{ background: checking ? "rgba(255,255,255,0.15)" : "linear-gradient(135deg, #facc15 0%, #f59e0b 100%)", color: checking ? "rgba(255,255,255,0.4)" : "#1c1917", fontWeight: 800, fontSize: 16, padding: "16px 44px", borderRadius: 16, border: "none", cursor: checking ? "not-allowed" : "pointer", boxShadow: checking ? "none" : "0 4px 24px rgba(250,204,21,0.4)", letterSpacing: "-0.3px", transition: "transform 0.2s, box-shadow 0.2s", width: "100%", maxWidth: 340 }}
               onMouseEnter={e => { if (!checking) { e.currentTarget.style.transform = "translateY(-2px)"; e.currentTarget.style.boxShadow = "0 8px 36px rgba(250,204,21,0.55)"; } }}
               onMouseLeave={e => { e.currentTarget.style.transform = "translateY(0)"; e.currentTarget.style.boxShadow = "0 4px 24px rgba(250,204,21,0.4)"; }}
             >
@@ -178,7 +178,7 @@ export default function UpgradePage() {
         {/* ── Free vs Pro comparison ── */}
         <section className="fade-up-d1">
           <h2 style={{ fontSize: 22, fontWeight: 800, color: "#09090b", letterSpacing: "-0.6px", marginBottom: 20 }}>Free vs Pro</h2>
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
 
             {/* Free */}
             <div style={{ background: "#fff", borderRadius: 20, border: "1.5px solid rgba(0,0,0,0.08)", padding: "22px 20px" }}>

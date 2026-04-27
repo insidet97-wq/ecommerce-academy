@@ -227,10 +227,11 @@ ecommerce-academy/
 
 ### Dashboard (`/dashboard`)
 - Protected (redirects to `/login` if not authenticated)
-- Progress card, streak badge, "Up next" dominant card
+- **Onboarding card** for brand-new users (no quiz taken yet, 0 completions): replaces the greeting/progress bar with a dark welcome hero showing 3 steps + quiz CTA + "Skip to Module 1" fallback
+- Progress card, streak badge, "Up next" dominant card (shown after first action or quiz completion)
 - Module list: modules 7–12 show "✨ Pro" badge and "Unlock →" button if free user
 - Upgrade CTA banner at bottom for free users
-- Pro users see "📦 Picks" and "📋 Briefings" in nav
+- Pro users see "📦 Picks" and "📋 Briefings" in nav; secondary nav links (`hidden sm:block`) collapse on mobile
 - Admin users see "Analytics" and "Content" in nav
 - `?upgraded=true` param triggers green "Welcome to Pro!" banner
 
@@ -256,6 +257,13 @@ ecommerce-academy/
 - Pro-gated
 - Shows latest published briefing + archive
 - Sections: summary, Meta Ads, TikTok Ads, Trending Niche, Add This Month, Drop This Month, Platform Changes
+
+### Settings (`/settings`)
+- Protected — redirects to `/login` if not authenticated
+- Change first name (pre-filled, button disabled when unchanged)
+- Change password (min 8 chars, confirm match, `supabase.auth.updateUser`)
+- Danger zone: contact email for account deletion requests
+- Linked from dashboard nav
 
 ### Admin: Analytics (`/admin`)
 - Redirects non-admins to `/dashboard`
@@ -661,6 +669,9 @@ Uses the Supabase service role key to bypass RLS. No auth check in the route —
 
 | Date | What changed |
 |------|-------------|
+| 2026-04-26 | **Onboarding experience:** First-time users (no quiz, 0 completions) see a full welcome card on the dashboard — dark hero, 3-step path, quiz CTA, "Skip to Module 1" fallback; returning users see the normal greeting + progress bar |
+| 2026-04-26 | **Mobile audit:** `px-8` → `px-4 sm:px-8` across all landing page sections; hero h1 `text-4xl sm:text-5xl`; CTA banner `p-7 sm:p-12`; dashboard nav secondary links `hidden sm:block`; upgrade page Free vs Pro grid `grid-cols-1 sm:grid-cols-2`; module complete button full-width with shortened label; upgrade hero CTA `maxWidth: 340` + full-width |
+| 2026-04-26 | **Settings page (`/settings`):** Change name + change password + danger zone; "Settings" link in dashboard nav |
 | 2026-04-27 | **Certificate page:** Public shareable `/certificate/[userId]` — server component, dynamic OG meta, not-yet-earned state, Copy/LinkedIn/X share buttons; dashboard completion card updated with "Share certificate" link |
 | 2026-04-27 | **SEO:** `app/sitemap.ts` (6 public URLs, priority-weighted), `app/robots.ts` (blocks /dashboard /admin /pro /modules /api), JSON-LD structured data on landing page (Organization + Course + FAQPage schemas) |
 | 2026-04-27 | **Google Analytics 4:** Measurement ID `G-VT4RZ3JB6L` added to `app/layout.tsx` via `afterInteractive` scripts |

@@ -282,6 +282,7 @@ export default function DashboardPage() {
               ] : []),
             ].map(item => (
               <Link key={item.href} href={item.href}
+                className="hidden sm:block"
                 style={{ fontSize: 13, fontWeight: 500, color: "#52525b", textDecoration: "none", padding: "6px 12px", borderRadius: 8 }}
                 onMouseEnter={e => { e.currentTarget.style.background = "#f4f4f5"; e.currentTarget.style.color = "#09090b"; }}
                 onMouseLeave={e => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = "#52525b"; }}
@@ -296,11 +297,17 @@ export default function DashboardPage() {
             )}
             {isPro && profile.stripe_customer_id && !admin && (
               <button onClick={handleManageBilling} disabled={portalLoading}
+                className="hidden sm:block"
                 style={{ fontSize: 12, fontWeight: 600, color: "#71717a", background: "none", border: "none", cursor: "pointer", padding: "6px 12px", borderRadius: 8 }}
                 onMouseEnter={e => { e.currentTarget.style.background = "#f4f4f5"; e.currentTarget.style.color = "#09090b"; }}
                 onMouseLeave={e => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = "#71717a"; }}
               >{portalLoading ? "Loading…" : "Billing"}</button>
             )}
+            <Link href="/settings"
+              style={{ fontSize: 13, fontWeight: 500, color: "#52525b", textDecoration: "none", padding: "6px 12px", borderRadius: 8 }}
+              onMouseEnter={e => { e.currentTarget.style.background = "#f4f4f5"; e.currentTarget.style.color = "#09090b"; }}
+              onMouseLeave={e => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = "#52525b"; }}
+            >Settings</Link>
             <div style={{ width: 1, height: 16, background: "#e4e4e7", margin: "0 4px" }} />
             <button onClick={handleLogout}
               style={{ fontSize: 13, fontWeight: 500, color: "#a1a1aa", background: "none", border: "none", cursor: "pointer", padding: "6px 12px", borderRadius: 8 }}
@@ -313,54 +320,120 @@ export default function DashboardPage() {
 
       <main style={{ maxWidth: 680, margin: "0 auto", padding: "36px 24px 80px" }}>
 
-        {/* ── Welcome ── */}
-        <div className="fade-up" style={{ marginBottom: 24 }}>
-          <p style={{ fontSize: 13, fontWeight: 600, color: trackColor, marginBottom: 4 }}>
-            {getGreeting()}, {firstName} 👋
-          </p>
-          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 8 }}>
-            <div>
-              {profile.track && (
-                <span style={{ fontSize: 11, fontWeight: 700, padding: "3px 10px", borderRadius: 99, background: trackColor, color: "#fff" }}>
-                  {profile.track}
-                </span>
-              )}
-              {profile.goal && (
-                <span style={{ fontSize: 12, color: "#a1a1aa", marginLeft: 8 }}>· {GOAL_LABELS[profile.goal] ?? profile.goal}</span>
-              )}
-            </div>
-          </div>
-        </div>
+        {/* ── ONBOARDING — shown only to first-time users with no track yet ── */}
+        {completedCount === 0 && !profile.track ? (
+          <div className="fade-up" style={{ marginBottom: 28 }}>
+            <div style={{
+              background: "linear-gradient(135deg, #1e1b4b 0%, #312e81 50%, #4c1d95 100%)",
+              borderRadius: 24, padding: "32px 28px",
+              position: "relative", overflow: "hidden",
+            }}>
+              <div className="dot-grid" style={{ position: "absolute", inset: 0, pointerEvents: "none" }} />
+              <div style={{ position: "absolute", inset: 0, pointerEvents: "none", background: "radial-gradient(ellipse 80% 60% at 50% -10%, rgba(139,92,246,0.45) 0%, transparent 70%)" }} />
+              <div style={{ position: "relative" }}>
 
-        {/* ── Progress card ── */}
-        <div className="fade-up-d1" style={{ marginBottom: 28 }}>
-          <div style={{ background: "#fff", borderRadius: 20, border: "1.5px solid rgba(0,0,0,0.06)", padding: "18px 20px", boxShadow: "0 1px 4px rgba(0,0,0,0.04)" }}>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
-              <div>
-                <span style={{ fontSize: 14, fontWeight: 700, color: "#09090b" }}>
-                  {completedCount} <span style={{ fontWeight: 400, color: "#71717a" }}>of {MODULES.length} modules complete</span>
+                {/* Label */}
+                <span style={{ display: "inline-block", fontSize: 10, fontWeight: 700, letterSpacing: "0.14em", textTransform: "uppercase", color: "rgba(167,139,250,0.9)", marginBottom: 14, background: "rgba(99,102,241,0.2)", border: "1px solid rgba(99,102,241,0.35)", padding: "4px 12px", borderRadius: 99 }}>
+                  You&apos;re in 🎉
                 </span>
-                {minutesInvested > 0 && (
-                  <p style={{ fontSize: 12, color: "#a1a1aa", marginTop: 2 }}>{timeLabel}</p>
-                )}
+
+                <h2 style={{ fontSize: 22, fontWeight: 900, color: "#fff", letterSpacing: "-0.6px", lineHeight: 1.2, marginBottom: 10 }}>
+                  Welcome, {firstName}. Your journey to your first sale starts here.
+                </h2>
+                <p style={{ fontSize: 13, color: "rgba(255,255,255,0.6)", lineHeight: 1.65, marginBottom: 24, maxWidth: 460 }}>
+                  12 focused modules. Real tasks. One clear step at a time. Answer 5 quick questions to get your personalised roadmap — it takes 2 minutes.
+                </p>
+
+                {/* 3-step path */}
+                <div style={{ display: "flex", gap: 10, marginBottom: 24, flexWrap: "wrap" }}>
+                  {[
+                    { n: "1", emoji: "🧭", label: "Take the quiz",       sub: "2 min · builds your personalised plan" },
+                    { n: "2", emoji: "⚡", label: "Work through modules", sub: "20–45 min each · one real task per step" },
+                    { n: "3", emoji: "💰", label: "Make your first sale", sub: "By Module 11 your store is live" },
+                  ].map((step) => (
+                    <div key={step.n} style={{ flex: "1 1 160px", background: "rgba(255,255,255,0.07)", border: "1px solid rgba(255,255,255,0.12)", borderRadius: 16, padding: "14px 16px" }}>
+                      <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8 }}>
+                        <span style={{ width: 22, height: 22, borderRadius: 7, background: "rgba(99,102,241,0.55)", color: "#fff", fontSize: 10, fontWeight: 700, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>{step.n}</span>
+                        <span style={{ fontSize: 16 }}>{step.emoji}</span>
+                      </div>
+                      <p style={{ fontSize: 12, fontWeight: 700, color: "#fff", marginBottom: 3 }}>{step.label}</p>
+                      <p style={{ fontSize: 11, color: "rgba(255,255,255,0.45)", lineHeight: 1.4 }}>{step.sub}</p>
+                    </div>
+                  ))}
+                </div>
+
+                {/* CTAs */}
+                <div style={{ display: "flex", alignItems: "center", gap: 14, flexWrap: "wrap" }}>
+                  <Link href="/quiz"
+                    style={{ display: "inline-flex", alignItems: "center", gap: 6, background: "linear-gradient(135deg, #facc15, #f59e0b)", color: "#1c1917", fontWeight: 800, fontSize: 14, padding: "13px 22px", borderRadius: 14, textDecoration: "none", boxShadow: "0 4px 16px rgba(250,204,21,0.35)", letterSpacing: "-0.2px" }}
+                    onMouseEnter={e => { e.currentTarget.style.transform = "translateY(-1px)"; e.currentTarget.style.boxShadow = "0 6px 24px rgba(250,204,21,0.5)"; }}
+                    onMouseLeave={e => { e.currentTarget.style.transform = "translateY(0)"; e.currentTarget.style.boxShadow = "0 4px 16px rgba(250,204,21,0.35)"; }}
+                  >
+                    🧭 Build my free plan →
+                  </Link>
+                  <Link href="/modules/1"
+                    style={{ fontSize: 13, fontWeight: 500, color: "rgba(255,255,255,0.5)", textDecoration: "none" }}
+                    onMouseEnter={e => (e.currentTarget.style.color = "rgba(255,255,255,0.85)")}
+                    onMouseLeave={e => (e.currentTarget.style.color = "rgba(255,255,255,0.5)")}
+                  >
+                    Skip quiz, start Module 1 →
+                  </Link>
+                </div>
               </div>
-              <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-                {/* Streak badge */}
-                {streak > 0 && (
-                  <div style={{ display: "flex", alignItems: "center", gap: 5, background: streakActiveToday ? "#fff7ed" : "#f4f4f5", border: `1.5px solid ${streakActiveToday ? "#fed7aa" : "#e4e4e7"}`, borderRadius: 99, padding: "4px 10px" }}>
-                    <span style={{ fontSize: 14 }}>🔥</span>
-                    <span style={{ fontSize: 13, fontWeight: 800, color: streakActiveToday ? "#ea580c" : "#a1a1aa", letterSpacing: "-0.3px" }}>{streak}</span>
-                    <span style={{ fontSize: 11, color: streakActiveToday ? "#fb923c" : "#a1a1aa", fontWeight: 500 }}>{streak === 1 ? "day" : "days"}</span>
-                  </div>
-                )}
-                <span style={{ fontSize: 22, fontWeight: 900, color: trackColor, letterSpacing: "-0.5px" }}>{progressPercent}%</span>
-              </div>
-            </div>
-            <div style={{ height: 8, borderRadius: 99, background: "#f4f4f5" }}>
-              <div style={{ height: 8, borderRadius: 99, background: `linear-gradient(90deg, ${trackColor}, #7c3aed)`, width: `${progressPercent}%`, transition: "width 0.8s cubic-bezier(0.16,1,0.3,1)" }} />
             </div>
           </div>
-        </div>
+        ) : (
+          <>
+            {/* ── Welcome (returning users) ── */}
+            <div className="fade-up" style={{ marginBottom: 24 }}>
+              <p style={{ fontSize: 13, fontWeight: 600, color: trackColor, marginBottom: 4 }}>
+                {getGreeting()}, {firstName} 👋
+              </p>
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 8 }}>
+                <div>
+                  {profile.track && (
+                    <span style={{ fontSize: 11, fontWeight: 700, padding: "3px 10px", borderRadius: 99, background: trackColor, color: "#fff" }}>
+                      {profile.track}
+                    </span>
+                  )}
+                  {profile.goal && (
+                    <span style={{ fontSize: 12, color: "#a1a1aa", marginLeft: 8 }}>· {GOAL_LABELS[profile.goal] ?? profile.goal}</span>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            {/* ── Progress card ── */}
+            <div className="fade-up-d1" style={{ marginBottom: 28 }}>
+              <div style={{ background: "#fff", borderRadius: 20, border: "1.5px solid rgba(0,0,0,0.06)", padding: "18px 20px", boxShadow: "0 1px 4px rgba(0,0,0,0.04)" }}>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
+                  <div>
+                    <span style={{ fontSize: 14, fontWeight: 700, color: "#09090b" }}>
+                      {completedCount} <span style={{ fontWeight: 400, color: "#71717a" }}>of {MODULES.length} modules complete</span>
+                    </span>
+                    {minutesInvested > 0 && (
+                      <p style={{ fontSize: 12, color: "#a1a1aa", marginTop: 2 }}>{timeLabel}</p>
+                    )}
+                  </div>
+                  <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+                    {/* Streak badge */}
+                    {streak > 0 && (
+                      <div style={{ display: "flex", alignItems: "center", gap: 5, background: streakActiveToday ? "#fff7ed" : "#f4f4f5", border: `1.5px solid ${streakActiveToday ? "#fed7aa" : "#e4e4e7"}`, borderRadius: 99, padding: "4px 10px" }}>
+                        <span style={{ fontSize: 14 }}>🔥</span>
+                        <span style={{ fontSize: 13, fontWeight: 800, color: streakActiveToday ? "#ea580c" : "#a1a1aa", letterSpacing: "-0.3px" }}>{streak}</span>
+                        <span style={{ fontSize: 11, color: streakActiveToday ? "#fb923c" : "#a1a1aa", fontWeight: 500 }}>{streak === 1 ? "day" : "days"}</span>
+                      </div>
+                    )}
+                    <span style={{ fontSize: 22, fontWeight: 900, color: trackColor, letterSpacing: "-0.5px" }}>{progressPercent}%</span>
+                  </div>
+                </div>
+                <div style={{ height: 8, borderRadius: 99, background: "#f4f4f5" }}>
+                  <div style={{ height: 8, borderRadius: 99, background: `linear-gradient(90deg, ${trackColor}, #7c3aed)`, width: `${progressPercent}%`, transition: "width 0.8s cubic-bezier(0.16,1,0.3,1)" }} />
+                </div>
+              </div>
+            </div>
+          </>
+        )}
 
         {/* ── UP NEXT — dominant card ── */}
         <div className="fade-up-d2" style={{ marginBottom: 12 }}>

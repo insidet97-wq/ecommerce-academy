@@ -202,7 +202,7 @@ export default function Home() {
 
         {/* ── NAV ── */}
         <nav
-          className="sticky top-0 z-30 px-8 py-4 flex items-center justify-between"
+          className="sticky top-0 z-30 px-4 sm:px-8 py-4 flex items-center justify-between"
           style={{
             background: "rgba(255,255,255,0.85)",
             backdropFilter: "blur(16px)",
@@ -290,7 +290,7 @@ export default function Home() {
             background: "radial-gradient(ellipse at center, rgba(139,92,246,0.12) 0%, transparent 70%)",
           }} />
 
-          <div className="relative z-10 max-w-3xl mx-auto px-8 py-20 text-center">
+          <div className="relative z-10 max-w-3xl mx-auto px-4 sm:px-8 py-14 sm:py-20 text-center">
             {/* Welcome back label */}
             <span
               className="inline-flex items-center gap-2 text-xs font-bold tracking-[0.1em] uppercase px-3 py-1.5 rounded-full mb-6"
@@ -302,7 +302,7 @@ export default function Home() {
 
             {/* Heading */}
             <h1
-              className="text-5xl sm:text-6xl font-extrabold text-white mb-5"
+              className="text-4xl sm:text-5xl font-extrabold text-white mb-5"
               style={{ lineHeight: "1.05", letterSpacing: "-0.04em" }}
             >
               Hey, {firstName}. 👋
@@ -361,7 +361,7 @@ export default function Home() {
         </section>
 
         {/* ── QUICK-ACCESS CARDS ── */}
-        <section className="px-8 py-16" style={{ background: "#f7f7fb" }}>
+        <section className="px-4 sm:px-8 py-16" style={{ background: "#f7f7fb" }}>
           <div className="max-w-4xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-5">
 
             {/* Card 1 — Progress */}
@@ -467,7 +467,7 @@ export default function Home() {
         </section>
 
         {/* ── QUOTE SECTION ── */}
-        <section className="px-8 py-16" style={{ background: "linear-gradient(135deg, #ede9fe 0%, #e0e7ff 100%)" }}>
+        <section className="px-4 sm:px-8 py-16" style={{ background: "linear-gradient(135deg, #ede9fe 0%, #e0e7ff 100%)" }}>
           <div className="max-w-2xl mx-auto text-center">
             <p
               className="text-lg font-semibold leading-relaxed mb-6"
@@ -488,7 +488,7 @@ export default function Home() {
         </section>
 
         {/* ── FOOTER ── */}
-        <footer className="px-8 py-10" style={{ background: "#08080f" }}>
+        <footer className="px-4 sm:px-8 py-10" style={{ background: "#08080f" }}>
           <div className="max-w-4xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
             <div className="flex items-center gap-2">
               <img src="/logo.png" alt="First Sale Lab" style={{ height: 28, width: "auto" }} />
@@ -603,7 +603,7 @@ export default function Home() {
       />
 
       {/* ── NAV ── */}
-      <nav className="absolute top-0 left-0 right-0 z-20 px-8 py-5 flex items-center justify-between">
+      <nav className="absolute top-0 left-0 right-0 z-20 px-4 sm:px-8 py-5 flex items-center justify-between">
         <div className="flex items-center gap-2">
           <img src="/logo.png" alt="First Sale Lab" style={{ height: 40, width: "auto" }} />
           <span className="text-base font-bold text-white tracking-tight" style={{ letterSpacing: "-0.4px" }}>First Sale Lab</span>
@@ -647,7 +647,7 @@ export default function Home() {
           background: "radial-gradient(ellipse at center, rgba(139,92,246,0.12) 0%, transparent 70%)",
         }} />
 
-        <div className="relative z-10 max-w-6xl mx-auto px-8 w-full flex flex-col lg:flex-row items-center gap-16 py-32">
+        <div className="relative z-10 max-w-6xl mx-auto px-4 sm:px-8 w-full flex flex-col lg:flex-row items-center gap-8 lg:gap-16 py-24 sm:py-32"  >
           <div className="flex-1 max-w-xl">
             <div className="fade-up">
               <span
@@ -660,7 +660,7 @@ export default function Home() {
             </div>
 
             <h1
-              className="fade-up-d1 text-5xl sm:text-6xl font-extrabold text-white mb-6"
+              className="fade-up-d1 text-4xl sm:text-5xl font-extrabold text-white mb-6"
               style={{ lineHeight: "1.05", letterSpacing: "-0.04em" }}
             >
               Stop learning.
@@ -689,7 +689,7 @@ export default function Home() {
               </Link>
             </div>
 
-            <div className="fade-up-d4 flex items-center gap-5 mt-8">
+            <div className="fade-up-d4 flex flex-wrap items-center gap-x-5 gap-y-2 mt-8">
               {["Modules 1–6 free", "No card to start", "Takes 2 minutes"].map((t) => (
                 <div key={t} className="flex items-center gap-1.5">
                   <span style={{ color: "#818cf8", fontSize: "12px" }}>✓</span>
@@ -714,7 +714,7 @@ export default function Home() {
       </section>
 
       {/* ── SOCIAL PROOF BAR ── */}
-      <section className="bg-white border-b border-gray-100 px-8 py-5">
+      <section className="bg-white border-b border-gray-100 px-4 sm:px-8 py-5">
         <div className="max-w-4xl mx-auto flex flex-wrap items-center justify-center gap-x-10 gap-y-3">
           {[
             { icon: "⭐", text: "Rated 4.9 by early users" },
@@ -731,11 +731,11 @@ export default function Home() {
       </section>
 
       {/* ── WHY DIFFERENT — comparison ── */}
-      <section className="bg-white px-8 py-20">
+      <section className="bg-white px-4 sm:px-8 py-16 sm:py-20">
         <div className="max-w-4xl mx-auto">
           <div className="text-center mb-12">
             <p className="text-xs font-bold tracking-[0.12em] uppercase mb-3" style={{ color: "#6366f1" }}>Why this works</p>
-            <h2 className="text-4xl font-bold text-gray-900" style={{ letterSpacing: "-0.025em" }}>Not another course.</h2>
+            <h2 className="text-3xl sm:text-4xl font-bold text-gray-900" style={{ letterSpacing: "-0.025em" }}>Not another course.</h2>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -782,11 +782,11 @@ export default function Home() {
       </section>
 
       {/* ── CURRICULUM ── */}
-      <section className="px-8 py-20" style={{ background: "#f7f7fb" }}>
+      <section className="px-4 sm:px-8 py-16 sm:py-20" style={{ background: "#f7f7fb" }}>
         <div className="max-w-4xl mx-auto">
           <div className="text-center mb-12">
             <p className="text-xs font-bold tracking-[0.12em] uppercase mb-3" style={{ color: "#6366f1" }}>The curriculum</p>
-            <h2 className="text-4xl font-bold text-gray-900 mb-4" style={{ letterSpacing: "-0.025em" }}>
+            <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4" style={{ letterSpacing: "-0.025em" }}>
               12 modules. One clear path.
             </h2>
             <p className="text-base text-gray-500">
@@ -827,11 +827,11 @@ export default function Home() {
       </section>
 
       {/* ── HOW IT WORKS — timeline ── */}
-      <section className="bg-white px-8 py-20">
+      <section className="bg-white px-4 sm:px-8 py-16 sm:py-20">
         <div className="max-w-2xl mx-auto">
           <div className="text-center mb-16">
             <p className="text-xs font-bold tracking-[0.12em] uppercase mb-3" style={{ color: "#6366f1" }}>How it works</p>
-            <h2 className="text-4xl font-bold text-gray-900 mb-4" style={{ letterSpacing: "-0.025em" }}>
+            <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4" style={{ letterSpacing: "-0.025em" }}>
               From confused to confident.
             </h2>
             <p className="text-base text-gray-500 leading-relaxed">No passive learning. No overwhelm. Just momentum.</p>
@@ -868,11 +868,11 @@ export default function Home() {
       </section>
 
       {/* ── WHAT YOU'LL WALK AWAY WITH ── */}
-      <section className="px-8 py-20" style={{ background: "#f7f7fb" }}>
+      <section className="px-4 sm:px-8 py-16 sm:py-20" style={{ background: "#f7f7fb" }}>
         <div className="max-w-4xl mx-auto">
           <div className="text-center mb-12">
             <p className="text-xs font-bold tracking-[0.12em] uppercase mb-3" style={{ color: "#6366f1" }}>What you&apos;ll build</p>
-            <h2 className="text-4xl font-bold text-gray-900" style={{ letterSpacing: "-0.025em" }}>
+            <h2 className="text-3xl sm:text-4xl font-bold text-gray-900" style={{ letterSpacing: "-0.025em" }}>
               Real skills. Real assets.
             </h2>
           </div>
@@ -904,11 +904,11 @@ export default function Home() {
       </section>
 
       {/* ── TESTIMONIALS ── */}
-      <section className="bg-white px-8 py-20">
+      <section className="bg-white px-4 sm:px-8 py-16 sm:py-20">
         <div className="max-w-4xl mx-auto">
           <div className="text-center mb-12">
             <p className="text-xs font-bold tracking-[0.12em] uppercase mb-3" style={{ color: "#6366f1" }}>From the community</p>
-            <h2 className="text-4xl font-bold text-gray-900" style={{ letterSpacing: "-0.025em" }}>People are already selling.</h2>
+            <h2 className="text-3xl sm:text-4xl font-bold text-gray-900" style={{ letterSpacing: "-0.025em" }}>People are already selling.</h2>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -961,11 +961,11 @@ export default function Home() {
       </section>
 
       {/* ── FREE VS PRO COMPARISON ── */}
-      <section className="px-8 py-20" style={{ background: "#f7f7fb" }}>
+      <section className="px-4 sm:px-8 py-16 sm:py-20" style={{ background: "#f7f7fb" }}>
         <div className="max-w-4xl mx-auto">
           <div className="text-center mb-12">
             <p className="text-xs font-bold tracking-[0.12em] uppercase mb-3" style={{ color: "#6366f1" }}>Free vs Pro</p>
-            <h2 className="text-4xl font-bold text-gray-900 mb-4" style={{ letterSpacing: "-0.025em" }}>
+            <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4" style={{ letterSpacing: "-0.025em" }}>
               Start free. Upgrade when you&apos;re ready.
             </h2>
             <p className="text-base text-gray-500">
@@ -1096,7 +1096,7 @@ export default function Home() {
       </section>
 
       {/* ── STATS ── */}
-      <section className="px-8 py-16" style={{ background: "#f7f7fb" }}>
+      <section className="px-4 sm:px-8 py-16" style={{ background: "#f7f7fb" }}>
         <div className="max-w-3xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
           {[
             { n: "12",   label: "Focused modules",          sub: "20–45 min each",         color: "#4f46e5" },
@@ -1114,11 +1114,11 @@ export default function Home() {
       </section>
 
       {/* ── FAQ ── */}
-      <section className="bg-white px-8 py-20">
+      <section className="bg-white px-4 sm:px-8 py-16 sm:py-20">
         <div className="max-w-2xl mx-auto">
           <div className="text-center mb-12">
             <p className="text-xs font-bold tracking-[0.12em] uppercase mb-3" style={{ color: "#6366f1" }}>FAQ</p>
-            <h2 className="text-4xl font-bold text-gray-900" style={{ letterSpacing: "-0.025em" }}>Common questions.</h2>
+            <h2 className="text-3xl sm:text-4xl font-bold text-gray-900" style={{ letterSpacing: "-0.025em" }}>Common questions.</h2>
           </div>
           <div className="space-y-3">
             {[
@@ -1154,10 +1154,10 @@ export default function Home() {
       </section>
 
       {/* ── CTA BANNER ── */}
-      <section className="px-8 py-20" style={{ background: "#f7f7fb" }}>
+      <section className="px-4 sm:px-8 py-16 sm:py-20" style={{ background: "#f7f7fb" }}>
         <div className="max-w-2xl mx-auto">
           <div
-            className="rounded-3xl p-12 text-center relative overflow-hidden dot-grid"
+            className="rounded-3xl p-7 sm:p-12 text-center relative overflow-hidden dot-grid"
             style={{ background: HERO_BG }}
           >
             <div className="absolute pointer-events-none" style={{
@@ -1166,7 +1166,7 @@ export default function Home() {
               background: "radial-gradient(ellipse, rgba(99,102,241,0.3) 0%, transparent 70%)",
             }} />
             <div className="relative z-10">
-              <h2 className="text-4xl font-extrabold text-white mb-4" style={{ letterSpacing: "-0.03em" }}>
+              <h2 className="text-3xl sm:text-4xl font-extrabold text-white mb-4" style={{ letterSpacing: "-0.03em" }}>
                 Ready to build your plan?
               </h2>
               <p className="text-sm mb-8" style={{ color: "rgba(255,255,255,0.5)" }}>
@@ -1182,7 +1182,7 @@ export default function Home() {
       </section>
 
       {/* ── FOOTER ── */}
-      <footer className="bg-white border-t border-gray-100 px-8 py-10">
+      <footer className="bg-white border-t border-gray-100 px-4 sm:px-8 py-10">
         <div className="max-w-4xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-2">
             <img src="/logo.png" alt="First Sale Lab" style={{ height: 28, width: "auto" }} />

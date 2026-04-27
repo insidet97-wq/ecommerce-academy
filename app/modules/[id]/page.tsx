@@ -604,8 +604,8 @@ export default function ModulePage() {
                   ✓ All done! You&apos;re ready to mark this module complete.
                 </p>
               )}
-              <GlowButton onClick={handleComplete} disabled={!allChecked || marking}>
-                {marking ? "Saving…" : isLast ? "Complete Course 🚀" : `Complete & Continue to Module ${nextId} →`}
+              <GlowButton onClick={handleComplete} disabled={!allChecked || marking} style={{ width: "100%", maxWidth: 480, padding: "14px 24px" }}>
+                {marking ? "Saving…" : isLast ? "Complete Course 🚀" : `Complete → Module ${nextId}`}
               </GlowButton>
             </div>
           )}
