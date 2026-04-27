@@ -64,7 +64,8 @@ export default function TermsPage() {
           </Section>
 
           <Section title="5. Refund policy">
-            <p>We offer a <strong>7-day refund</strong> on your first month if you are not satisfied. To request a refund, email <a href="mailto:hello@firstsalelab.com" style={{ color: "#6366f1" }}>hello@firstsalelab.com</a> within 7 days of your initial payment. Refunds are not available after 7 days or for renewal payments.</p>
+            <p>All payments are <strong>non-refundable</strong>. By completing your purchase you acknowledge and agree that no refunds will be issued, including for partial months, unused periods, or renewal charges.</p>
+            <p>If you have a billing issue or believe you were charged in error, contact us at <a href="mailto:hello@firstsalelab.com" style={{ color: "#6366f1" }}>hello@firstsalelab.com</a> and we will review your case.</p>
           </Section>
 
           <Section title="6. Intellectual property">

@@ -258,7 +258,7 @@ ecommerce-academy/
 ### Privacy Policy (`/privacy`) and Terms of Service (`/terms`)
 - Static server-rendered pages matching the site design
 - Privacy covers: data collected, Supabase/Stripe/Resend/Groq/AdSense/Vercel usage, cookies, retention, user rights
-- Terms covers: subscription terms, 7-day refund policy, AI content disclaimer, IP, acceptable use
+- Terms covers: subscription terms, no-refund policy, AI content disclaimer, IP, acceptable use
 - Linked from the footer on all pages
 
 ### Certificate (`/certificate/[userId]`)
