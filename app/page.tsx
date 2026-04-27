@@ -249,6 +249,14 @@ export default function Home() {
               Resources
             </Link>
             <Link
+              href="/blog"
+              className="text-sm font-medium text-gray-500 hidden md:block"
+              onMouseEnter={e => (e.currentTarget.style.color = "#111")}
+              onMouseLeave={e => (e.currentTarget.style.color = "#6b7280")}
+            >
+              Blog
+            </Link>
+            <Link
               href="/dashboard"
               className="text-sm font-semibold"
               style={{ color: "#6366f1" }}
@@ -608,27 +616,43 @@ export default function Home() {
           <img src="/logo.png" alt="First Sale Lab" decoding="async" style={{ height: 40, width: "auto" }} />
           <span className="text-base font-bold text-white tracking-tight" style={{ letterSpacing: "-0.4px" }}>First Sale Lab</span>
         </div>
-        <div className="flex items-center gap-6">
-          <div className="flex items-center gap-4">
-            <Link
-              href="/login"
-              className="text-sm font-medium"
-              style={{ color: "rgba(255,255,255,0.55)" }}
-              onMouseEnter={e => (e.currentTarget.style.color = "white")}
-              onMouseLeave={e => (e.currentTarget.style.color = "rgba(255,255,255,0.55)")}
-            >
-              Log in
-            </Link>
-            <Link
-              href="/quiz"
-              className="text-sm font-semibold px-4 py-2 rounded-lg text-white"
-              style={{ border: "1px solid rgba(255,255,255,0.15)", background: "rgba(255,255,255,0.06)" }}
-              onMouseEnter={e => { const t = e.currentTarget; t.style.background = "rgba(255,255,255,0.12)"; t.style.borderColor = "rgba(255,255,255,0.25)"; }}
-              onMouseLeave={e => { const t = e.currentTarget; t.style.background = "rgba(255,255,255,0.06)"; t.style.borderColor = "rgba(255,255,255,0.15)"; }}
-            >
-              Get Started
-            </Link>
-          </div>
+        <div className="flex items-center gap-3 sm:gap-5">
+          <Link
+            href="/niche-picker"
+            className="text-sm font-medium hidden md:inline"
+            style={{ color: "rgba(255,255,255,0.55)" }}
+            onMouseEnter={e => (e.currentTarget.style.color = "white")}
+            onMouseLeave={e => (e.currentTarget.style.color = "rgba(255,255,255,0.55)")}
+          >
+            Niche Picker
+          </Link>
+          <Link
+            href="/blog"
+            className="text-sm font-medium hidden sm:inline"
+            style={{ color: "rgba(255,255,255,0.55)" }}
+            onMouseEnter={e => (e.currentTarget.style.color = "white")}
+            onMouseLeave={e => (e.currentTarget.style.color = "rgba(255,255,255,0.55)")}
+          >
+            Blog
+          </Link>
+          <Link
+            href="/login"
+            className="text-sm font-medium"
+            style={{ color: "rgba(255,255,255,0.55)" }}
+            onMouseEnter={e => (e.currentTarget.style.color = "white")}
+            onMouseLeave={e => (e.currentTarget.style.color = "rgba(255,255,255,0.55)")}
+          >
+            Log in
+          </Link>
+          <Link
+            href="/quiz"
+            className="text-sm font-semibold px-4 py-2 rounded-lg text-white"
+            style={{ border: "1px solid rgba(255,255,255,0.15)", background: "rgba(255,255,255,0.06)" }}
+            onMouseEnter={e => { const t = e.currentTarget; t.style.background = "rgba(255,255,255,0.12)"; t.style.borderColor = "rgba(255,255,255,0.25)"; }}
+            onMouseLeave={e => { const t = e.currentTarget; t.style.background = "rgba(255,255,255,0.06)"; t.style.borderColor = "rgba(255,255,255,0.15)"; }}
+          >
+            Get Started
+          </Link>
         </div>
       </nav>
 
@@ -1149,6 +1173,36 @@ export default function Home() {
             ].map((item) => (
               <FAQItem key={item.q} q={item.q} a={item.a} />
             ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ── SOFT-ENTRY: NICHE PICKER ── */}
+      <section className="px-4 sm:px-8 py-12 sm:py-14 bg-white">
+        <div className="max-w-3xl mx-auto">
+          <div
+            className="rounded-3xl p-7 sm:p-10 flex flex-col sm:flex-row items-center gap-6 sm:gap-8"
+            style={{ background: "linear-gradient(135deg, #fef3c7 0%, #fde68a 100%)", border: "1.5px solid #fcd34d" }}
+          >
+            <div style={{ fontSize: 56, lineHeight: 1, flexShrink: 0 }}>🎯</div>
+            <div className="flex-1 text-center sm:text-left">
+              <p className="text-xs font-bold uppercase tracking-[0.12em] mb-2" style={{ color: "#92400e" }}>Not ready yet?</p>
+              <h3 className="text-xl sm:text-2xl font-extrabold mb-2" style={{ color: "#78350f", letterSpacing: "-0.4px" }}>
+                Try the free Niche Picker first.
+              </h3>
+              <p className="text-sm leading-relaxed mb-4 sm:mb-0" style={{ color: "#92400e" }}>
+                30 seconds. No signup. Tell us what you&apos;re into and we&apos;ll suggest 3 ecommerce niches matched to your interests, budget, and experience.
+              </p>
+            </div>
+            <Link
+              href="/niche-picker"
+              className="text-sm font-bold px-6 py-3 rounded-xl flex-shrink-0 whitespace-nowrap"
+              style={{ background: "#1c1917", color: "#fde68a", textDecoration: "none" }}
+              onMouseEnter={e => { e.currentTarget.style.background = "#0c0a09"; }}
+              onMouseLeave={e => { e.currentTarget.style.background = "#1c1917"; }}
+            >
+              Try it free →
+            </Link>
           </div>
         </div>
       </section>
