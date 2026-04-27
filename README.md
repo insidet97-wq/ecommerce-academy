@@ -59,7 +59,7 @@ The owner (admin) has an **analytics dashboard** and a **content dashboard** for
 | Auth         | Supabase Auth (email/password, no email confirmation) |
 | Email        | Resend (transactional emails) |
 | Payments     | Stripe (subscriptions, webhooks, billing portal) |
-| AI Content   | Perplexity API (sonar model, real-time web search) |
+| AI Content   | Groq (`llama-3.3-70b-versatile`, free tier) |
 | Ads          | Google AdSense (free users only) |
 | Analytics    | Vercel Analytics (passive page tracking) |
 | Scheduling   | Vercel Cron (products, briefing, reminder, newsletter) |
@@ -140,6 +140,13 @@ ecommerce-academy/
 │   ├── pro/
 │   │   ├── products/page.tsx         # Weekly Product Picks (Pro-gated)
 │   │   └── briefings/page.tsx        # Monthly Ecom Briefings (Pro-gated)
+│   │
+│   ├── certificate/[userId]/
+│   │   ├── page.tsx                  # Public shareable certificate (server component, no auth)
+│   │   └── CopyButton.tsx            # Client island — copy link with "Copied!" feedback
+│   │
+│   ├── privacy/page.tsx              # Privacy Policy page
+│   └── terms/page.tsx                # Terms of Service page
 │   │
 │   ├── admin/
 │   │   ├── page.tsx                  # Admin analytics dashboard
@@ -247,6 +254,21 @@ ecommerce-academy/
 - Redirects non-admins to `/dashboard`
 - Total users, active today/this week, new signups, max streak, total completions
 - Module funnel: bar chart with drop-off % per module
+
+### Privacy Policy (`/privacy`) and Terms of Service (`/terms`)
+- Static server-rendered pages matching the site design
+- Privacy covers: data collected, Supabase/Stripe/Resend/Groq/AdSense/Vercel usage, cookies, retention, user rights
+- Terms covers: subscription terms, 7-day refund policy, AI content disclaimer, IP, acceptable use
+- Linked from the footer on all pages
+
+### Certificate (`/certificate/[userId]`)
+- **Public** — no login required, anyone can view the link
+- Server component fetches first name + module 12 completion date via service role key (bypasses RLS)
+- Shows "not found" if user doesn't exist, "not yet earned" if not all 12 modules are complete
+- Dynamic OG meta tags — looks great when shared on LinkedIn/X/Twitter
+- Share buttons: Copy link (with "Copied!" feedback), LinkedIn, X
+- Certificate ID = first 8 chars of userId (uppercase)
+- Accessible from dashboard completion card via "Share certificate 🔗" button
 
 ### Admin: Content (`/admin/content`)
 - Tabs: Products | Briefings (with pending draft counts)
@@ -628,6 +650,9 @@ Uses the Supabase service role key to bypass RLS. No auth check in the route —
 
 | Date | What changed |
 |------|-------------|
+| 2026-04-27 | **Certificate page:** Public shareable `/certificate/[userId]` — server component, dynamic OG meta, not-yet-earned state, Copy/LinkedIn/X share buttons; dashboard completion card updated with "Share certificate" link |
+| 2026-04-27 | **Privacy Policy + Terms of Service:** `/privacy` and `/terms` pages with real content covering all third-party services; 7-day refund policy in Terms; Privacy/Terms links added to all footers |
+| 2026-04-27 | **Pro welcome email:** Fires from Stripe webhook on `checkout.session.completed`; includes unlocked modules list, weekly picks and monthly briefing highlights |
 | 2026-04-26 | **Landing page Free vs Pro section:** New comparison section after testimonials — dark purple Pro card with dynamic "April 2026 Ad Strategy Update" label (auto-updates monthly), weekly winning products feature card, Free column with locked greyed-out Pro items; FAQ updated to mention weekly picks + briefing |
 | 2026-04-26 | **Email newsletters:** Saturday admin reminder cron (supports multiple addresses via `ADMIN_EMAILS` env var); Monday product picks newsletter to Pro users; monthly briefing auto-published + emailed to Pro users; `lib/email-helpers.ts` with `getProUsers`, `sendBatch`, 3 HTML email generators; upgrade page PRO_INCLUDES updated with Weekly Picks + Monthly Briefing perks |
 | 2026-04-26 | **AI provider:** Switched from Perplexity (paid) → Gemini (quota issues) → Groq (free, working); `GROQ_API_KEY` env var; `llama-3.3-70b-versatile` model with `json_object` response format |
