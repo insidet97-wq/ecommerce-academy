@@ -630,7 +630,7 @@ export const modules: Module[] = [
     ],
     resources: [
       { label: "Klaviyo — email marketing for ecommerce (free to 250)", url: "https://www.klaviyo.com" },
-      { label: "Privy — popup and form builder", url: "https://www.privy.com" },
+      { label: "Privy — popup and form builder", url: "https://go.privy.com/NYUtfS6" },
     ],
   },
 

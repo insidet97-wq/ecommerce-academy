@@ -500,10 +500,11 @@ Affiliate/referral links are used in `lib/modules.ts` resource arrays. Current a
 | Shopify | 5 | `https://shopify.pxf.io/3k9Wjr` |
 | ReConvert | 6 | `https://apps.shopify.com/reconvert-upsell-cross-sell?mref=bfgeliiu` |
 | AutoDS | 3 | `https://platform.autods.com/register?ref=NTI2MjAyMQ==` |
+| Privy | 10 | `https://go.privy.com/NYUtfS6` |
 
-Pending (application submitted or program unavailable): Klaviyo, Jungle Scout, Triple Whale, Canva, Loox, Zipify Pages, AdSpy, Privy.
+Pending (application submitted or program unavailable): Klaviyo, Jungle Scout, Triple Whale, Canva, Loox, Zipify Pages, AdSpy.
 
-When a new affiliate link is received, update the matching resource URL in `lib/modules.ts`.
+When a new affiliate link is received, update the matching resource URL in `lib/modules.ts` AND add it to `lib/resources.ts` so it appears on `/resources` too.
 
 ---
 
@@ -678,6 +679,7 @@ Uses the Supabase service role key to bypass RLS. No auth check in the route —
 
 | Date | What changed |
 |------|-------------|
+| 2026-04-27 | **Privy affiliate link:** `https://go.privy.com/NYUtfS6` wired into `lib/modules.ts` (Module 10 resource) and added as a new entry in `lib/resources.ts` under Email Marketing so it also appears on `/resources` |
 | 2026-04-27 | **Re-engagement email cron:** New daily cron at 10:00 UTC (`/api/cron/reengagement`); finds users who signed up 3–14 days ago with 0 module completions and sends them one nudge email; tracked via new `user_profiles.reengagement_sent_at` column to ensure at most one email per user. **Run SQL migration:** `ALTER TABLE user_profiles ADD COLUMN reengagement_sent_at timestamptz;` |
 | 2026-04-27 | **Admin user management (`/admin/users`):** Browse all users, search by email/name, filter by Pro/free/active/inactive; grant or revoke Pro manually with a single click. Backed by `GET /api/admin/users` and `POST /api/admin/users/[userId]/pro`. Note: doesn't touch Stripe — webhook will overwrite if user has active sub |
 | 2026-04-27 | **Module 6 → Pro pitch:** When a free user completes Module 6, the slide-up completion overlay now shows a celebration + Pro upgrade pitch (Modules 7–12 preview, weekly picks/briefing, social proof quote, $19/mo CTA) instead of redirecting them to the locked Module 7. Auto-redirect disabled for this case so they have time to read |

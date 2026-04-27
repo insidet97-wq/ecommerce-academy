@@ -127,7 +127,7 @@ CRON_SECRET
 - [x] Module 6 → Pro upgrade pitch (celebration overlay, no auto-redirect for free users)
 - [x] Admin user management page (`/admin/users`) — search, filter, grant/revoke Pro
 - [x] Re-engagement email cron (daily, nudges users with 0 completions 3+ days post-signup)
-- [x] Affiliate links: Shopify, ReConvert, AutoDS
+- [x] Affiliate links: Shopify, ReConvert, AutoDS, Privy
 
 ---
 

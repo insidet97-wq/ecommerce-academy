@@ -213,6 +213,16 @@ export const resources: Resource[] = [
     free: false,
     freeTier: "Free up to 250 contacts / 500 emails/month",
   },
+  {
+    id: "privy",
+    category: "Email Marketing",
+    name: "Privy",
+    description: "The simplest popup and email capture builder for Shopify. Exit-intent, spin-to-win, embedded forms — turn store visitors into subscribers without writing code.",
+    url: "https://go.privy.com/NYUtfS6",
+    emoji: "🎯",
+    free: false,
+    freeTier: "Free up to 100 contacts",
+  },
 
   /* ── Analytics ── */
   {
