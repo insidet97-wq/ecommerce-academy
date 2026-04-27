@@ -8,6 +8,7 @@ import { isAdmin } from "@/lib/admin";
 import { updateStreak } from "@/lib/streak";
 import Link from "next/link";
 import AdBanner from "@/components/AdBanner";
+import SupplierValidator from "@/components/SupplierValidator";
 
 const MODULE_EMOJIS: Record<number, string> = {
   1: "🎮", 2: "🎯", 3: "🏆", 4: "🧠",  5: "🛒",
@@ -563,6 +564,19 @@ export default function ModulePage() {
 
         {/* ── Ad (free users only) ── */}
         <AdBanner isPro={isPro} slot={process.env.NEXT_PUBLIC_ADSENSE_SLOT_MODULE ?? ""} />
+
+        {/* ── Embedded Supplier Validator (Module 3 only) ── */}
+        {moduleId === 3 && (
+          <section className="fade-up-d2">
+            <SectionHeading icon="🏭" title="Validate a Supplier" />
+            <Card>
+              <p style={{ fontSize: 13, color: "#71717a", lineHeight: 1.65, marginBottom: 18 }}>
+                Found a potential supplier? Score them across 5 categories before placing a sample order. A trust score below 50 is a hard pass — keep looking.
+              </p>
+              <SupplierValidator />
+            </Card>
+          </section>
+        )}
 
         {/* ── Common Mistakes ── */}
         <section className="fade-up-d2">

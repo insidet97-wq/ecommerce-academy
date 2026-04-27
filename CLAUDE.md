@@ -136,6 +136,7 @@ CRON_SECRET
 - [x] Resend webhook for email open/click tracking (logs to email_events table)
 - [x] Dynamic OG images: site-wide default + per-certificate (Next.js ImageResponse)
 - [x] Free lead magnet: Niche Picker (`/niche-picker`) — Groq AI suggests 3 niches, captures email, day-0 email, 4-step drip sequence over 7 days, rate-limited 1/email/24h
+- [x] Supplier Validator: 0–100 trust score with 5-category breakdown — embedded in `/tools` (5th tab) and inside Module 3; logged-in users can save validations to `supplier_validations` table
 - [x] Blog system: public `/blog` + `/blog/[slug]` with JSON-LD, weekly Groq-drafted posts, admin review/publish at `/admin/blog`
 - [x] Performance: AdSense moved from beforeInteractive → afterInteractive (no longer blocks page interactivity); decoding="async" on logo images
 - [x] Affiliate links: Shopify, ReConvert, AutoDS, Privy
@@ -146,6 +147,7 @@ CRON_SECRET
 
 | What | Detail |
 |------|--------|
+| Supplier Validator | New reusable component `components/SupplierValidator.tsx`. Scores any supplier 0–100 across reviews/shipping/communication/quality/price. Embedded as 5th tab on `/tools` (deep-linkable via `?tool=supplier`) and inside Module 3. Optional save to `supplier_validations` table. Stub `fetchSupplierData(url)` ready for future API integration |
 | Niche Picker drip + rate-limit | Day-0 email sends 3 niches immediately; daily 14:00 UTC cron `/api/cron/niche-drip` sends day-2 ("Validate in 48h"), day-5 ("Niche mistake"), day-7 ("Take the quiz"); rate-limited 1 generation per email per 24h with friendly UI; visible white email input on the dark CTA card |
 | Admin blog RLS fix | `/admin/blog` was using anon key which RLS blocks on the new `blog_posts` table → moved to service-role-backed `GET /api/admin/blog` endpoint, mirrors the `/api/admin/users` pattern |
 | Blog system | Public `/blog` + `/blog/[slug]` with JSON-LD; weekly Wednesday 7am cron drafts via Groq; admin `/admin/blog` to preview/publish/discard; manual generate with optional topic |
@@ -217,6 +219,21 @@ CRON_SECRET
 
   -- If niche_leads already exists from earlier migration, run this instead:
   -- ALTER TABLE niche_leads ADD COLUMN IF NOT EXISTS drip_stage int NOT NULL DEFAULT 0;
+
+  -- Supplier Validator saved validations (used by /api/supplier-validations)
+  CREATE TABLE IF NOT EXISTS supplier_validations (
+    id            uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id       uuid NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+    supplier_name text NOT NULL,
+    supplier_url  text,
+    inputs        jsonb NOT NULL,
+    scores        jsonb NOT NULL,
+    total_score   int NOT NULL,
+    verdict       text NOT NULL,
+    notes         text,
+    created_at    timestamptz NOT NULL DEFAULT now()
+  );
+  CREATE INDEX IF NOT EXISTS supplier_validations_user_id_idx ON supplier_validations (user_id);
 
   -- Blog posts (used by /api/cron/blog and admin /admin/blog)
   CREATE TABLE blog_posts (

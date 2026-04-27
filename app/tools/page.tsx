@@ -1,13 +1,15 @@
 ﻿"use client";
 
 import { useState, useRef, useEffect } from "react";
+import { useSearchParams } from "next/navigation";
 import Link from "next/link";
+import SupplierValidator from "@/components/SupplierValidator";
 
 /* ── Design tokens ── */
 const INDIGO = "#6366f1";
 const GRAD   = "linear-gradient(135deg, #6366f1 0%, #7c3aed 100%)";
 
-type Tool = "profit" | "validation" | "roas" | "checklist";
+type Tool = "profit" | "validation" | "roas" | "checklist" | "supplier";
 
 /* ════════════════════════════════════════════
    Shared UI primitives
@@ -583,14 +585,21 @@ function LaunchChecklist() {
    Main page
 ════════════════════════════════════════════ */
 const TOOLS_META: { id: Tool; emoji: string; label: string; tagline: string }[] = [
-  { id: "profit",     emoji: "💰", label: "Profit Calculator", tagline: "Is your margin healthy?" },
-  { id: "validation", emoji: "🎯", label: "Validation Score",  tagline: "Score your product idea /100" },
-  { id: "roas",       emoji: "📈", label: "Break-Even ROAS",   tagline: "Find your ad profit threshold" },
-  { id: "checklist",  emoji: "✅", label: "Launch Checklist",  tagline: "24 items before going live" },
+  { id: "profit",     emoji: "💰", label: "Profit Calculator",  tagline: "Is your margin healthy?" },
+  { id: "validation", emoji: "🎯", label: "Validation Score",   tagline: "Score your product idea /100" },
+  { id: "roas",       emoji: "📈", label: "Break-Even ROAS",    tagline: "Find your ad profit threshold" },
+  { id: "checklist",  emoji: "✅", label: "Launch Checklist",   tagline: "24 items before going live" },
+  { id: "supplier",   emoji: "🏭", label: "Supplier Validator", tagline: "Score any supplier 0–100" },
 ];
 
+const VALID_TOOLS: Tool[] = ["profit", "validation", "roas", "checklist", "supplier"];
+
 export default function ToolsPage() {
-  const [active, setActive] = useState<Tool>("profit");
+  const params = useSearchParams();
+  const initial = (params.get("tool") as Tool | null);
+  const [active, setActive] = useState<Tool>(
+    initial && VALID_TOOLS.includes(initial) ? initial : "profit"
+  );
   const meta = TOOLS_META.find(t => t.id === active)!;
 
   return (
@@ -630,7 +639,7 @@ export default function ToolsPage() {
             Seller Toolkit
           </h1>
           <p style={{ fontSize: 14, color: "rgba(255,255,255,0.6)", maxWidth: 420, margin: "0 auto", lineHeight: 1.6 }}>
-            Four calculators to validate your product, price it right, and launch with confidence.
+            Free calculators to validate your product, vet suppliers, price right, and launch with confidence.
           </p>
         </div>
       </div>
@@ -689,6 +698,7 @@ export default function ToolsPage() {
           {active === "validation" && <ValidationScore />}
           {active === "roas"       && <ROASCalculator />}
           {active === "checklist"  && <LaunchChecklist />}
+          {active === "supplier"   && <SupplierValidator />}
         </div>
 
       </main>

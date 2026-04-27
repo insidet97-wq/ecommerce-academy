@@ -77,8 +77,12 @@ body {
 }
 
 /* ── Responsive grid helpers ── */
-.tool-selector { grid-template-columns: repeat(4, 1fr); }
+.tool-selector { grid-template-columns: repeat(5, 1fr); }
 .calc-grid     { grid-template-columns: repeat(2, 1fr); }
+
+@media (max-width: 800px) {
+  .tool-selector { grid-template-columns: repeat(3, 1fr); }
+}
 
 @media (max-width: 600px) {
   .tool-selector { grid-template-columns: repeat(2, 1fr) !important; }

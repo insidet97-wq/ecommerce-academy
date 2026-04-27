@@ -410,6 +410,20 @@ Briefing content shape:
 | `published_at` | timestamptz | When admin clicked publish |
 | `created_at` | timestamptz | Auto-set |
 
+#### `supplier_validations`
+| Column | Type | Notes |
+|--------|------|-------|
+| `id` | uuid | Primary key |
+| `user_id` | uuid | FK → `auth.users.id`, CASCADE on delete |
+| `supplier_name` | text | What the user calls the supplier |
+| `supplier_url` | text | Optional URL for reference |
+| `inputs` | jsonb | Raw form inputs (rating, count, days, etc.) |
+| `scores` | jsonb | `{ reviews, shipping, communication, quality, price }` |
+| `total_score` | int | 0–100 |
+| `verdict` | text | `'good'` / `'risky'` / `'avoid'` |
+| `notes` | text | Optional user notes |
+| `created_at` | timestamptz | Auto-set |
+
 ### RLS Policies
 - `user_profiles` and `user_progress`: users can only read/write their own rows
 - `product_drops` and `briefings`: authenticated users can read rows where `status = 'published'`; service role key used for all writes
@@ -721,6 +735,7 @@ Uses the Supabase service role key to bypass RLS. No auth check in the route —
 
 | Date | What changed |
 |------|-------------|
+| 2026-04-27 | **Supplier Validator:** New reusable component `components/SupplierValidator.tsx` that scores any supplier 0–100 across 5 categories (reviews 25 / shipping 20 / communication 15 / quality 20 / price 20) and outputs a Good/Risky/Avoid verdict. Embedded as 5th tab on `/tools` (deep-linkable via `?tool=supplier`) and inline inside Module 3 ("Find Your Winning Product"). Logged-in users can save validations via `POST /api/supplier-validations` → new `supplier_validations` table. Future-ready: `fetchSupplierData(url)` stub for plugging in Trustpilot / AliExpress APIs later without UI changes |
 | 2026-04-27 | **Niche Picker drip + rate-limit:** Email input on the dark CTA card now has visible white background + gold focus ring. Day-0 email sends the 3 niches via Resend immediately on form submit. New daily cron at 14:00 UTC (`/api/cron/niche-drip`) runs the 4-stage sequence: day-0 ("Your 3 niches") → day-2 ("Validate in 48h") → day-5 ("The niche mistake") → day-7 ("Take the quiz"). Rate-limited to 1 generation per email per 24h (returns 429 with friendly message). New column: `niche_leads.drip_stage` |
 | 2026-04-27 | **Admin blog RLS fix:** `/admin/blog` page was using anon key client which RLS blocked on the new `blog_posts` table → moved to service-role-backed `GET /api/admin/blog` endpoint. Drafts now visible to admins |
 | 2026-04-27 | **Blog system:** Public `/blog` index + `/blog/[slug]` post pages with JSON-LD BlogPosting schema; weekly Wednesday 7am UTC cron (`/api/cron/blog`) drafts via Groq; admin `/admin/blog` page to preview/publish/discard with optional manual topic input. **SQL migration:** new `blog_posts` table |
