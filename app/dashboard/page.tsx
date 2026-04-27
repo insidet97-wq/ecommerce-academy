@@ -413,19 +413,30 @@ export default function DashboardPage() {
               <div style={{ fontSize: 40, marginBottom: 12 }}>🎉</div>
               <h2 style={{ fontSize: 20, fontWeight: 800, color: "#09090b", letterSpacing: "-0.5px", marginBottom: 6 }}>Course Complete!</h2>
               <p style={{ fontSize: 13, color: "#71717a", marginBottom: 20 }}>You&apos;ve finished all 12 modules. You have everything you need to sell.</p>
-              <button onClick={openCert} style={{ background: "linear-gradient(135deg, #059669, #047857)", color: "#fff", fontWeight: 700, fontSize: 14, padding: "13px 32px", borderRadius: 14, border: "none", cursor: "pointer", boxShadow: "0 4px 16px rgba(5,150,105,0.3)" }}>
-                View Your Certificate 🏆
-              </button>
+              <div style={{ display: "flex", gap: 10, justifyContent: "center", flexWrap: "wrap" }}>
+                <button onClick={openCert} style={{ background: "#059669", color: "#fff", fontWeight: 700, fontSize: 14, padding: "13px 28px", borderRadius: 14, border: "none", cursor: "pointer" }}>
+                  View Certificate 🏆
+                </button>
+                {userId && (
+                  <Link href={`/certificate/${userId}`} target="_blank"
+                    style={{ display: "inline-flex", alignItems: "center", gap: 6, background: "#f0fdf4", color: "#059669", fontWeight: 700, fontSize: 14, padding: "13px 28px", borderRadius: 14, border: "1.5px solid #a7f3d0", textDecoration: "none" }}>
+                    Share certificate 🔗
+                  </Link>
+                )}
+              </div>
             </div>
           ) : null}
         </div>
 
         {/* Admin cert shortcut */}
-        {admin && nextModule && (
-          <div style={{ textAlign: "center", marginBottom: 20 }}>
+        {admin && userId && (
+          <div style={{ textAlign: "center", marginBottom: 20, display: "flex", gap: 16, justifyContent: "center" }}>
             <button onClick={openCert} style={{ fontSize: 12, color: "#a1a1aa", background: "none", border: "none", cursor: "pointer", textDecoration: "underline" }}>
               View certificate
             </button>
+            <Link href={`/certificate/${userId}`} target="_blank" style={{ fontSize: 12, color: "#6366f1", textDecoration: "underline" }}>
+              Public certificate →
+            </Link>
           </div>
         )}
 
