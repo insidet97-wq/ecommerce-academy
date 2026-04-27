@@ -65,7 +65,7 @@ export default function TermsPage() {
 
           <Section title="5. Refund policy">
             <p>All payments are <strong>non-refundable</strong>. By completing your purchase you acknowledge and agree that no refunds will be issued, including for partial months, unused periods, or renewal charges.</p>
-            <p>If you have a billing issue or believe you were charged in error, contact us at <a href="mailto:hello@firstsalelab.com" style={{ color: "#6366f1" }}>hello@firstsalelab.com</a> and we will review your case.</p>
+            <p>If you have a billing issue or believe you were charged in error, contact us at <a href="mailto:support@firstsalelab.com" style={{ color: "#6366f1" }}>support@firstsalelab.com</a> and we will review your case.</p>
           </Section>
 
           <Section title="6. Intellectual property">
@@ -100,7 +100,7 @@ export default function TermsPage() {
           </Section>
 
           <Section title="12. Contact">
-            <p>For any questions about these terms, contact us at <a href="mailto:hello@firstsalelab.com" style={{ color: "#6366f1" }}>hello@firstsalelab.com</a>.</p>
+            <p>For any questions about these terms, contact us at <a href="mailto:support@firstsalelab.com" style={{ color: "#6366f1" }}>support@firstsalelab.com</a>.</p>
           </Section>
 
         </div>

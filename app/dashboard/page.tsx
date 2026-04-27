@@ -334,21 +334,21 @@ export default function DashboardPage() {
 
                 {/* Label */}
                 <span style={{ display: "inline-block", fontSize: 10, fontWeight: 700, letterSpacing: "0.14em", textTransform: "uppercase", color: "rgba(167,139,250,0.9)", marginBottom: 14, background: "rgba(99,102,241,0.2)", border: "1px solid rgba(99,102,241,0.35)", padding: "4px 12px", borderRadius: 99 }}>
-                  You&apos;re in 🎉
+                  Welcome 🎉
                 </span>
 
                 <h2 style={{ fontSize: 22, fontWeight: 900, color: "#fff", letterSpacing: "-0.6px", lineHeight: 1.2, marginBottom: 10 }}>
-                  Welcome, {firstName}. Your journey to your first sale starts here.
+                  You&apos;re all set, {firstName}. Here&apos;s how this works.
                 </h2>
                 <p style={{ fontSize: 13, color: "rgba(255,255,255,0.6)", lineHeight: 1.65, marginBottom: 24, maxWidth: 460 }}>
-                  12 focused modules. Real tasks. One clear step at a time. Answer 5 quick questions to get your personalised roadmap — it takes 2 minutes.
+                  12 focused modules. Real tasks. One clear step at a time. Complete each module&apos;s task to unlock the next — no skipping ahead.
                 </p>
 
                 {/* 3-step path */}
                 <div style={{ display: "flex", gap: 10, marginBottom: 24, flexWrap: "wrap" }}>
                   {[
-                    { n: "1", emoji: "🧭", label: "Take the quiz",       sub: "2 min · builds your personalised plan" },
-                    { n: "2", emoji: "⚡", label: "Work through modules", sub: "20–45 min each · one real task per step" },
+                    { n: "1", emoji: "⚡", label: "Do each module",       sub: "20–45 min each · one real task per step" },
+                    { n: "2", emoji: "🔓", label: "Unlock the next step", sub: "Complete the task to advance" },
                     { n: "3", emoji: "💰", label: "Make your first sale", sub: "By Module 11 your store is live" },
                   ].map((step) => (
                     <div key={step.n} style={{ flex: "1 1 160px", background: "rgba(255,255,255,0.07)", border: "1px solid rgba(255,255,255,0.12)", borderRadius: 16, padding: "14px 16px" }}>
@@ -362,23 +362,14 @@ export default function DashboardPage() {
                   ))}
                 </div>
 
-                {/* CTAs */}
-                <div style={{ display: "flex", alignItems: "center", gap: 14, flexWrap: "wrap" }}>
-                  <Link href="/quiz"
-                    style={{ display: "inline-flex", alignItems: "center", gap: 6, background: "linear-gradient(135deg, #facc15, #f59e0b)", color: "#1c1917", fontWeight: 800, fontSize: 14, padding: "13px 22px", borderRadius: 14, textDecoration: "none", boxShadow: "0 4px 16px rgba(250,204,21,0.35)", letterSpacing: "-0.2px" }}
-                    onMouseEnter={e => { e.currentTarget.style.transform = "translateY(-1px)"; e.currentTarget.style.boxShadow = "0 6px 24px rgba(250,204,21,0.5)"; }}
-                    onMouseLeave={e => { e.currentTarget.style.transform = "translateY(0)"; e.currentTarget.style.boxShadow = "0 4px 16px rgba(250,204,21,0.35)"; }}
-                  >
-                    🧭 Build my free plan →
-                  </Link>
-                  <Link href="/modules/1"
-                    style={{ fontSize: 13, fontWeight: 500, color: "rgba(255,255,255,0.5)", textDecoration: "none" }}
-                    onMouseEnter={e => (e.currentTarget.style.color = "rgba(255,255,255,0.85)")}
-                    onMouseLeave={e => (e.currentTarget.style.color = "rgba(255,255,255,0.5)")}
-                  >
-                    Skip quiz, start Module 1 →
-                  </Link>
-                </div>
+                {/* CTA */}
+                <Link href="/modules/1"
+                  style={{ display: "inline-flex", alignItems: "center", gap: 6, background: "linear-gradient(135deg, #facc15, #f59e0b)", color: "#1c1917", fontWeight: 800, fontSize: 14, padding: "13px 22px", borderRadius: 14, textDecoration: "none", boxShadow: "0 4px 16px rgba(250,204,21,0.35)", letterSpacing: "-0.2px" }}
+                  onMouseEnter={e => { e.currentTarget.style.transform = "translateY(-1px)"; e.currentTarget.style.boxShadow = "0 6px 24px rgba(250,204,21,0.5)"; }}
+                  onMouseLeave={e => { e.currentTarget.style.transform = "translateY(0)"; e.currentTarget.style.boxShadow = "0 4px 16px rgba(250,204,21,0.35)"; }}
+                >
+                  🚀 Start Module 1 →
+                </Link>
               </div>
             </div>
           </div>

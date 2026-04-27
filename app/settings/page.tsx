@@ -234,7 +234,7 @@ export default function SettingsPage() {
             <h2 style={{ fontSize: 15, fontWeight: 800, color: "#09090b", letterSpacing: "-0.3px", marginBottom: 4 }}>Danger zone</h2>
             <p style={{ fontSize: 13, color: "#a1a1aa", marginBottom: 20 }}>
               To delete your account or cancel your subscription, email us at{" "}
-              <a href="mailto:hello@firstsalelab.com" style={{ color: "#6366f1", textDecoration: "none" }}>hello@firstsalelab.com</a>.
+              <a href="mailto:support@firstsalelab.com" style={{ color: "#6366f1", textDecoration: "none" }}>support@firstsalelab.com</a>.
             </p>
             <p style={{ fontSize: 12, color: "#fca5a5" }}>
               Deleting your account is permanent and cannot be undone.

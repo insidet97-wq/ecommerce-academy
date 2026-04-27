@@ -32,7 +32,7 @@ export default function PrivacyPage() {
 
           <Section title="1. Who we are">
             <p>First Sale Lab (&ldquo;we&rdquo;, &ldquo;us&rdquo;, &ldquo;our&rdquo;) is an ecommerce education platform operated at <strong>firstsalelab.com</strong>. We help beginners build their first Shopify dropshipping business through a structured 12-module course.</p>
-            <p>If you have any questions about this policy, contact us at <a href="mailto:hello@firstsalelab.com" style={{ color: "#6366f1" }}>hello@firstsalelab.com</a>.</p>
+            <p>If you have any questions about this policy, contact us at <a href="mailto:support@firstsalelab.com" style={{ color: "#6366f1" }}>support@firstsalelab.com</a>.</p>
           </Section>
 
           <Section title="2. What data we collect">
@@ -107,7 +107,7 @@ export default function PrivacyPage() {
               <li>Export your data</li>
               <li>Unsubscribe from marketing emails at any time (transactional emails related to your account cannot be opted out of while your account is active)</li>
             </ul>
-            <p>To exercise any of these rights, email <a href="mailto:hello@firstsalelab.com" style={{ color: "#6366f1" }}>hello@firstsalelab.com</a>.</p>
+            <p>To exercise any of these rights, email <a href="mailto:support@firstsalelab.com" style={{ color: "#6366f1" }}>support@firstsalelab.com</a>.</p>
           </Section>
 
           <Section title="8. Children">
