@@ -495,15 +495,20 @@ export default function Home() {
               <span className="text-sm font-bold text-white" style={{ letterSpacing: "-0.3px" }}>First Sale Lab</span>
             </div>
             <p className="text-sm" style={{ color: "rgba(255,255,255,0.35)" }}>© 2026 First Sale Lab</p>
-            <Link
-              href="/dashboard"
-              className="text-xs font-semibold"
-              style={{ color: "#a78bfa" }}
-              onMouseEnter={e => (e.currentTarget.style.color = "#c4b5fd")}
-              onMouseLeave={e => (e.currentTarget.style.color = "#a78bfa")}
-            >
-              Dashboard →
-            </Link>
+            <div className="flex items-center gap-5">
+              <Link href="/privacy" className="text-xs" style={{ color: "rgba(255,255,255,0.35)" }}
+                onMouseEnter={e => (e.currentTarget.style.color = "rgba(255,255,255,0.6)")}
+                onMouseLeave={e => (e.currentTarget.style.color = "rgba(255,255,255,0.35)")}
+              >Privacy</Link>
+              <Link href="/terms" className="text-xs" style={{ color: "rgba(255,255,255,0.35)" }}
+                onMouseEnter={e => (e.currentTarget.style.color = "rgba(255,255,255,0.6)")}
+                onMouseLeave={e => (e.currentTarget.style.color = "rgba(255,255,255,0.35)")}
+              >Terms</Link>
+              <Link href="/dashboard" className="text-xs font-semibold" style={{ color: "#a78bfa" }}
+                onMouseEnter={e => (e.currentTarget.style.color = "#c4b5fd")}
+                onMouseLeave={e => (e.currentTarget.style.color = "#a78bfa")}
+              >Dashboard →</Link>
+            </div>
           </div>
         </footer>
 
@@ -1103,6 +1108,8 @@ export default function Home() {
           </div>
           <p className="text-sm text-gray-400">© 2026 · Built for complete beginners</p>
           <div className="flex items-center gap-5">
+            <Link href="/privacy" className="text-xs text-gray-400 hover:text-gray-700">Privacy</Link>
+            <Link href="/terms" className="text-xs text-gray-400 hover:text-gray-700">Terms</Link>
             <Link href="/login" className="text-xs text-gray-400 hover:text-gray-700">Log in</Link>
             <Link href="/quiz" className="text-xs font-semibold" style={{ color: "#6366f1" }}>Get started →</Link>
           </div>
