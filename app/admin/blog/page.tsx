@@ -36,12 +36,17 @@ export default function AdminBlogPage() {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user || !isAdmin(user.email)) { router.push("/dashboard"); return; }
 
-    const { data } = await supabase
-      .from("blog_posts")
-      .select("*")
-      .order("created_at", { ascending: false });
+    // Use admin API endpoint (service role) — anon key is blocked by RLS on blog_posts
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session?.access_token) { setLoading(false); return; }
 
-    setPosts(data ?? []);
+    const res = await fetch("/api/admin/blog", {
+      headers: { Authorization: `Bearer ${session.access_token}` },
+    });
+    if (res.ok) {
+      const json = await res.json();
+      setPosts(json.posts ?? []);
+    }
     setLoading(false);
   }
 
