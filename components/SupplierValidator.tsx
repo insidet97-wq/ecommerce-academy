@@ -15,10 +15,20 @@
  * Save: optional. Calls POST /api/supplier-validations if user is logged in.
  */
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import Link from "next/link";
 import { supabase } from "@/lib/supabase";
+import { isAdmin } from "@/lib/admin";
 
 const INDIGO = "#6366f1";
+
+type AIAnalysis = {
+  summary:       string;
+  red_flags:     string[];
+  questions:     string[];
+  likely_issues: string[];
+  checklist:     string[];
+};
 
 // ── Stub for future URL-based auto-fill ──────────────────────
 // When you wire up a real API later (Trustpilot, AliExpress, etc.),
@@ -192,6 +202,30 @@ export default function SupplierValidator() {
   const [saveMsg, setSaveMsg] = useState<{ type: "success" | "error"; text: string } | null>(null);
   const [urlLoading, setUrlLoading] = useState(false);
 
+  // Pro / auth state — drives whether the AI analysis CTA is the upgrade pitch or the real button
+  const [authState, setAuthState] = useState<"unknown" | "anon" | "free" | "pro">("unknown");
+  const [analysis,  setAnalysis]  = useState<AIAnalysis | null>(null);
+  const [analyzing, setAnalyzing] = useState(false);
+  const [analysisErr, setAnalysisErr] = useState<string>("");
+
+  useEffect(() => {
+    let active = true;
+    (async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!active) return;
+      if (!user) { setAuthState("anon"); return; }
+      if (isAdmin(user.email)) { setAuthState("pro"); return; } // admins always Pro
+      const { data: profile } = await supabase
+        .from("user_profiles")
+        .select("is_pro")
+        .eq("id", user.id)
+        .single();
+      if (!active) return;
+      setAuthState(profile?.is_pro ? "pro" : "free");
+    })();
+    return () => { active = false; };
+  }, []);
+
   function update<K extends keyof Inputs>(key: K, value: Inputs[K]) {
     setInputs(prev => ({ ...prev, [key]: value }));
   }
@@ -255,6 +289,41 @@ export default function SupplierValidator() {
       setSaveMsg({ type: "error", text: err instanceof Error ? err.message : "Save failed" });
     } finally {
       setSaving(false);
+    }
+  }
+
+  async function runAIAnalysis() {
+    if (!result) return;
+    setAnalyzing(true);
+    setAnalysisErr("");
+    setAnalysis(null);
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session?.access_token) { setAnalysisErr("Log in as a Pro member."); return; }
+      const res = await fetch("/api/supplier-ai-analysis", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${session.access_token}` },
+        body: JSON.stringify({
+          supplier_name: inputs.supplierName,
+          supplier_url:  inputs.supplierUrl || null,
+          review_rating: inputs.reviewRating,
+          review_count:  inputs.reviewCount,
+          shipping_days: inputs.shippingDays,
+          communication: inputs.communication,
+          quality:       inputs.quality,
+          margin_pct:    inputs.marginPct,
+          notes:         inputs.notes || null,
+          total_score:   result.total,
+          verdict:       result.verdict,
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error ?? "Analysis failed");
+      setAnalysis(data.analysis);
+    } catch (err) {
+      setAnalysisErr(err instanceof Error ? err.message : "Analysis failed");
+    } finally {
+      setAnalyzing(false);
     }
   }
 
@@ -398,6 +467,134 @@ export default function SupplierValidator() {
             <ScoreBar label="📦 Quality"        value={result.scores.quality}       max={20} color={verdictMeta.barColor} />
             <ScoreBar label="💰 Price/margin"   value={result.scores.price}         max={20} color={verdictMeta.barColor} />
           </div>
+
+          {/* ── AI Analysis (Pro feature) ── */}
+          {authState === "pro" ? (
+            <div style={{ background: "#fff", borderRadius: 12, padding: "16px 18px", marginTop: 12, border: "1.5px solid #c4b5fd" }}>
+              {!analysis ? (
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12, flexWrap: "wrap" }}>
+                  <div style={{ flex: "1 1 200px" }}>
+                    <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: "#7c3aed", marginBottom: 4 }}>
+                      ✨ Pro · AI Analysis
+                    </p>
+                    <p style={{ fontSize: 12, color: "#52525b", lineHeight: 1.5 }}>
+                      Get red flags, questions to ask, likely issues, and a verification checklist tailored to this supplier.
+                    </p>
+                  </div>
+                  <button
+                    onClick={runAIAnalysis}
+                    disabled={analyzing}
+                    style={{
+                      background: analyzing ? "#e4e4e7" : "linear-gradient(135deg, #6366f1, #7c3aed)",
+                      color: analyzing ? "#a1a1aa" : "#fff",
+                      fontWeight: 700, fontSize: 13, padding: "10px 18px",
+                      borderRadius: 10, border: "none",
+                      cursor: analyzing ? "not-allowed" : "pointer",
+                      whiteSpace: "nowrap",
+                    }}
+                  >
+                    {analyzing ? "Analysing…" : "🤖 Run AI analysis"}
+                  </button>
+                </div>
+              ) : (
+                <div>
+                  <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: "#7c3aed", marginBottom: 8 }}>
+                    🤖 AI Analysis
+                  </p>
+                  {analysis.summary && (
+                    <p style={{ fontSize: 13, color: "#3f3f46", lineHeight: 1.65, marginBottom: 14, fontStyle: "italic", paddingLeft: 12, borderLeft: "3px solid #c4b5fd" }}>
+                      {analysis.summary}
+                    </p>
+                  )}
+
+                  {analysis.red_flags?.length > 0 && (
+                    <div style={{ marginBottom: 14 }}>
+                      <p style={{ fontSize: 12, fontWeight: 700, color: "#dc2626", marginBottom: 6 }}>🚩 Red flags</p>
+                      <ul style={{ margin: 0, paddingLeft: 20, color: "#7f1d1d" }}>
+                        {analysis.red_flags.map((f, i) => (
+                          <li key={i} style={{ fontSize: 12, lineHeight: 1.6, marginBottom: 4 }}>{f}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+
+                  {analysis.questions?.length > 0 && (
+                    <div style={{ marginBottom: 14 }}>
+                      <p style={{ fontSize: 12, fontWeight: 700, color: "#2563eb", marginBottom: 6 }}>❓ Ask the supplier</p>
+                      <ul style={{ margin: 0, paddingLeft: 20, color: "#1e40af" }}>
+                        {analysis.questions.map((q, i) => (
+                          <li key={i} style={{ fontSize: 12, lineHeight: 1.6, marginBottom: 4 }}>{q}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+
+                  {analysis.likely_issues?.length > 0 && (
+                    <div style={{ marginBottom: 14 }}>
+                      <p style={{ fontSize: 12, fontWeight: 700, color: "#d97706", marginBottom: 6 }}>⚠️ Likely issues to watch for</p>
+                      <ul style={{ margin: 0, paddingLeft: 20, color: "#92400e" }}>
+                        {analysis.likely_issues.map((it, i) => (
+                          <li key={i} style={{ fontSize: 12, lineHeight: 1.6, marginBottom: 4 }}>{it}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+
+                  {analysis.checklist?.length > 0 && (
+                    <div>
+                      <p style={{ fontSize: 12, fontWeight: 700, color: "#16a34a", marginBottom: 6 }}>✅ Pre-order checklist</p>
+                      <ul style={{ margin: 0, paddingLeft: 20, color: "#166534" }}>
+                        {analysis.checklist.map((c, i) => (
+                          <li key={i} style={{ fontSize: 12, lineHeight: 1.6, marginBottom: 4 }}>{c}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+
+                  <button
+                    onClick={runAIAnalysis}
+                    disabled={analyzing}
+                    style={{ background: "transparent", border: "none", color: "#7c3aed", fontSize: 12, fontWeight: 600, cursor: "pointer", marginTop: 12, padding: 0 }}
+                  >
+                    ↺ Re-run analysis
+                  </button>
+                </div>
+              )}
+              {analysisErr && (
+                <p style={{ fontSize: 12, color: "#dc2626", marginTop: 10 }}>⚠ {analysisErr}</p>
+              )}
+            </div>
+          ) : authState !== "unknown" && (
+            <Link
+              href={authState === "anon" ? "/signup" : "/upgrade"}
+              style={{
+                display: "block", textDecoration: "none", marginTop: 12,
+                background: "linear-gradient(135deg, #1e1b4b 0%, #4c1d95 100%)",
+                borderRadius: 12, padding: "16px 18px", position: "relative", overflow: "hidden",
+              }}
+              onMouseEnter={e => { e.currentTarget.style.transform = "translateY(-1px)"; }}
+              onMouseLeave={e => { e.currentTarget.style.transform = "translateY(0)"; }}
+            >
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12, flexWrap: "wrap", position: "relative" }}>
+                <div style={{ flex: "1 1 200px" }}>
+                  <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: "#fde68a", marginBottom: 4 }}>
+                    🔒 Pro · AI Analysis
+                  </p>
+                  <p style={{ fontSize: 13, fontWeight: 700, color: "#fff", marginBottom: 4 }}>
+                    Unlock red flags, questions, and a tailored checklist
+                  </p>
+                  <p style={{ fontSize: 12, color: "rgba(255,255,255,0.6)", lineHeight: 1.5 }}>
+                    {authState === "anon"
+                      ? "Sign up free to get started, then upgrade to Pro for AI-powered supplier analysis."
+                      : "Pro members get AI-tailored red flags, verification questions, and a custom pre-order checklist for every supplier."}
+                  </p>
+                </div>
+                <span style={{ background: "linear-gradient(135deg, #facc15, #f59e0b)", color: "#1c1917", fontSize: 12, fontWeight: 800, padding: "8px 16px", borderRadius: 10, whiteSpace: "nowrap" }}>
+                  {authState === "anon" ? "Get started →" : "Upgrade to Pro →"}
+                </span>
+              </div>
+            </Link>
+          )}
 
           {/* Save + reset */}
           <div style={{ display: "flex", gap: 8, marginTop: 16, flexWrap: "wrap" }}>

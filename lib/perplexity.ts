@@ -161,6 +161,68 @@ Return a JSON object:
   };
 }
 
+// ── Supplier AI analysis (Pro feature) ───────────────────────
+
+export type SupplierAnalysis = {
+  summary:        string;     // 2–3 sentence executive summary
+  red_flags:      string[];   // 3–5 concerning patterns based on the inputs
+  questions:      string[];   // 5–7 questions the user should ask the supplier
+  likely_issues:  string[];   // 3–5 issues to watch for given the inputs
+  checklist:      string[];   // 8–10 specific verification items before ordering
+};
+
+export type SupplierAnalysisInput = {
+  supplier_name: string;
+  supplier_url?: string | null;
+  review_rating: number;     // 1–5
+  review_count:  number;
+  shipping_days: number;
+  communication: number;     // 1–5
+  quality:       number;     // 1–5
+  margin_pct:    number;
+  notes?:        string | null;
+  total_score:   number;     // 0–100
+  verdict:       string;     // good / risky / avoid
+};
+
+export async function analyzeSupplier(input: SupplierAnalysisInput): Promise<SupplierAnalysis> {
+  const prompt = `You are an experienced ecommerce sourcing advisor reviewing a potential supplier for a Shopify dropshipping store. Your job is to give the user practical, specific advice based on the data they entered.
+
+Supplier data:
+- Name: ${input.supplier_name}
+- URL: ${input.supplier_url ?? "not provided"}
+- Average review rating: ${input.review_rating}/5 (${input.review_count} reviews)
+- Shipping time: ${input.shipping_days} days
+- Communication rating: ${input.communication}/5
+- Product quality rating: ${input.quality}/5
+- Margin: ${input.margin_pct}%
+- User notes: ${input.notes ?? "none"}
+- Computed trust score: ${input.total_score}/100 (verdict: ${input.verdict})
+
+Be specific to THIS supplier's data — don't give generic advice. If a number is bad (e.g. shipping > 21 days, fewer than 50 reviews, margin under 50%), call it out directly. If a number is good, acknowledge it.
+
+Return a JSON object:
+{
+  "summary": "2-3 sentence executive read on this supplier — would you personally order from them and why",
+  "red_flags": ["specific concern 1 tied to the data", "specific concern 2", "specific concern 3"],
+  "questions": ["question 1 the user should ask the supplier directly", "question 2", "...5-7 total"],
+  "likely_issues": ["practical issue 1 to expect", "issue 2", "...3-5 total"],
+  "checklist": ["specific verification step 1", "step 2", "...8-10 specific actions before ordering"]
+}
+
+Each item should be one short sentence — punchy, actionable, no fluff. Reference the specific numbers from the inputs where relevant (e.g. "With only ${input.review_count} reviews, request ..."). Don't pad the lists — better 4 sharp items than 5 weak ones.`;
+
+  const raw = await callGroq(prompt);
+  const parsed = JSON.parse(raw);
+  return {
+    summary:       String(parsed.summary ?? "").slice(0, 600),
+    red_flags:     Array.isArray(parsed.red_flags)     ? parsed.red_flags.slice(0, 6).map(String)     : [],
+    questions:     Array.isArray(parsed.questions)     ? parsed.questions.slice(0, 8).map(String)     : [],
+    likely_issues: Array.isArray(parsed.likely_issues) ? parsed.likely_issues.slice(0, 6).map(String) : [],
+    checklist:     Array.isArray(parsed.checklist)     ? parsed.checklist.slice(0, 12).map(String)    : [],
+  };
+}
+
 // ── Niche picker (public lead magnet at /niche-picker) ───────
 
 export type NicheSuggestion = {
