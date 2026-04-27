@@ -517,8 +517,90 @@ export default function Home() {
   }
 
   /* ── Marketing landing page (non-logged-in) ── */
+
+  const faqItems = [
+    { q: "Is this actually free?", a: "Modules 1–6 are completely free — no credit card, no trial. Modules 7–12 are part of First Sale Lab Pro at $19/month, which covers traffic, ads, conversions, and scaling. Pro members also get weekly winning product picks every Monday and a monthly ad strategy update. You can complete the full beginner foundation before deciding if Pro is right for you." },
+    { q: "Do I need experience or money to start?", a: "No experience needed at all — that's the point. For budget, you can start learning and building for $0." },
+    { q: "How long does the full course take?", a: "Each module is 20–45 minutes of focused content plus your real-world task. Most people complete the full 12 modules in 3–6 weeks, doing one or two modules per week alongside a job or studies." },
+    { q: "What's the difference between this and a YouTube playlist?", a: "Structure and accountability. YouTube gives you information. First Sale Lab gives you a sequence — each module builds on the last, you can't skip ahead without completing the task, and you always know exactly what to do next." },
+    { q: "What platform do you teach? Shopify, Etsy, Amazon?", a: "We focus on Shopify + your own traffic (TikTok organic and Meta ads). This gives you the most control and the best margins. You own your store, your audience, and your brand." },
+    { q: "What if I get stuck on a module?", a: "Each module has a clear checklist of exactly what to do. If you're stuck, re-read the action steps — they're written to be as specific as possible." },
+  ];
+
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "Organization",
+        "@id": "https://firstsalelab.com/#organization",
+        "name": "First Sale Lab",
+        "url": "https://firstsalelab.com",
+        "logo": "https://firstsalelab.com/logo.png",
+        "description": "First Sale Lab is a freemium ecommerce course that gets complete beginners to their first Shopify sale through 12 focused modules.",
+        "contactPoint": {
+          "@type": "ContactPoint",
+          "email": "hello@firstsalelab.com",
+          "contactType": "customer support",
+        },
+      },
+      {
+        "@type": "Course",
+        "@id": "https://firstsalelab.com/#course",
+        "name": "First Sale Lab — From Zero to First Sale",
+        "description": "12 focused ecommerce modules that take complete beginners from idea to first Shopify sale. Modules 1–6 are free. Pro unlocks traffic, ads, conversions, and scaling.",
+        "url": "https://firstsalelab.com",
+        "provider": {
+          "@type": "Organization",
+          "@id": "https://firstsalelab.com/#organization",
+        },
+        "educationalLevel": "Beginner",
+        "teaches": "Shopify dropshipping, product research, TikTok organic traffic, Meta ads, conversion optimisation, email marketing",
+        "hasCourseInstance": [
+          {
+            "@type": "CourseInstance",
+            "courseMode": "online",
+            "courseWorkload": "PT3H",
+          },
+        ],
+        "offers": [
+          {
+            "@type": "Offer",
+            "name": "Free — Modules 1–6",
+            "price": "0",
+            "priceCurrency": "USD",
+            "availability": "https://schema.org/InStock",
+            "url": "https://firstsalelab.com/signup",
+          },
+          {
+            "@type": "Offer",
+            "name": "Pro — All 12 Modules",
+            "price": "19",
+            "priceCurrency": "USD",
+            "availability": "https://schema.org/InStock",
+            "url": "https://firstsalelab.com/upgrade",
+          },
+        ],
+      },
+      {
+        "@type": "FAQPage",
+        "mainEntity": faqItems.map(({ q, a }) => ({
+          "@type": "Question",
+          "name": q,
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": a,
+          },
+        })),
+      },
+    ],
+  };
+
   return (
     <div className="min-h-screen bg-white flex flex-col">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
 
       {/* ── NAV ── */}
       <nav className="absolute top-0 left-0 right-0 z-20 px-8 py-5 flex items-center justify-between">

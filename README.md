@@ -203,6 +203,8 @@ ecommerce-academy/
 │   ├── export-logo.html
 │   └── ads.txt                 # AdSense authorized sellers file
 │
+├── app/sitemap.ts              # Dynamic sitemap — 6 public URLs, auto-submitted to Google
+├── app/robots.ts               # Robots rules — blocks gated pages, points to sitemap
 ├── vercel.json                 # Vercel Cron schedule (4 jobs: see Automated Pro Content section)
 ├── .env.local                  # Local env vars (NOT committed)
 ├── README.md                   # This file — updated after every session
@@ -660,6 +662,7 @@ Uses the Supabase service role key to bypass RLS. No auth check in the route —
 | Date | What changed |
 |------|-------------|
 | 2026-04-27 | **Certificate page:** Public shareable `/certificate/[userId]` — server component, dynamic OG meta, not-yet-earned state, Copy/LinkedIn/X share buttons; dashboard completion card updated with "Share certificate" link |
+| 2026-04-27 | **SEO:** `app/sitemap.ts` (6 public URLs, priority-weighted), `app/robots.ts` (blocks /dashboard /admin /pro /modules /api), JSON-LD structured data on landing page (Organization + Course + FAQPage schemas) |
 | 2026-04-27 | **Google Analytics 4:** Measurement ID `G-VT4RZ3JB6L` added to `app/layout.tsx` via `afterInteractive` scripts |
 | 2026-04-27 | **Privacy Policy + Terms of Service:** `/privacy` and `/terms` pages with real content covering all third-party services; 7-day refund policy in Terms; Privacy/Terms links added to all footers |
 | 2026-04-27 | **Pro welcome email:** Fires from Stripe webhook on `checkout.session.completed`; includes unlocked modules list, weekly picks and monthly briefing highlights |
