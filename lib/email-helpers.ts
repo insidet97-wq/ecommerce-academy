@@ -247,6 +247,99 @@ export function briefingNewsletterHTML(firstName: string, content: BriefingConte
 </html>`;
 }
 
+// ── Email: Pro upgrade welcome ────────────────────────────────
+
+export function proWelcomeEmailHTML(firstName: string): string {
+  const month = new Date().toLocaleDateString("en-US", { month: "long", year: "numeric" });
+  const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://firstsalelab.com";
+
+  return `<!DOCTYPE html>
+<html>
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"></head>
+<body style="margin:0;padding:0;background:#f4f4f8;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="background:#f4f4f8;padding:40px 20px;">
+    <tr><td align="center">
+      <table width="100%" cellpadding="0" cellspacing="0" style="max-width:540px;">
+
+        <!-- Header -->
+        <tr><td style="background:#1e1b4b;border-radius:20px 20px 0 0;padding:40px;text-align:center;">
+          <div style="font-size:48px;margin-bottom:12px;">🎉</div>
+          <h1 style="margin:0 0 8px;font-size:24px;font-weight:900;color:#fff;letter-spacing:-0.5px;">You're now Pro, ${firstName}!</h1>
+          <p style="margin:0;font-size:14px;color:rgba(255,255,255,0.5);">Welcome to First Sale Lab Pro</p>
+        </td></tr>
+
+        <!-- Body -->
+        <tr><td style="background:#fff;padding:36px 40px;">
+          <p style="margin:0 0 20px;font-size:15px;color:#3f3f46;line-height:1.7;">
+            Your subscription is active. Here's everything you now have access to:
+          </p>
+
+          <!-- Unlocked modules -->
+          <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:16px;">
+            <tr><td style="background:#f5f3ff;border-radius:14px;padding:18px 20px;border:1px solid #ede9fe;">
+              <p style="margin:0 0 12px;font-size:11px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:#7c3aed;">🔓 Modules Unlocked</p>
+              <table width="100%" cellpadding="0" cellspacing="0">
+                <tr>
+                  <td width="50%" style="vertical-align:top;padding-right:8px;">
+                    <p style="margin:0 0 6px;font-size:12px;color:#4c1d95;">📱 Module 7 — TikTok Organic</p>
+                    <p style="margin:0 0 6px;font-size:12px;color:#4c1d95;">📣 Module 8 — Run Your First Ad</p>
+                    <p style="margin:0 0 6px;font-size:12px;color:#4c1d95;">📈 Module 9 — Conversion Optimisation</p>
+                  </td>
+                  <td width="50%" style="vertical-align:top;">
+                    <p style="margin:0 0 6px;font-size:12px;color:#4c1d95;">📧 Module 10 — Build Email List</p>
+                    <p style="margin:0 0 6px;font-size:12px;color:#4c1d95;">💰 Module 11 — Make Your First Sale</p>
+                    <p style="margin:0 0 6px;font-size:12px;color:#4c1d95;">🚀 Module 12 — Scale and Grow</p>
+                  </td>
+                </tr>
+              </table>
+            </td></tr>
+          </table>
+
+          <!-- Weekly picks -->
+          <table width="100%" cellpadding="0" cellspacing="6" style="margin-bottom:16px;">
+            <tr>
+              <td width="50%" style="vertical-align:top;">
+                <div style="background:#f0fdf4;border-radius:14px;padding:16px 18px;border:1px solid #bbf7d0;">
+                  <p style="margin:0 0 6px;font-size:22px;">📦</p>
+                  <p style="margin:0 0 4px;font-size:13px;font-weight:800;color:#09090b;">Weekly Product Picks</p>
+                  <p style="margin:0;font-size:12px;color:#52525b;line-height:1.5;">5 trending products with margins &amp; ad hooks — every Monday in your inbox.</p>
+                </div>
+              </td>
+              <td width="50%" style="vertical-align:top;padding-left:6px;">
+                <div style="background:#eff6ff;border-radius:14px;padding:16px 18px;border:1px solid #bfdbfe;">
+                  <p style="margin:0 0 6px;font-size:22px;">📋</p>
+                  <p style="margin:0 0 4px;font-size:13px;font-weight:800;color:#09090b;">${month} Ad Strategy</p>
+                  <p style="margin:0;font-size:12px;color:#52525b;line-height:1.5;">What's working on Meta &amp; TikTok right now — updated every month.</p>
+                </div>
+              </td>
+            </tr>
+          </table>
+
+          <p style="margin:0 0 28px;font-size:13px;color:#71717a;line-height:1.6;">
+            No ads. No limits. Just the full system — from your first store to your first sale and beyond.
+          </p>
+
+          <div style="text-align:center;">
+            <a href="${SITE_URL}/dashboard"
+              style="display:inline-block;background:#6366f1;color:#fff;font-weight:800;font-size:15px;padding:14px 40px;border-radius:14px;text-decoration:none;letter-spacing:-0.2px;">
+              Go to Dashboard →
+            </a>
+          </div>
+        </td></tr>
+
+        <!-- Footer -->
+        <tr><td style="background:#f8f8fb;border-radius:0 0 20px 20px;padding:20px 40px;text-align:center;border-top:1px solid #e4e4e7;">
+          <p style="margin:0 0 4px;font-size:12px;font-weight:700;color:#09090b;">First Sale Lab Pro</p>
+          <p style="margin:0;font-size:12px;color:#a1a1aa;">Questions? Reply to this email — we read every one.</p>
+        </td></tr>
+
+      </table>
+    </td></tr>
+  </table>
+</body>
+</html>`;
+}
+
 // ── Shared Supabase admin client factory ──────────────────────
 
 export function getAdminSupabase() {

@@ -1,6 +1,8 @@
 import Stripe from "stripe";
 import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
+import { Resend } from "resend";
+import { proWelcomeEmailHTML } from "@/lib/email-helpers";
 
 export const dynamic = "force-dynamic";
 
@@ -41,6 +43,24 @@ export async function POST(req: Request) {
             stripe_customer_id:      customerId,
             stripe_subscription_id:  subId,
           }, { onConflict: "id" });
+
+          // Fetch user email + first name to send welcome email
+          const [{ data: { user } }, { data: profile }] = await Promise.all([
+            supabase.auth.admin.getUserById(userId),
+            supabase.from("user_profiles").select("first_name").eq("id", userId).single(),
+          ]);
+
+          if (user?.email) {
+            const firstName = profile?.first_name || user.email.split("@")[0];
+            const resend = new Resend(process.env.RESEND_API_KEY);
+            // fire-and-forget — don't block webhook response
+            resend.emails.send({
+              from: "First Sale Lab <hello@firstsalelab.com>",
+              to: user.email,
+              subject: "🎉 Welcome to First Sale Lab Pro!",
+              html: proWelcomeEmailHTML(firstName),
+            }).catch(err => console.error("Pro welcome email error:", err));
+          }
         }
         break;
       }
