@@ -54,12 +54,34 @@ export async function POST(req: Request) {
       audience:   String(input.audience   ?? "Mixed").slice(0, 50),
     };
 
-    const niches = await generateNiches(cleaned);
     const cleanedEmail = email.toLowerCase().trim();
+
+    // Rate limit: 1 generation per email per 24h.
+    // Protects Groq quota and prevents spam/abuse.
+    const supabaseRL = getAdminSupabase();
+    const since = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
+    const { data: recent } = await supabaseRL
+      .from("niche_leads")
+      .select("id, created_at")
+      .eq("email", cleanedEmail)
+      .gte("created_at", since)
+      .limit(1)
+      .maybeSingle();
+
+    if (recent) {
+      const minutesAgo = Math.round((Date.now() - new Date(recent.created_at).getTime()) / 60000);
+      const hoursLeft  = Math.max(1, Math.ceil((24 * 60 - minutesAgo) / 60));
+      return NextResponse.json({
+        error: `You already generated niches with this email ${minutesAgo < 60 ? "a few minutes" : `${Math.floor(minutesAgo / 60)}h`} ago. Check your inbox for the email — or try again in ${hoursLeft}h.`,
+        rateLimited: true,
+      }, { status: 429 });
+    }
+
+    const niches = await generateNiches(cleaned);
     const firstName = nameFromEmail(cleanedEmail);
 
     // Capture lead with drip_stage = 1 (day-0 email being sent right now)
-    const supabase = getAdminSupabase();
+    const supabase = supabaseRL;
     supabase.from("niche_leads").insert({
       email: cleanedEmail,
       interests:  cleaned.interests,

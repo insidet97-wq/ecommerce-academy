@@ -24,7 +24,7 @@ const DIFF_COLORS: Record<Niche["difficulty"], { bg: string; fg: string; border:
 };
 
 export default function NichePickerPage() {
-  const [step,        setStep]        = useState<"form" | "loading" | "results" | "error">("form");
+  const [step,        setStep]        = useState<"form" | "loading" | "results" | "error" | "rate_limited">("form");
   const [interests,   setInterests]   = useState("");
   const [budget,      setBudget]      = useState(BUDGET_OPTIONS[1]);
   const [experience,  setExperience]  = useState(EXP_OPTIONS[0]);
@@ -49,6 +49,11 @@ export default function NichePickerPage() {
         }),
       });
       const data = await res.json();
+      if (res.status === 429 || data.rateLimited) {
+        setErrorMsg(data.error ?? "Slow down — try again later.");
+        setStep("rate_limited");
+        return;
+      }
       if (!res.ok) throw new Error(data.error ?? "Something went wrong");
       setNiches(data.niches ?? []);
       setStep("results");
@@ -246,6 +251,24 @@ export default function NichePickerPage() {
             <button onClick={() => setStep("form")} style={{ background: "#dc2626", color: "#fff", fontWeight: 700, fontSize: 13, padding: "10px 22px", borderRadius: 10, border: "none", cursor: "pointer" }}>
               Try again
             </button>
+          </div>
+        )}
+
+        {step === "rate_limited" && (
+          <div style={{ background: "#fffbeb", border: "1.5px solid #fde68a", borderRadius: 18, padding: "28px 24px", textAlign: "center" }}>
+            <p style={{ fontSize: 32, marginBottom: 10 }}>⏰</p>
+            <p style={{ fontSize: 15, fontWeight: 800, color: "#92400e", marginBottom: 8 }}>Already used today</p>
+            <p style={{ fontSize: 13, color: "#78350f", marginBottom: 22, lineHeight: 1.65, maxWidth: 380, margin: "0 auto 22px" }}>
+              {errorMsg}
+            </p>
+            <div style={{ display: "flex", gap: 10, justifyContent: "center", flexWrap: "wrap" }}>
+              <Link href="/quiz" style={{ background: "linear-gradient(135deg, #6366f1, #7c3aed)", color: "#fff", fontWeight: 700, fontSize: 13, padding: "11px 22px", borderRadius: 10, textDecoration: "none" }}>
+                Try the full course quiz →
+              </Link>
+              <button onClick={() => setStep("form")} style={{ background: "#fff", border: "1.5px solid #fde68a", color: "#92400e", fontWeight: 700, fontSize: 13, padding: "10px 22px", borderRadius: 10, cursor: "pointer" }}>
+                Use a different email
+              </button>
+            </div>
           </div>
         )}
 

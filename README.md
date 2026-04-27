@@ -395,7 +395,8 @@ Briefing content shape:
 | `email` | text | Captured from the Niche Picker form |
 | `interests` / `budget` / `experience` / `audience` | text | The 4 inputs the user submitted |
 | `niches` | jsonb | The 3 niches Groq generated for them |
-| `created_at` | timestamptz | Auto-set |
+| `drip_stage` | int | 0 = nothing, 1 = day-0 sent, 2 = day-2 sent, 3 = day-5 sent, 4 = day-7 sent (drip complete). Used by `/api/cron/niche-drip` to advance the sequence |
+| `created_at` | timestamptz | Auto-set; the drip cron uses this to determine which email is due next |
 
 #### `blog_posts`
 | Column | Type | Notes |
@@ -515,6 +516,7 @@ Two types of AI-generated content are created automatically and go through an ad
 | Streak-save | `GET /api/cron/streak-save` | Daily at 19:00 UTC | Saves at-risk streaks — users with `streak_days >= 1` whose `last_active = yesterday`; once per day via `streak_save_email_date` |
 | Weekly digest | `GET /api/cron/digest` | Sundays at 17:00 UTC | Recap email to ALL users — modules this week, total progress, streak, next module suggestion |
 | Blog draft | `GET /api/cron/blog` | Wednesdays at 07:00 UTC | Drafts a new SEO blog post via Groq from a random topic in `lib/perplexity.ts` BLOG_TOPIC_POOL; admin reviews + publishes at `/admin/blog` |
+| Niche Picker drip | `GET /api/cron/niche-drip` | Daily at 14:00 UTC | Processes the 4-stage drip for `niche_leads`: day-0 sent immediately, day-2/5/7 sent by this cron based on `created_at` + `drip_stage`. Stops after stage 4 (drip complete). Each lead gets at most 4 emails in 7 days |
 
 Cron routes are secured with `Authorization: Bearer <CRON_SECRET>` (Vercel sends this automatically).
 
@@ -719,6 +721,8 @@ Uses the Supabase service role key to bypass RLS. No auth check in the route —
 
 | Date | What changed |
 |------|-------------|
+| 2026-04-27 | **Niche Picker drip + rate-limit:** Email input on the dark CTA card now has visible white background + gold focus ring. Day-0 email sends the 3 niches via Resend immediately on form submit. New daily cron at 14:00 UTC (`/api/cron/niche-drip`) runs the 4-stage sequence: day-0 ("Your 3 niches") → day-2 ("Validate in 48h") → day-5 ("The niche mistake") → day-7 ("Take the quiz"). Rate-limited to 1 generation per email per 24h (returns 429 with friendly message). New column: `niche_leads.drip_stage` |
+| 2026-04-27 | **Admin blog RLS fix:** `/admin/blog` page was using anon key client which RLS blocked on the new `blog_posts` table → moved to service-role-backed `GET /api/admin/blog` endpoint. Drafts now visible to admins |
 | 2026-04-27 | **Blog system:** Public `/blog` index + `/blog/[slug]` post pages with JSON-LD BlogPosting schema; weekly Wednesday 7am UTC cron (`/api/cron/blog`) drafts via Groq; admin `/admin/blog` page to preview/publish/discard with optional manual topic input. **SQL migration:** new `blog_posts` table |
 | 2026-04-27 | **Niche Picker lead magnet:** Public `/niche-picker` — 4 inputs (interests/budget/experience/audience), Groq returns 3 niches via `/api/niche-picker`; email captured to new `niche_leads` table for future drip campaigns. Linked from landing footer + sitemap + robots allow |
 | 2026-04-27 | **Dynamic OG images:** Site-wide default at `app/opengraph-image.tsx` + per-certificate at `app/certificate/[userId]/opengraph-image.tsx` (personalised name + completion date) — better social share previews on LinkedIn/X/Slack |
