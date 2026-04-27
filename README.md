@@ -61,7 +61,7 @@ The owner (admin) has an **analytics dashboard** and a **content dashboard** for
 | Payments     | Stripe (subscriptions, webhooks, billing portal) |
 | AI Content   | Groq (`llama-3.3-70b-versatile`, free tier) |
 | Ads          | Google AdSense (free users only) |
-| Analytics    | Vercel Analytics (passive page tracking) |
+| Analytics    | Vercel Analytics + Google Analytics 4 (GA4) |
 | Scheduling   | Vercel Cron (products, briefing, reminder, newsletter) |
 | Hosting      | Vercel (auto-deploys from GitHub `main` branch) |
 | Domain       | Namecheap → `firstsalelab.com` |
@@ -104,6 +104,11 @@ The owner (admin) has an **analytics dashboard** and a **content dashboard** for
 - **ads.txt:** `public/ads.txt` contains the authorized sellers line
 - **GDPR:** Google's built-in CMP selected
 - See [Google AdSense](#google-adsense) section
+
+### Google Analytics
+- **Measurement ID:** `G-VT4RZ3JB6L`
+- **Loaded via:** Two `<Script>` tags in `app/layout.tsx` with `strategy="afterInteractive"`
+- **Tracks:** All page views across the site automatically
 
 ### Vercel
 - **Auto-deploy:** Every push to `main` triggers a Vercel deploy (~60 seconds)
@@ -651,6 +656,7 @@ Uses the Supabase service role key to bypass RLS. No auth check in the route —
 | Date | What changed |
 |------|-------------|
 | 2026-04-27 | **Certificate page:** Public shareable `/certificate/[userId]` — server component, dynamic OG meta, not-yet-earned state, Copy/LinkedIn/X share buttons; dashboard completion card updated with "Share certificate" link |
+| 2026-04-27 | **Google Analytics 4:** Measurement ID `G-VT4RZ3JB6L` added to `app/layout.tsx` via `afterInteractive` scripts |
 | 2026-04-27 | **Privacy Policy + Terms of Service:** `/privacy` and `/terms` pages with real content covering all third-party services; 7-day refund policy in Terms; Privacy/Terms links added to all footers |
 | 2026-04-27 | **Pro welcome email:** Fires from Stripe webhook on `checkout.session.completed`; includes unlocked modules list, weekly picks and monthly briefing highlights |
 | 2026-04-26 | **Landing page Free vs Pro section:** New comparison section after testimonials — dark purple Pro card with dynamic "April 2026 Ad Strategy Update" label (auto-updates monthly), weekly winning products feature card, Free column with locked greyed-out Pro items; FAQ updated to mention weekly picks + briefing |
