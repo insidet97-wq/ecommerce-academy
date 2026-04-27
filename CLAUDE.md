@@ -57,6 +57,19 @@ Freemium ecommerce course — 12 modules, modules 1–6 free, 7–12 behind a $1
 
 ---
 
+## ❌ Never do this (owner instructions)
+
+> Add rules here whenever I make a change you don't want repeated.
+> Format: one line per rule, plain English. I check this before every change.
+
+<!-- Example rules (remove this block and add real ones as needed):
+- Never remove the streak feature from the dashboard
+- Never change the module count from 12
+- Never add a free trial to the Stripe checkout
+-->
+
+---
+
 ## Key business rules (never change without asking)
 
 - **No refunds** — explicitly requested by owner; terms say "all payments are non-refundable"
