@@ -3,6 +3,7 @@
 import { useState, useRef } from "react";
 import Link from "next/link";
 import { resources, CATEGORIES, type Category } from "@/lib/resources";
+import UserAdBanner from "@/components/UserAdBanner";
 
 const INDIGO = "#6366f1";
 
@@ -251,6 +252,9 @@ export default function ResourcesPage() {
             <p style={{ fontSize: 13, color: "#a1a1aa" }}>Try changing the category or turning off the free filter.</p>
           </div>
         )}
+
+        {/* Ad — shown to free / anonymous users only */}
+        <UserAdBanner slot={process.env.NEXT_PUBLIC_ADSENSE_SLOT_CONTENT ?? ""} />
 
       </main>
     </div>

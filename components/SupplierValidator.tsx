@@ -338,6 +338,41 @@ export default function SupplierValidator() {
 
   return (
     <div>
+      {/* ── Pro AI analysis preview banner (always visible) ── */}
+      {authState !== "unknown" && (
+        authState === "pro" ? (
+          <div style={{ background: "#f5f3ff", border: "1.5px solid #c4b5fd", borderRadius: 12, padding: "10px 14px", marginBottom: 18, display: "flex", alignItems: "center", gap: 10 }}>
+            <span style={{ fontSize: 18 }}>✨</span>
+            <p style={{ fontSize: 12, color: "#5b21b6", lineHeight: 1.5, margin: 0 }}>
+              <strong>Pro · AI analysis enabled.</strong> After you calculate the score, you&apos;ll get red flags, verification questions, and a tailored pre-order checklist below.
+            </p>
+          </div>
+        ) : (
+          <Link
+            href={authState === "anon" ? "/signup" : "/upgrade"}
+            style={{ textDecoration: "none", display: "block", marginBottom: 18 }}
+          >
+            <div style={{ background: "linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%)", border: "1.5px solid #fcd34d", borderRadius: 12, padding: "12px 14px", display: "flex", alignItems: "center", gap: 10, transition: "transform 0.15s" }}
+              onMouseEnter={e => (e.currentTarget.style.transform = "translateY(-1px)")}
+              onMouseLeave={e => (e.currentTarget.style.transform = "translateY(0)")}
+            >
+              <span style={{ fontSize: 22 }}>🤖</span>
+              <div style={{ flex: 1 }}>
+                <p style={{ fontSize: 12, fontWeight: 800, color: "#78350f", lineHeight: 1.45, margin: 0 }}>
+                  Upgrade to Pro and the AI does the work for you
+                </p>
+                <p style={{ fontSize: 11, color: "#92400e", lineHeight: 1.5, margin: "2px 0 0" }}>
+                  Pro members get red flags, verification questions, and a custom pre-order checklist for every supplier.
+                </p>
+              </div>
+              <span style={{ background: "#1c1917", color: "#fde68a", fontSize: 11, fontWeight: 800, padding: "6px 11px", borderRadius: 8, whiteSpace: "nowrap" }}>
+                {authState === "anon" ? "Sign up →" : "Upgrade →"}
+              </span>
+            </div>
+          </Link>
+        )
+      )}
+
       {/* ── Form ── */}
       <Field label="Supplier name" hint="What you call them — e.g. AliExpress Seller XYZ, Spocket store ABC">
         <input

@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { createClient } from "@supabase/supabase-js";
 import type { Metadata } from "next";
+import UserAdBanner from "@/components/UserAdBanner";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 300; // 5 min ISR
@@ -108,6 +109,9 @@ export default async function BlogIndexPage() {
             ))}
           </div>
         )}
+
+        {/* Ad — shown to free / anonymous users only */}
+        <UserAdBanner slot={process.env.NEXT_PUBLIC_ADSENSE_SLOT_CONTENT ?? ""} />
 
       </main>
     </div>

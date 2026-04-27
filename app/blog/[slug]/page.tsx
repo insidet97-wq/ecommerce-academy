@@ -3,6 +3,7 @@ import { createClient } from "@supabase/supabase-js";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import type { BlogPostContent } from "@/lib/perplexity";
+import UserAdBanner from "@/components/UserAdBanner";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 300;
@@ -149,6 +150,9 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
             </section>
           )}
         </div>
+
+        {/* Ad — shown between article body and CTA, free users only */}
+        <UserAdBanner slot={process.env.NEXT_PUBLIC_ADSENSE_SLOT_CONTENT ?? ""} />
 
         {/* CTA */}
         <div style={{ background: "linear-gradient(135deg, #1e1b4b 0%, #4c1d95 100%)", borderRadius: 20, padding: "28px 30px", color: "#fff", marginTop: 24, position: "relative", overflow: "hidden" }}>

@@ -627,6 +627,15 @@ export default function Home() {
             Niche Picker
           </Link>
           <Link
+            href="/tools"
+            className="text-sm font-medium hidden md:inline"
+            style={{ color: "rgba(255,255,255,0.55)" }}
+            onMouseEnter={e => (e.currentTarget.style.color = "white")}
+            onMouseLeave={e => (e.currentTarget.style.color = "rgba(255,255,255,0.55)")}
+          >
+            Tools
+          </Link>
+          <Link
             href="/blog"
             className="text-sm font-medium hidden sm:inline"
             style={{ color: "rgba(255,255,255,0.55)" }}
@@ -1245,6 +1254,7 @@ export default function Home() {
           <p className="text-sm text-gray-400">© 2026 · Built for complete beginners</p>
           <div className="flex items-center gap-5 flex-wrap justify-center">
             <Link href="/niche-picker" className="text-xs text-gray-400 hover:text-gray-700">🎯 Niche Picker</Link>
+            <Link href="/tools" className="text-xs text-gray-400 hover:text-gray-700">Free Tools</Link>
             <Link href="/blog" className="text-xs text-gray-400 hover:text-gray-700">Blog</Link>
             <Link href="/privacy" className="text-xs text-gray-400 hover:text-gray-700">Privacy</Link>
             <Link href="/terms" className="text-xs text-gray-400 hover:text-gray-700">Terms</Link>

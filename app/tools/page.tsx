@@ -4,6 +4,7 @@ import { useState, useRef, useEffect, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import SupplierValidator from "@/components/SupplierValidator";
+import UserAdBanner from "@/components/UserAdBanner";
 
 /* ── Design tokens ── */
 const INDIGO = "#6366f1";
@@ -704,6 +705,9 @@ function ToolsPageInner() {
           {active === "checklist"  && <LaunchChecklist />}
           {active === "supplier"   && <SupplierValidator />}
         </div>
+
+        {/* Ad — shown to free / anonymous users only */}
+        <UserAdBanner slot={process.env.NEXT_PUBLIC_ADSENSE_SLOT_CONTENT ?? ""} />
 
       </main>
     </div>

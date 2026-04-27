@@ -594,6 +594,7 @@ ADMIN_EMAIL=hello@firstsalelab.com
 # Google AdSense slot IDs (add these once AdSense account is approved)
 NEXT_PUBLIC_ADSENSE_SLOT_DASHBOARD=   # 10-digit slot ID for the dashboard ad unit
 NEXT_PUBLIC_ADSENSE_SLOT_MODULE=      # 10-digit slot ID for the module pages ad unit
+NEXT_PUBLIC_ADSENSE_SLOT_CONTENT=     # 10-digit slot ID used on /tools, /blog, /blog/[slug], /resources
 
 # Vercel Cron security
 CRON_SECRET=<random hex string>
@@ -735,6 +736,7 @@ Uses the Supabase service role key to bypass RLS. No auth check in the route —
 
 | Date | What changed |
 |------|-------------|
+| 2026-04-27 | **Tools / Blog / Resources promoted to landing + ads added:** `/tools` link added to marketing nav and footer (anonymous accessible — already was, just wasn't linked). New `components/UserAdBanner.tsx` wraps `AdBanner` and handles Pro detection on public pages where we don't already have it in state. AdSense banners now render on `/tools` (after the panel), `/resources` (after the list), `/blog` (after the post list), and `/blog/[slug]` (between article body and CTA card) — all controlled by new `NEXT_PUBLIC_ADSENSE_SLOT_CONTENT` env var. `sitemap.ts` and `robots.ts` updated to include `/tools` and `/resources`. Supplier Validator also got a new top-of-form Pro tease banner so the upsell appears even before users calculate |
 | 2026-04-27 | **Supplier Validator + Pro AI Analysis:** Free 5-category scoring calculator (reviews 25 / shipping 20 / communication 15 / quality 20 / price 20) → 0–100 trust score with Good/Risky/Avoid verdict. Embedded at `/tools` (5th tab, deep-linkable via `?tool=supplier`) and inline in Module 3. Logged-in users can save via `POST /api/supplier-validations`. **NEW Pro tier:** `POST /api/supplier-ai-analysis` (Pro-gated server-side) calls Groq with the supplier's inputs and returns AI-tailored red flags, verification questions, likely issues, and an 8–10 step pre-order checklist. Free users see a "🔒 Pro · Unlock AI analysis" upgrade card linking to `/upgrade`; anonymous users see one linking to `/signup`. Pro/admin users get the "🤖 Run AI analysis" button. `fetchSupplierData(url)` stub ready for future API integration |
 | 2026-04-27 | **Niche Picker drip + rate-limit:** Email input on the dark CTA card now has visible white background + gold focus ring. Day-0 email sends the 3 niches via Resend immediately on form submit. New daily cron at 14:00 UTC (`/api/cron/niche-drip`) runs the 4-stage sequence: day-0 ("Your 3 niches") → day-2 ("Validate in 48h") → day-5 ("The niche mistake") → day-7 ("Take the quiz"). Rate-limited to 1 generation per email per 24h (returns 429 with friendly message). New column: `niche_leads.drip_stage` |
 | 2026-04-27 | **Admin blog RLS fix:** `/admin/blog` page was using anon key client which RLS blocked on the new `blog_posts` table → moved to service-role-backed `GET /api/admin/blog` endpoint. Drafts now visible to admins |
