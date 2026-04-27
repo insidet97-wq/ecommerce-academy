@@ -1,1 +1,150 @@
 @AGENTS.md
+
+---
+
+# First Sale Lab — AI Session Brief
+
+> **Read this first every session.** Full technical docs are in `README.md`.
+> **Rule #1: Update this file AND `README.md` (push to GitHub) after every working session.**
+
+---
+
+## What this project is
+
+Freemium ecommerce course — 12 modules, modules 1–6 free, 7–12 behind a $19/month Pro subscription. Live at **firstsalelab.com**.
+
+---
+
+## Tech stack (one line per layer)
+
+- **Framework:** Next.js App Router (TypeScript)
+- **Styling:** Tailwind CSS + inline `style={{}}` for dynamic values
+- **Database + Auth:** Supabase (PostgreSQL, email/password, no email confirmation)
+- **Email:** Resend — from address `hello@firstsalelab.com`
+- **Payments:** Stripe subscriptions + webhooks + billing portal
+- **AI content:** Groq `llama-3.3-70b-versatile` (free tier)
+- **Ads:** Google AdSense (free users only; pending approval)
+- **Analytics:** Vercel Analytics + GA4 (`G-VT4RZ3JB6L`)
+- **Crons:** Vercel Cron (4 jobs — see README)
+- **Hosting:** Vercel (auto-deploys from GitHub `main`)
+- **Domain:** Namecheap → `firstsalelab.com`
+
+---
+
+## All pages at a glance
+
+| Route | What it does | Auth? |
+|-------|-------------|-------|
+| `/` | Landing page (logged-out: marketing; logged-in: personalised dashboard preview) | No |
+| `/quiz` | 4-step quiz → builds personalised roadmap | No |
+| `/login` | Login | No |
+| `/signup` | Signup → welcome email → redirect to module | No |
+| `/forgot-password` | Send reset email | No |
+| `/reset-password` | Handle reset link | No |
+| `/dashboard` | Main app: progress, streak, onboarding, module list | Yes |
+| `/modules/[1-12]` | Individual module (intro → lesson → checklist → complete) | Yes |
+| `/upgrade` | Pro paywall — dark hero, pricing, Stripe checkout | Yes |
+| `/settings` | Change name, change password, danger zone | Yes |
+| `/tools` | Curated tools page | Yes |
+| `/resources` | Curated resources page | Yes |
+| `/pro/products` | Weekly product picks (Pro-gated) | Yes (Pro) |
+| `/pro/briefings` | Monthly ecom briefings (Pro-gated) | Yes (Pro) |
+| `/certificate/[userId]` | Public shareable completion certificate | No |
+| `/admin` | Analytics dashboard (admin-only) | Yes (admin) |
+| `/admin/content` | Generate/review/publish AI content drafts | Yes (admin) |
+| `/privacy` | Privacy policy | No |
+| `/terms` | Terms of service (no-refund policy) | No |
+
+---
+
+## Key business rules (never change without asking)
+
+- **No refunds** — explicitly requested by owner; terms say "all payments are non-refundable"
+- **Modules 1–6 free, 7–12 Pro** — gating is `id > 6 && !isPro`
+- **Admin email:** `insidet97@gmail.com` — bypass all Pro gating, extra nav links
+- **Quiz is required** before signup (quiz → signup flow, not the other way round)
+- **From email:** `hello@firstsalelab.com` (verified in Resend — do not change)
+- **Support/contact email for users:** `support@firstsalelab.com` (settings, terms, privacy)
+- **Stripe webhook must use `www`:** `https://www.firstsalelab.com/api/stripe/webhook` (apex 307-redirects, Stripe won't follow)
+
+---
+
+## Environment variables (Vercel + .env.local)
+
+```
+NEXT_PUBLIC_SUPABASE_URL
+NEXT_PUBLIC_SUPABASE_ANON_KEY
+SUPABASE_SERVICE_ROLE_KEY
+NEXT_PUBLIC_SITE_URL=https://firstsalelab.com
+RESEND_API_KEY
+STRIPE_SECRET_KEY
+STRIPE_WEBHOOK_SECRET
+NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY
+GROQ_API_KEY
+ADMIN_EMAIL=hello@firstsalelab.com
+NEXT_PUBLIC_ADSENSE_SLOT_DASHBOARD   # add when AdSense approved
+NEXT_PUBLIC_ADSENSE_SLOT_MODULE      # add when AdSense approved
+CRON_SECRET
+```
+
+---
+
+## What's been built (complete feature list)
+
+- [x] 12 fully-written modules with content, checklist, steps, common mistakes, resources
+- [x] Sequential unlock logic + quiz pre-unlock (startModule)
+- [x] Daily streak tracking (`streak_days`, `last_active`)
+- [x] Pro gating (Stripe subscription, webhook, billing portal)
+- [x] Stripe race-condition fix (`?upgraded=true` → optimistic Pro state)
+- [x] Welcome email (after signup) + module completion email
+- [x] Pro welcome email (fires from Stripe webhook)
+- [x] Weekly product picks: Groq AI → admin draft → publish → email Pro users
+- [x] Monthly ecom briefing: Groq AI → auto-publish → email Pro users
+- [x] Admin content review page (generate, swap one product, publish)
+- [x] Admin analytics dashboard (user stats, module funnel)
+- [x] Public shareable certificate page (server component, dynamic OG meta)
+- [x] Google AdSense (verified, slot guard, env-var-activated, Pro = no ads)
+- [x] Google Analytics 4 (`G-VT4RZ3JB6L`, afterInteractive scripts)
+- [x] SEO: sitemap.ts (6 URLs), robots.ts, JSON-LD (Organization + Course + FAQPage)
+- [x] Privacy policy + Terms of service (no-refund policy)
+- [x] Settings page (change name, change password, danger zone)
+- [x] Onboarding card for first-time users (welcome + 3-step orientation + Module 1 CTA)
+- [x] Mobile audit: responsive padding, nav collapse, grid fixes, button sizing
+- [x] Affiliate links: Shopify, ReConvert, AutoDS
+
+---
+
+## Recent changes (last session)
+
+| What | Detail |
+|------|--------|
+| Onboarding experience | First-time users (0 completions, no track) see a dark welcome card with 3-step orientation and "Start Module 1 →" CTA instead of blank 0% progress bar |
+| Mobile audit | `px-8` → `px-4 sm:px-8` across all sections; hero `text-4xl sm:text-5xl`; CTA banner `p-7 sm:p-12`; dashboard nav secondary links `hidden sm:block`; upgrade grid `grid-cols-1 sm:grid-cols-2`; module complete button full-width |
+| Settings page | `/settings` — change name, change password (min 8 chars, confirm match), danger zone; linked from dashboard nav |
+| Support email | `hello@` → `support@firstsalelab.com` in settings, terms, and privacy (user-facing contact only; from-address stays `hello@`) |
+| Certificate page | Public `/certificate/[userId]` — server component, dynamic OG, not-yet-earned state, Copy/LinkedIn/X share |
+| SEO | sitemap.ts, robots.ts, JSON-LD structured data on landing page |
+| GA4 | `G-VT4RZ3JB6L` in layout.tsx |
+| Privacy + Terms | Static pages with real content, no-refund policy |
+| Pro welcome email | Fires from Stripe webhook on checkout.session.completed |
+
+---
+
+## Pending / known issues
+
+- Google AdSense: pending approval — slots activate via env vars, no code changes needed
+- Stripe: currently in **test mode** — switch to live keys when ready to accept real payments
+- Sitemap submitted to Google Search Console — may take days to index
+- `support@firstsalelab.com` needs to be set up in Namecheap Pro Email
+
+---
+
+## How to deploy
+
+```bash
+git add <files>
+git commit -m "description"
+git push   # Vercel auto-deploys in ~60 seconds
+```
+
+TypeScript check before pushing: `npx tsc --noEmit`

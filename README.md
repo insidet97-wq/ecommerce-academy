@@ -669,7 +669,10 @@ Uses the Supabase service role key to bypass RLS. No auth check in the route —
 
 | Date | What changed |
 |------|-------------|
-| 2026-04-26 | **Onboarding experience:** First-time users (no quiz, 0 completions) see a full welcome card on the dashboard — dark hero, 3-step path, quiz CTA, "Skip to Module 1" fallback; returning users see the normal greeting + progress bar |
+| 2026-04-27 | **Onboarding card fix:** Removed quiz CTA (quiz is already required for signup); card now says "You're all set" with 3 orientation steps (do module → unlock next → first sale) and a single "Start Module 1 →" CTA |
+| 2026-04-27 | **Support email:** `hello@firstsalelab.com` → `support@firstsalelab.com` in settings danger zone, terms of service, and privacy policy (user-facing contact only; transactional from-address stays `hello@`) |
+| 2026-04-27 | **CLAUDE.md index file:** Replaced single-line CLAUDE.md with a compact session brief — tech stack, all pages, business rules, env vars, feature checklist, recent changes, pending work; updated every session |
+| 2026-04-26 | **Onboarding experience:** First-time users (no quiz taken, 0 completions) see a dark welcome hero card with 3-step orientation and "Start Module 1 →" CTA instead of blank 0% progress bar; returning users see normal greeting + progress bar |
 | 2026-04-26 | **Mobile audit:** `px-8` → `px-4 sm:px-8` across all landing page sections; hero h1 `text-4xl sm:text-5xl`; CTA banner `p-7 sm:p-12`; dashboard nav secondary links `hidden sm:block`; upgrade page Free vs Pro grid `grid-cols-1 sm:grid-cols-2`; module complete button full-width with shortened label; upgrade hero CTA `maxWidth: 340` + full-width |
 | 2026-04-26 | **Settings page (`/settings`):** Change name + change password + danger zone; "Settings" link in dashboard nav |
 | 2026-04-27 | **Certificate page:** Public shareable `/certificate/[userId]` — server component, dynamic OG meta, not-yet-earned state, Copy/LinkedIn/X share buttons; dashboard completion card updated with "Share certificate" link |
