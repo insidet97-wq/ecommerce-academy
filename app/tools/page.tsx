@@ -1,6 +1,6 @@
 ﻿"use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import SupplierValidator from "@/components/SupplierValidator";
@@ -594,7 +594,11 @@ const TOOLS_META: { id: Tool; emoji: string; label: string; tagline: string }[] 
 
 const VALID_TOOLS: Tool[] = ["profit", "validation", "roas", "checklist", "supplier"];
 
-export default function ToolsPage() {
+// useSearchParams must be wrapped in a Suspense boundary in Next.js App Router,
+// otherwise the build fails with "useSearchParams() should be wrapped in a
+// suspense boundary at page /tools". The wrapper at the bottom of the file
+// renders this inner component inside <Suspense>.
+function ToolsPageInner() {
   const params = useSearchParams();
   const initial = (params.get("tool") as Tool | null);
   const [active, setActive] = useState<Tool>(
@@ -703,5 +707,19 @@ export default function ToolsPage() {
 
       </main>
     </div>
+  );
+}
+
+/* Default export: wrap the page in <Suspense> so useSearchParams works
+   during static generation. The fallback is a minimal loading state. */
+export default function ToolsPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen flex items-center justify-center" style={{ background: "#f8f8fb" }}>
+        <div className="spinner" />
+      </div>
+    }>
+      <ToolsPageInner />
+    </Suspense>
   );
 }
