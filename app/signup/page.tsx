@@ -56,7 +56,7 @@ export default function SignupPage() {
         fetch("/api/send-welcome", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ firstName: firstName.trim(), email, startModule }),
+          body: JSON.stringify({ firstName: firstName.trim(), email, startModule, userId: data.user?.id }),
         });
       } catch {}
 

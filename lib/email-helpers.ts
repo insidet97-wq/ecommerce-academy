@@ -340,6 +340,165 @@ export function proWelcomeEmailHTML(firstName: string): string {
 </html>`;
 }
 
+// ── Email: Weekly progress digest (free users, Sunday) ──
+
+export function weeklyDigestEmailHTML(firstName: string, opts: {
+  totalDone: number;
+  doneThisWeek: number;
+  streak: number;
+  nextModuleId: number | null;
+  nextModuleTitle: string | null;
+}): string {
+  const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://firstsalelab.com";
+  const { totalDone, doneThisWeek, streak, nextModuleId, nextModuleTitle } = opts;
+  const progressPct = Math.round((totalDone / 12) * 100);
+
+  const headlinePraise =
+    doneThisWeek >= 3 ? "🚀 You crushed it this week!" :
+    doneThisWeek === 2 ? "💪 Strong week." :
+    doneThisWeek === 1 ? "✓ One module down. Keep momentum." :
+                          "👋 Check in time.";
+
+  const headlineCopy =
+    doneThisWeek >= 3 ? "Three or more modules in a single week is the top 5% of learners. Don't slow down." :
+    doneThisWeek === 2 ? "Two modules this week — solid pace. One more next week and you're flying." :
+    doneThisWeek === 1 ? "Quality over speed. One module done is one module more than 90% of people who 'want to start a business.'" :
+                          "You didn't complete a module this week — that's fine, life happens. Pick up where you left off below.";
+
+  return `<!DOCTYPE html>
+<html>
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"></head>
+<body style="margin:0;padding:0;background:#f4f4f8;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="background:#f4f4f8;padding:40px 20px;">
+    <tr><td align="center">
+      <table width="100%" cellpadding="0" cellspacing="0" style="max-width:540px;">
+
+        <tr><td style="background:#312e81;border-radius:20px 20px 0 0;padding:36px 40px;text-align:center;">
+          <p style="margin:0 0 8px;font-size:11px;font-weight:700;letter-spacing:0.15em;text-transform:uppercase;color:rgba(255,255,255,0.45);">Your week</p>
+          <h1 style="margin:0;font-size:24px;font-weight:900;color:#fff;letter-spacing:-0.5px;">${headlinePraise}</h1>
+        </td></tr>
+
+        <tr><td style="background:#fff;padding:32px 40px;">
+          <p style="margin:0 0 22px;font-size:14px;color:#52525b;line-height:1.7;">
+            Hey ${firstName} — ${headlineCopy}
+          </p>
+
+          <!-- Stats grid -->
+          <table width="100%" cellpadding="0" cellspacing="6" style="margin-bottom:24px;">
+            <tr>
+              <td width="33%" style="vertical-align:top;">
+                <div style="background:#eef2ff;border-radius:12px;padding:14px 12px;text-align:center;">
+                  <p style="margin:0 0 4px;font-size:24px;font-weight:900;color:#4338ca;letter-spacing:-0.6px;">${doneThisWeek}</p>
+                  <p style="margin:0;font-size:10px;color:#6366f1;text-transform:uppercase;letter-spacing:0.06em;font-weight:700;">This week</p>
+                </div>
+              </td>
+              <td width="33%" style="vertical-align:top;">
+                <div style="background:#f0fdf4;border-radius:12px;padding:14px 12px;text-align:center;">
+                  <p style="margin:0 0 4px;font-size:24px;font-weight:900;color:#15803d;letter-spacing:-0.6px;">${totalDone}/12</p>
+                  <p style="margin:0;font-size:10px;color:#16a34a;text-transform:uppercase;letter-spacing:0.06em;font-weight:700;">Total · ${progressPct}%</p>
+                </div>
+              </td>
+              <td width="33%" style="vertical-align:top;">
+                <div style="background:#fff7ed;border-radius:12px;padding:14px 12px;text-align:center;">
+                  <p style="margin:0 0 4px;font-size:24px;font-weight:900;color:#c2410c;letter-spacing:-0.6px;">${streak > 0 ? "🔥 " + streak : "—"}</p>
+                  <p style="margin:0;font-size:10px;color:#ea580c;text-transform:uppercase;letter-spacing:0.06em;font-weight:700;">Day streak</p>
+                </div>
+              </td>
+            </tr>
+          </table>
+
+          ${nextModuleId && nextModuleTitle ? `
+          <div style="background:#f8f8fb;border-radius:14px;padding:18px 20px;margin-bottom:24px;border:1px solid #e4e4e7;">
+            <p style="margin:0 0 6px;font-size:11px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:#6366f1;">Up next</p>
+            <p style="margin:0 0 4px;font-size:15px;font-weight:800;color:#09090b;">Module ${nextModuleId} — ${nextModuleTitle}</p>
+            <p style="margin:0;font-size:12px;color:#71717a;">Pick up where you left off — your progress is saved.</p>
+          </div>
+          <div style="text-align:center;">
+            <a href="${SITE_URL}/modules/${nextModuleId}"
+              style="display:inline-block;background:#6366f1;color:#fff;font-weight:800;font-size:14px;padding:13px 32px;border-radius:13px;text-decoration:none;letter-spacing:-0.2px;">
+              Continue Module ${nextModuleId} →
+            </a>
+          </div>
+          ` : `
+          <div style="background:#ecfdf5;border-radius:14px;padding:18px 20px;margin-bottom:24px;border:1px solid #a7f3d0;text-align:center;">
+            <p style="margin:0 0 6px;font-size:24px;">🏆</p>
+            <p style="margin:0 0 4px;font-size:14px;font-weight:800;color:#065f46;">All 12 modules done!</p>
+            <p style="margin:0;font-size:12px;color:#16a34a;">Time to focus on growing your store. View your certificate from the dashboard.</p>
+          </div>
+          <div style="text-align:center;">
+            <a href="${SITE_URL}/dashboard"
+              style="display:inline-block;background:#059669;color:#fff;font-weight:800;font-size:14px;padding:13px 32px;border-radius:13px;text-decoration:none;letter-spacing:-0.2px;">
+              View Dashboard →
+            </a>
+          </div>
+          `}
+        </td></tr>
+
+        <tr><td style="background:#f8f8fb;border-radius:0 0 20px 20px;padding:18px 40px;text-align:center;border-top:1px solid #e4e4e7;">
+          <p style="margin:0 0 4px;font-size:12px;font-weight:700;color:#09090b;">First Sale Lab</p>
+          <p style="margin:0;font-size:11px;color:#a1a1aa;">Sent every Sunday — keeps you on track without spamming you.</p>
+        </td></tr>
+
+      </table>
+    </td></tr>
+  </table>
+</body>
+</html>`;
+}
+
+// ── Email: Streak loss recovery (sent when a user's streak is at risk) ──
+
+export function streakSaveEmailHTML(firstName: string, streakDays: number, nextModuleId: number, nextModuleTitle: string): string {
+  const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://firstsalelab.com";
+  return `<!DOCTYPE html>
+<html>
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"></head>
+<body style="margin:0;padding:0;background:#f4f4f8;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="background:#f4f4f8;padding:40px 20px;">
+    <tr><td align="center">
+      <table width="100%" cellpadding="0" cellspacing="0" style="max-width:520px;">
+
+        <tr><td style="background:#9a3412;border-radius:20px 20px 0 0;padding:36px 40px;text-align:center;">
+          <div style="font-size:54px;margin-bottom:10px;">🔥</div>
+          <p style="margin:0 0 6px;font-size:11px;font-weight:700;letter-spacing:0.15em;text-transform:uppercase;color:rgba(255,255,255,0.55);">Don&apos;t break it now</p>
+          <h1 style="margin:0;font-size:24px;font-weight:900;color:#fff;letter-spacing:-0.5px;">Your ${streakDays}-day streak is on the line</h1>
+        </td></tr>
+
+        <tr><td style="background:#fff;padding:32px 40px;">
+          <p style="margin:0 0 16px;font-size:15px;color:#3f3f46;line-height:1.7;">
+            Hey ${firstName},
+          </p>
+          <p style="margin:0 0 20px;font-size:14px;color:#52525b;line-height:1.7;">
+            You&apos;ve completed a module every day for <strong style="color:#09090b;">${streakDays} ${streakDays === 1 ? "day" : "days"} in a row</strong>. Don&apos;t lose that today — finish one more module before midnight and your streak rolls forward.
+          </p>
+
+          <div style="background:#fff7ed;border-left:3px solid #f97316;border-radius:12px;padding:16px 20px;margin-bottom:24px;">
+            <p style="margin:0 0 4px;font-size:11px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:#9a3412;">⚡ Up next</p>
+            <p style="margin:0 0 4px;font-size:14px;font-weight:800;color:#09090b;">Module ${nextModuleId} — ${nextModuleTitle}</p>
+            <p style="margin:0;font-size:12px;color:#9a3412;">Most modules take 20–45 minutes. You&apos;ve got time.</p>
+          </div>
+
+          <div style="text-align:center;">
+            <a href="${SITE_URL}/modules/${nextModuleId}"
+              style="display:inline-block;background:#ea580c;color:#fff;font-weight:800;font-size:15px;padding:14px 36px;border-radius:14px;text-decoration:none;letter-spacing:-0.2px;">
+              Save my streak →
+            </a>
+            <p style="margin:14px 0 0;font-size:12px;color:#a1a1aa;">Complete one module and you&apos;re back to ${streakDays + 1} 🔥</p>
+          </div>
+        </td></tr>
+
+        <tr><td style="background:#f8f8fb;border-radius:0 0 20px 20px;padding:20px 40px;text-align:center;border-top:1px solid #e4e4e7;">
+          <p style="margin:0 0 4px;font-size:12px;font-weight:700;color:#09090b;">First Sale Lab</p>
+          <p style="margin:0;font-size:11px;color:#a1a1aa;">You&apos;re receiving this because your streak is about to break. We send these at most once per day.</p>
+        </td></tr>
+
+      </table>
+    </td></tr>
+  </table>
+</body>
+</html>`;
+}
+
 // ── Email: Re-engagement nudge (3 days inactive, 0 completions) ──
 
 export function reengagementEmailHTML(firstName: string): string {

@@ -34,12 +34,18 @@ const MILESTONE_COPY: Record<number, string> = {
 
 export async function POST(req: Request) {
   try {
-    const { firstName, email, completedModuleId } = await req.json();
+    const { firstName, email, completedModuleId, userId } = await req.json();
     const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://firstsalelab.com";
     const done = MODULES[completedModuleId];
     const isLast = completedModuleId === 12;
     const next = !isLast ? MODULES[completedModuleId + 1] : null;
     const milestone = MILESTONE_COPY[completedModuleId] ?? "Keep the momentum going.";
+
+    const tags = [
+      { name: "type", value: isLast ? "completion_final" : "completion" },
+      { name: "module", value: String(completedModuleId) },
+    ];
+    if (userId) tags.push({ name: "user_id", value: userId });
 
     await resend.emails.send({
       from: "First Sale Lab <hello@firstsalelab.com>",
@@ -47,6 +53,7 @@ export async function POST(req: Request) {
       subject: isLast
         ? `🏆 You've completed First Sale Lab, ${firstName}!`
         : `✅ Module ${completedModuleId} complete — here's what's next`,
+      tags,
       html: `
 <!DOCTYPE html>
 <html>

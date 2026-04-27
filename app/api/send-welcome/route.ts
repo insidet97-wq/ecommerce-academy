@@ -26,16 +26,20 @@ const MODULE_EMOJIS: Record<number, string> = {
 
 export async function POST(req: Request) {
   try {
-    const { firstName, email, startModule } = await req.json();
+    const { firstName, email, startModule, userId } = await req.json();
     const moduleNum = startModule ?? 1;
     const moduleTitle = MODULE_TITLES[moduleNum] ?? "The Rules of the Game";
     const moduleEmoji = MODULE_EMOJIS[moduleNum] ?? "🎮";
     const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://firstsalelab.com";
 
+    const tags = [{ name: "type", value: "welcome" }];
+    if (userId) tags.push({ name: "user_id", value: userId });
+
     await resend.emails.send({
       from: "First Sale Lab <hello@firstsalelab.com>",
       to: email,
       subject: `Your roadmap is ready, ${firstName} 🚀`,
+      tags,
       html: `
 <!DOCTYPE html>
 <html>

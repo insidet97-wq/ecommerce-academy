@@ -76,6 +76,144 @@ async function callGroq(prompt: string): Promise<string> {
   return data.choices[0].message.content;
 }
 
+// ── Blog posts (SEO content, AI-drafted, admin-published) ────
+
+export type BlogPostContent = {
+  intro: string;
+  sections: { heading: string; body: string }[];
+  conclusion: string;
+  cta: string;
+};
+
+export type BlogPost = {
+  id: string;
+  slug: string;
+  title: string;
+  excerpt: string;
+  content: BlogPostContent;
+  status: "draft" | "published";
+  published_at: string | null;
+  created_at: string;
+};
+
+const BLOG_TOPIC_POOL = [
+  "How to find a winning ecommerce product in 2026",
+  "The 3X markup rule: why most dropshippers go broke ignoring it",
+  "TikTok organic vs paid ads: which is better for new stores in 2026",
+  "Best Shopify themes for dropshipping (and what to avoid)",
+  "Email marketing for ecommerce: 5 flows every store needs",
+  "How much budget do you really need to start dropshipping",
+  "Niche down or go broad: ecommerce niche selection in 2026",
+  "Common dropshipping mistakes that kill stores in the first month",
+  "How to read a Meta ads dashboard without losing your mind",
+  "The first 100 customers: how to get them when you have $0 budget",
+  "Customer avatar templates for ecommerce — fill-in-the-blank guide",
+  "How to spot a saturated product (before you waste money on ads)",
+];
+
+export async function generateBlogPost(suggestedTopic?: string): Promise<{
+  slug: string;
+  title: string;
+  excerpt: string;
+  content: BlogPostContent;
+}> {
+  // Pick a random topic if none provided
+  const topic = suggestedTopic ?? BLOG_TOPIC_POOL[Math.floor(Math.random() * BLOG_TOPIC_POOL.length)];
+
+  const prompt = `Write a long-form, SEO-optimised blog post for a beginner ecommerce education site (firstsalelab.com). The site teaches complete beginners how to launch a Shopify dropshipping store.
+
+Topic: "${topic}"
+
+Tone: direct, practical, no fluff. Target reader is a complete beginner who hasn't sold anything yet. Reference specific tools/numbers/frameworks where relevant (Shopify, AliExpress, Meta ads, the 3X markup rule, etc.). Avoid corporate-speak.
+
+Length: ~1200–1600 words total. 4–6 sections. Each section's body should be 2–4 paragraphs of substance, not 1-line filler.
+
+Return a JSON object:
+{
+  "title":  "5–10 word headline, punchy, searchable. Don't restate the topic verbatim — make it a real headline.",
+  "slug":   "lowercase-hyphenated-version-of-title (URL safe, no special chars)",
+  "excerpt": "1 sentence (under 160 chars) — meta description for SEO",
+  "content": {
+    "intro": "2 short paragraphs setting up the problem and what the reader will learn. Hook them.",
+    "sections": [
+      { "heading": "Section heading (5–8 words, no questions)", "body": "2–4 paragraphs. Concrete. Examples. Numbers." }
+    ],
+    "conclusion": "1 short paragraph summarising the takeaway.",
+    "cta": "1 short paragraph nudging the reader to take the free First Sale Lab quiz at /quiz to get their personalised roadmap."
+  }
+}`;
+
+  const raw = await callGroq(prompt);
+  const parsed = JSON.parse(raw);
+
+  // Defensive: ensure slug is URL-safe
+  const slug = String(parsed.slug ?? "")
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "")
+    .slice(0, 80) || `post-${Date.now()}`;
+
+  return {
+    slug,
+    title:   String(parsed.title ?? topic).slice(0, 200),
+    excerpt: String(parsed.excerpt ?? "").slice(0, 200),
+    content: parsed.content,
+  };
+}
+
+// ── Niche picker (public lead magnet at /niche-picker) ───────
+
+export type NicheSuggestion = {
+  name: string;
+  why_fits_you: string;
+  ideal_customer: string;
+  example_products: string[];
+  starter_budget: string;
+  difficulty: "Beginner" | "Intermediate" | "Advanced";
+  growth_signal: string;
+};
+
+export type NichePickerInput = {
+  interests: string;     // free text, e.g. "fitness, dogs, cooking"
+  budget: string;        // "Under $200" | "$200-500" | "$500-1000" | "$1000+"
+  experience: string;    // "Complete beginner" | "Some experience" | "Experienced"
+  audience: string;      // "Gen Z (under 25)" | "Millennials" | "Parents" | "Professionals" | "Mixed"
+};
+
+export async function generateNiches(input: NichePickerInput): Promise<NicheSuggestion[]> {
+  const prompt = `You are an ecommerce niche advisor. Suggest 3 specific, profitable ecommerce niches for someone with this profile:
+
+Interests / passions: ${input.interests}
+Starting budget: ${input.budget}
+Experience level: ${input.experience}
+Target customer demographic: ${input.audience}
+
+Each niche must be:
+- Specific (not "fitness" — instead "Home gym recovery tools for desk workers")
+- Sellable on Shopify with a 3X markup
+- Realistic for the user's budget and experience
+- Aligned with current trends (2026)
+
+Return a JSON object with a "niches" array containing exactly 3 objects:
+{
+  "niches": [
+    {
+      "name": "specific niche name (5-8 words)",
+      "why_fits_you": "1-2 sentences explaining why this matches their interests/profile",
+      "ideal_customer": "1 sentence describing the buyer persona",
+      "example_products": ["product 1", "product 2", "product 3"],
+      "starter_budget": "estimated $ amount to launch (e.g. '$300-500')",
+      "difficulty": "Beginner" | "Intermediate" | "Advanced",
+      "growth_signal": "1 sentence on why this niche is trending right now"
+    }
+  ]
+}`;
+
+  const raw = await callGroq(prompt);
+  const parsed = JSON.parse(raw);
+  return parsed.niches ?? parsed;
+}
+
 // ── Public generators ─────────────────────────────────────────
 
 export async function generateProducts(

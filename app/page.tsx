@@ -210,7 +210,7 @@ export default function Home() {
           }}
         >
           <div className="flex items-center gap-3">
-            <img src="/logo.png" alt="First Sale Lab" style={{ height: 36, width: "auto" }} />
+            <img src="/logo.png" alt="First Sale Lab" decoding="async" style={{ height: 36, width: "auto" }} />
             <span className="text-base font-bold text-gray-900" style={{ letterSpacing: "-0.4px" }}>First Sale Lab</span>
             {isPro ? (
               <span
@@ -491,7 +491,7 @@ export default function Home() {
         <footer className="px-4 sm:px-8 py-10" style={{ background: "#08080f" }}>
           <div className="max-w-4xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
             <div className="flex items-center gap-2">
-              <img src="/logo.png" alt="First Sale Lab" style={{ height: 28, width: "auto" }} />
+              <img src="/logo.png" alt="First Sale Lab" decoding="async" style={{ height: 28, width: "auto" }} />
               <span className="text-sm font-bold text-white" style={{ letterSpacing: "-0.3px" }}>First Sale Lab</span>
             </div>
             <p className="text-sm" style={{ color: "rgba(255,255,255,0.35)" }}>© 2026 First Sale Lab</p>
@@ -605,7 +605,7 @@ export default function Home() {
       {/* ── NAV ── */}
       <nav className="absolute top-0 left-0 right-0 z-20 px-4 sm:px-8 py-5 flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <img src="/logo.png" alt="First Sale Lab" style={{ height: 40, width: "auto" }} />
+          <img src="/logo.png" alt="First Sale Lab" decoding="async" style={{ height: 40, width: "auto" }} />
           <span className="text-base font-bold text-white tracking-tight" style={{ letterSpacing: "-0.4px" }}>First Sale Lab</span>
         </div>
         <div className="flex items-center gap-6">
@@ -1185,11 +1185,13 @@ export default function Home() {
       <footer className="bg-white border-t border-gray-100 px-4 sm:px-8 py-10">
         <div className="max-w-4xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-2">
-            <img src="/logo.png" alt="First Sale Lab" style={{ height: 28, width: "auto" }} />
+            <img src="/logo.png" alt="First Sale Lab" decoding="async" style={{ height: 28, width: "auto" }} />
             <span className="text-sm font-bold text-gray-900" style={{ letterSpacing: "-0.3px" }}>First Sale Lab</span>
           </div>
           <p className="text-sm text-gray-400">© 2026 · Built for complete beginners</p>
-          <div className="flex items-center gap-5">
+          <div className="flex items-center gap-5 flex-wrap justify-center">
+            <Link href="/niche-picker" className="text-xs text-gray-400 hover:text-gray-700">🎯 Niche Picker</Link>
+            <Link href="/blog" className="text-xs text-gray-400 hover:text-gray-700">Blog</Link>
             <Link href="/privacy" className="text-xs text-gray-400 hover:text-gray-700">Privacy</Link>
             <Link href="/terms" className="text-xs text-gray-400 hover:text-gray-700">Terms</Link>
             <Link href="/login" className="text-xs text-gray-400 hover:text-gray-700">Log in</Link>

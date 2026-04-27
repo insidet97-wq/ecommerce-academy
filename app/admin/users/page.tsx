@@ -162,6 +162,7 @@ export default function AdminUsersPage() {
             <Link href="/admin"           style={{ fontSize: 13, fontWeight: 500, color: "#52525b", textDecoration: "none" }}>Analytics</Link>
             <Link href="/admin/content"   style={{ fontSize: 13, fontWeight: 500, color: "#52525b", textDecoration: "none" }}>Content</Link>
             <Link href="/admin/users"     style={{ fontSize: 13, fontWeight: 700, color: "#6366f1", textDecoration: "none" }}>Users</Link>
+            <Link href="/admin/blog"      style={{ fontSize: 13, fontWeight: 500, color: "#52525b", textDecoration: "none" }}>Blog</Link>
             <Link href="/dashboard"       style={{ fontSize: 13, fontWeight: 500, color: "#6366f1", textDecoration: "none" }}>← Dashboard</Link>
           </div>
         </div>

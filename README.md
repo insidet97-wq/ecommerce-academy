@@ -320,6 +320,7 @@ ecommerce-academy/
 | `stripe_customer_id` | text | Stripe customer ID (set on first checkout) |
 | `stripe_subscription_id` | text | Active Stripe subscription ID |
 | `reengagement_sent_at` | timestamptz | When the 3-day-inactive re-engagement email was sent (NULL = never). Cron uses this to send at most once per user. |
+| `streak_save_email_date` | date | Date when the most recent streak-save email was sent. Cron skips if already sent today. |
 
 #### `user_progress`
 | Column | Type | Notes |
@@ -374,9 +375,44 @@ Briefing content shape:
 }
 ```
 
+#### `email_events`
+| Column | Type | Notes |
+|--------|------|-------|
+| `id` | uuid | Primary key |
+| `event_type` | text | `email.delivered` / `email.opened` / `email.clicked` / `email.bounced` / `email.complained` |
+| `resend_id` | text | Resend's email ID — useful for grouping events to a single send |
+| `to_email` | text | Recipient email |
+| `user_id` | uuid | From the `user_id` tag we set when sending (nullable for emails without user context) |
+| `email_type` | text | From the `type` tag — e.g. `welcome`, `completion`, `pro_welcome`, `streak_save`, `weekly_digest`, `reengagement` |
+| `subject` | text | Email subject line |
+| `click_url` | text | URL clicked (only set on `email.clicked` events) |
+| `created_at` | timestamptz | Auto-set |
+
+#### `niche_leads`
+| Column | Type | Notes |
+|--------|------|-------|
+| `id` | uuid | Primary key |
+| `email` | text | Captured from the Niche Picker form |
+| `interests` / `budget` / `experience` / `audience` | text | The 4 inputs the user submitted |
+| `niches` | jsonb | The 3 niches Groq generated for them |
+| `created_at` | timestamptz | Auto-set |
+
+#### `blog_posts`
+| Column | Type | Notes |
+|--------|------|-------|
+| `id` | uuid | Primary key |
+| `slug` | text | Unique URL slug, lowercase-hyphenated |
+| `title` | text | Headline |
+| `excerpt` | text | Meta description (under 160 chars) |
+| `content` | jsonb | `{ intro, sections[], conclusion, cta }` |
+| `status` | text | `'draft'` or `'published'` |
+| `published_at` | timestamptz | When admin clicked publish |
+| `created_at` | timestamptz | Auto-set |
+
 ### RLS Policies
 - `user_profiles` and `user_progress`: users can only read/write their own rows
 - `product_drops` and `briefings`: authenticated users can read rows where `status = 'published'`; service role key used for all writes
+- `email_events`, `niche_leads`, `blog_posts`: service role key only — never accessed from client code directly. `blog_posts` published rows are fetched server-side in `/blog` and `/blog/[slug]` server components.
 
 ---
 
@@ -476,6 +512,9 @@ Two types of AI-generated content are created automatically and go through an ad
 | Products newsletter | `GET /api/cron/newsletter` | Every Monday at 08:00 UTC | Emails Pro users |
 | Monthly briefing | `GET /api/cron/briefing` | 1st of each month at 07:00 UTC | Auto-publishes + emails Pro users |
 | Re-engagement | `GET /api/cron/reengagement` | Daily at 10:00 UTC | Nudges users 3–14 days post-signup with 0 completions; once per user via `reengagement_sent_at` |
+| Streak-save | `GET /api/cron/streak-save` | Daily at 19:00 UTC | Saves at-risk streaks — users with `streak_days >= 1` whose `last_active = yesterday`; once per day via `streak_save_email_date` |
+| Weekly digest | `GET /api/cron/digest` | Sundays at 17:00 UTC | Recap email to ALL users — modules this week, total progress, streak, next module suggestion |
+| Blog draft | `GET /api/cron/blog` | Wednesdays at 07:00 UTC | Drafts a new SEO blog post via Groq from a random topic in `lib/perplexity.ts` BLOG_TOPIC_POOL; admin reviews + publishes at `/admin/blog` |
 
 Cron routes are secured with `Authorization: Bearer <CRON_SECRET>` (Vercel sends this automatically).
 
@@ -523,6 +562,7 @@ NEXT_PUBLIC_SITE_URL=https://firstsalelab.com
 
 # Resend (email)
 RESEND_API_KEY=re_...
+RESEND_WEBHOOK_SECRET=whsec_...   # signing secret from Resend webhooks dashboard (optional but recommended)
 
 # Stripe (payments)
 STRIPE_SECRET_KEY=sk_live_...
@@ -679,6 +719,13 @@ Uses the Supabase service role key to bypass RLS. No auth check in the route —
 
 | Date | What changed |
 |------|-------------|
+| 2026-04-27 | **Blog system:** Public `/blog` index + `/blog/[slug]` post pages with JSON-LD BlogPosting schema; weekly Wednesday 7am UTC cron (`/api/cron/blog`) drafts via Groq; admin `/admin/blog` page to preview/publish/discard with optional manual topic input. **SQL migration:** new `blog_posts` table |
+| 2026-04-27 | **Niche Picker lead magnet:** Public `/niche-picker` — 4 inputs (interests/budget/experience/audience), Groq returns 3 niches via `/api/niche-picker`; email captured to new `niche_leads` table for future drip campaigns. Linked from landing footer + sitemap + robots allow |
+| 2026-04-27 | **Dynamic OG images:** Site-wide default at `app/opengraph-image.tsx` + per-certificate at `app/certificate/[userId]/opengraph-image.tsx` (personalised name + completion date) — better social share previews on LinkedIn/X/Slack |
+| 2026-04-27 | **Resend webhook:** `/api/webhooks/resend` logs every email event (delivered/opened/clicked/bounced/complained) to new `email_events` table; existing email sends tagged with `type` + `user_id`. Webhook setup needed in Resend dashboard. New env var: `RESEND_WEBHOOK_SECRET` |
+| 2026-04-27 | **Streak-save email cron:** Daily 19:00 UTC — finds users with active streak whose last_active = yesterday and sends a nudge to save the streak before midnight; tracked via new `streak_save_email_date` column |
+| 2026-04-27 | **Weekly digest email cron:** Sunday 17:00 UTC — sends every user a recap email (modules done this week, total progress, streak, next module CTA); no DB tracking column needed |
+| 2026-04-27 | **Performance audit:** Google AdSense script moved from `strategy="beforeInteractive"` to `"afterInteractive"` — major fix, page is no longer blocked from becoming interactive while AdSense loads. AdSense verification still works via the meta tag in `metadata.other`. Added `decoding="async"` to all logo images |
 | 2026-04-27 | **Privy affiliate link:** `https://go.privy.com/NYUtfS6` wired into `lib/modules.ts` (Module 10 resource) and added as a new entry in `lib/resources.ts` under Email Marketing so it also appears on `/resources` |
 | 2026-04-27 | **Re-engagement email cron:** New daily cron at 10:00 UTC (`/api/cron/reengagement`); finds users who signed up 3–14 days ago with 0 module completions and sends them one nudge email; tracked via new `user_profiles.reengagement_sent_at` column to ensure at most one email per user. **Run SQL migration:** `ALTER TABLE user_profiles ADD COLUMN reengagement_sent_at timestamptz;` |
 | 2026-04-27 | **Admin user management (`/admin/users`):** Browse all users, search by email/name, filter by Pro/free/active/inactive; grant or revoke Pro manually with a single click. Backed by `GET /api/admin/users` and `POST /api/admin/users/[userId]/pro`. Note: doesn't touch Stripe — webhook will overwrite if user has active sub |

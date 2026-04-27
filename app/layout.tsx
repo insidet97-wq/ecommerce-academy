@@ -73,12 +73,14 @@ export default function RootLayout({
             gtag('config', 'G-VT4RZ3JB6L');
           `}
         </Script>
-        {/* Google AdSense */}
+        {/* Google AdSense — afterInteractive keeps it from blocking page interactivity.
+            AdSense verification is handled via the `google-adsense-account` meta tag in
+            metadata.other (line 26), so this script's load timing doesn't affect verification. */}
         <Script
           async
           src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1382028135058819"
           crossOrigin="anonymous"
-          strategy="beforeInteractive"
+          strategy="afterInteractive"
         />
       </body>
     </html>

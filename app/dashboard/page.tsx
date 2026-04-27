@@ -253,7 +253,7 @@ export default function DashboardPage() {
           {/* Left — logo + admin/pro badge */}
           <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
             <Link href="/" style={{ display: "flex", alignItems: "center", gap: 9, textDecoration: "none" }}>
-              <img src="/logo.png" alt="First Sale Lab" style={{ height: 40, width: "auto" }} />
+              <img src="/logo.png" alt="First Sale Lab" decoding="async" style={{ height: 40, width: "auto" }} />
               <span style={{ fontWeight: 800, fontSize: 15, color: "#09090b", letterSpacing: "-0.4px" }}>First Sale Lab</span>
             </Link>
             {admin ? (
@@ -280,6 +280,7 @@ export default function DashboardPage() {
                 { href: "/admin",         label: "Analytics" },
                 { href: "/admin/content", label: "Content"   },
                 { href: "/admin/users",   label: "Users"     },
+                { href: "/admin/blog",    label: "Blog"      },
               ] : []),
             ].map(item => (
               <Link key={item.href} href={item.href}

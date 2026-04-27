@@ -59,6 +59,10 @@ export async function POST(req: Request) {
               to: user.email,
               subject: "🎉 Welcome to First Sale Lab Pro!",
               html: proWelcomeEmailHTML(firstName),
+              tags: [
+                { name: "type", value: "pro_welcome" },
+                { name: "user_id", value: userId },
+              ],
             }).catch(err => console.error("Pro welcome email error:", err));
           }
         }

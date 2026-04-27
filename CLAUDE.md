@@ -37,6 +37,9 @@ Freemium ecommerce course — 12 modules, modules 1–6 free, 7–12 behind a $1
 |-------|-------------|-------|
 | `/` | Landing page (logged-out: marketing; logged-in: personalised dashboard preview) | No |
 | `/quiz` | 4-step quiz → builds personalised roadmap | No |
+| `/niche-picker` | Free lead magnet — AI generates 3 niches, captures email | No |
+| `/blog` | Public blog index | No |
+| `/blog/[slug]` | Public blog post page | No |
 | `/login` | Login | No |
 | `/signup` | Signup → welcome email → redirect to module | No |
 | `/forgot-password` | Send reset email | No |
@@ -53,6 +56,7 @@ Freemium ecommerce course — 12 modules, modules 1–6 free, 7–12 behind a $1
 | `/admin` | Analytics dashboard (admin-only) | Yes (admin) |
 | `/admin/content` | Generate/review/publish AI content drafts | Yes (admin) |
 | `/admin/users` | Browse/search users, grant or revoke Pro manually | Yes (admin) |
+| `/admin/blog` | Manage blog drafts (generate, preview, publish/discard) | Yes (admin) |
 | `/privacy` | Privacy policy | No |
 | `/terms` | Terms of service (no-refund policy) | No |
 
@@ -127,6 +131,13 @@ CRON_SECRET
 - [x] Module 6 → Pro upgrade pitch (celebration overlay, no auto-redirect for free users)
 - [x] Admin user management page (`/admin/users`) — search, filter, grant/revoke Pro
 - [x] Re-engagement email cron (daily, nudges users with 0 completions 3+ days post-signup)
+- [x] Streak-loss recovery email cron (daily 19:00 UTC, saves at-risk streaks)
+- [x] Weekly progress digest email cron (Sunday 17:00 UTC, all users)
+- [x] Resend webhook for email open/click tracking (logs to email_events table)
+- [x] Dynamic OG images: site-wide default + per-certificate (Next.js ImageResponse)
+- [x] Free lead magnet: Niche Picker (`/niche-picker`) — Groq AI suggests 3 niches, captures email
+- [x] Blog system: public `/blog` + `/blog/[slug]` with JSON-LD, weekly Groq-drafted posts, admin review/publish at `/admin/blog`
+- [x] Performance: AdSense moved from beforeInteractive → afterInteractive (no longer blocks page interactivity); decoding="async" on logo images
 - [x] Affiliate links: Shopify, ReConvert, AutoDS, Privy
 
 ---
@@ -135,6 +146,13 @@ CRON_SECRET
 
 | What | Detail |
 |------|--------|
+| Blog system | Public `/blog` + `/blog/[slug]` with JSON-LD; weekly Wednesday 7am cron drafts via Groq; admin `/admin/blog` to preview/publish/discard; manual generate with optional topic |
+| Niche Picker lead magnet | Public `/niche-picker` — 4 inputs (interests/budget/experience/audience), Groq returns 3 niches; email captured to `niche_leads` table |
+| Dynamic OG images | Site default `app/opengraph-image.tsx` (dark hero) + per-certificate `app/certificate/[userId]/opengraph-image.tsx` (personalised) |
+| Resend webhook | `/api/webhooks/resend` logs every email event (delivered/opened/clicked/bounced) to `email_events` table; existing emails tagged with `type` + `user_id` for attribution |
+| Streak-save email | Daily 19:00 UTC cron — finds users with active streak whose last_active = yesterday, sends nudge email; tracked via `streak_save_email_date` |
+| Weekly digest email | Sunday 17:00 UTC cron — sends a "your week" recap to all users (this week / total / streak / next module) |
+| Performance | AdSense `beforeInteractive` → `afterInteractive` (no longer blocks page interactive); `decoding="async"` on logo images |
 | Module 6 → Pro pitch | When a free user completes Module 6, the slide-up overlay shows a celebration + Pro upgrade pitch (no auto-redirect, lists Modules 7–12 + weekly picks/briefing); free users converting at peak intent moment |
 | Admin user management | `/admin/users` — browse/search all users, filter (Pro/free/active/inactive), grant or revoke Pro manually (note: doesn't touch Stripe — webhook will overwrite if active sub) |
 | Re-engagement email cron | Daily at 10am UTC, sends a single nudge to users 3–14 days post-signup with 0 completions; tracked via `user_profiles.reengagement_sent_at` to send at most once |
@@ -156,10 +174,58 @@ CRON_SECRET
 - Stripe: currently in **test mode** — switch to live keys when ready to accept real payments
 - Sitemap submitted to Google Search Console — may take days to index
 - `support@firstsalelab.com` needs to be set up in Namecheap Pro Email
-- **SQL migration needed:** run this once in Supabase SQL editor to enable re-engagement cron:
+- **SQL migrations needed** — run all of these once in the Supabase SQL editor:
   ```sql
+  -- Re-engagement email tracking (used by /api/cron/reengagement)
   ALTER TABLE user_profiles ADD COLUMN reengagement_sent_at timestamptz;
+
+  -- Streak-save email tracking (used by /api/cron/streak-save)
+  ALTER TABLE user_profiles ADD COLUMN streak_save_email_date date;
+
+  -- Email events log (used by /api/webhooks/resend)
+  CREATE TABLE email_events (
+    id           uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+    event_type   text NOT NULL,
+    resend_id    text,
+    to_email     text,
+    user_id      uuid,
+    email_type   text,
+    subject      text,
+    click_url    text,
+    created_at   timestamptz NOT NULL DEFAULT now()
+  );
+  CREATE INDEX email_events_user_id_idx    ON email_events (user_id);
+  CREATE INDEX email_events_email_type_idx ON email_events (email_type);
+  CREATE INDEX email_events_event_type_idx ON email_events (event_type);
+
+  -- Niche Picker lead capture (used by /api/niche-picker)
+  CREATE TABLE niche_leads (
+    id          uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+    email       text NOT NULL,
+    interests   text,
+    budget      text,
+    experience  text,
+    audience    text,
+    niches      jsonb,
+    created_at  timestamptz NOT NULL DEFAULT now()
+  );
+  CREATE INDEX niche_leads_email_idx ON niche_leads (email);
+
+  -- Blog posts (used by /api/cron/blog and admin /admin/blog)
+  CREATE TABLE blog_posts (
+    id           uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+    slug         text NOT NULL UNIQUE,
+    title        text NOT NULL,
+    excerpt      text,
+    content      jsonb NOT NULL,
+    status       text NOT NULL DEFAULT 'draft',
+    published_at timestamptz,
+    created_at   timestamptz NOT NULL DEFAULT now()
+  );
+  CREATE INDEX blog_posts_status_idx ON blog_posts (status);
+  CREATE INDEX blog_posts_slug_idx   ON blog_posts (slug);
   ```
+- **Resend webhook setup needed:** In Resend dashboard → Webhooks → Add Endpoint → URL `https://www.firstsalelab.com/api/webhooks/resend`, subscribe to `email.delivered/opened/clicked/bounced/complained`. Copy signing secret → set as `RESEND_WEBHOOK_SECRET` env var in Vercel.
 
 ---
 
