@@ -441,7 +441,7 @@ export default function DashboardPage() {
         )}
 
         {/* ── Ad (free users only) ── */}
-        <AdBanner isPro={isPro} slot="YOUR_SLOT_ID_1" />
+        <AdBanner isPro={isPro} slot={process.env.NEXT_PUBLIC_ADSENSE_SLOT_DASHBOARD ?? ""} />
 
         {/* ── Module list ── */}
         <div className="fade-up-d3">

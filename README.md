@@ -430,7 +430,7 @@ The correct Stripe SDK type is `Stripe.Checkout.Session` (not `Stripe.CheckoutSe
 - `data-ad-client="ca-pub-1382028135058819"`
 - Currently used in: dashboard (`slot="YOUR_SLOT_ID_1"`) and module pages (`slot="YOUR_SLOT_ID_2"`)
 
-> **TODO:** Replace `YOUR_SLOT_ID_1` and `YOUR_SLOT_ID_2` with real ad unit slot IDs once Google approves the account (1–14 days from verification).
+> **When approved:** Create 2 ad units in AdSense dashboard, then add `NEXT_PUBLIC_ADSENSE_SLOT_DASHBOARD` and `NEXT_PUBLIC_ADSENSE_SLOT_MODULE` to Vercel environment variables. No code changes needed — AdBanner will activate automatically.
 
 ---
 
@@ -514,6 +514,10 @@ GROQ_API_KEY=gsk_...
 
 # Admin (receives Saturday reminder email)
 ADMIN_EMAIL=hello@firstsalelab.com
+
+# Google AdSense slot IDs (add these once AdSense account is approved)
+NEXT_PUBLIC_ADSENSE_SLOT_DASHBOARD=   # 10-digit slot ID for the dashboard ad unit
+NEXT_PUBLIC_ADSENSE_SLOT_MODULE=      # 10-digit slot ID for the module pages ad unit
 
 # Vercel Cron security
 CRON_SECRET=<random hex string>

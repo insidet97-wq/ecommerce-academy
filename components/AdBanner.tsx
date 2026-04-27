@@ -26,16 +26,22 @@ interface AdBannerProps {
 export default function AdBanner({ isPro, slot, format = "auto", style }: AdBannerProps) {
   const pushed = useRef(false);
 
+  // Don't render if slot ID is missing or still a placeholder
+  const slotReady = slot && !slot.startsWith("YOUR_");
+
   useEffect(() => {
-    if (isPro || pushed.current) return;
+    if (isPro || !slotReady || pushed.current) return;
     pushed.current = true;
     try {
       (window.adsbygoogle = window.adsbygoogle || []).push({});
     } catch {}
-  }, [isPro]);
+  }, [isPro, slotReady]);
 
   // Pro users see nothing — ad-free is a Pro benefit
   if (isPro) return null;
+
+  // Slot not configured yet — render nothing silently
+  if (!slotReady) return null;
 
   return (
     <div style={{

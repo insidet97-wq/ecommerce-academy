@@ -480,7 +480,7 @@ export default function ModulePage() {
         </section>
 
         {/* ── Ad (free users only) ── */}
-        <AdBanner isPro={isPro} slot="YOUR_SLOT_ID_2" />
+        <AdBanner isPro={isPro} slot={process.env.NEXT_PUBLIC_ADSENSE_SLOT_MODULE ?? ""} />
 
         {/* ── Common Mistakes ── */}
         <section className="fade-up-d2">
