@@ -52,6 +52,7 @@ Freemium ecommerce course — 12 modules, modules 1–6 free, 7–12 behind a $1
 | `/certificate/[userId]` | Public shareable completion certificate | No |
 | `/admin` | Analytics dashboard (admin-only) | Yes (admin) |
 | `/admin/content` | Generate/review/publish AI content drafts | Yes (admin) |
+| `/admin/users` | Browse/search users, grant or revoke Pro manually | Yes (admin) |
 | `/privacy` | Privacy policy | No |
 | `/terms` | Terms of service (no-refund policy) | No |
 
@@ -123,6 +124,9 @@ CRON_SECRET
 - [x] Settings page (change name, change password, danger zone)
 - [x] Onboarding card for first-time users (welcome + 3-step orientation + Module 1 CTA)
 - [x] Mobile audit: responsive padding, nav collapse, grid fixes, button sizing
+- [x] Module 6 → Pro upgrade pitch (celebration overlay, no auto-redirect for free users)
+- [x] Admin user management page (`/admin/users`) — search, filter, grant/revoke Pro
+- [x] Re-engagement email cron (daily, nudges users with 0 completions 3+ days post-signup)
 - [x] Affiliate links: Shopify, ReConvert, AutoDS
 
 ---
@@ -131,6 +135,9 @@ CRON_SECRET
 
 | What | Detail |
 |------|--------|
+| Module 6 → Pro pitch | When a free user completes Module 6, the slide-up overlay shows a celebration + Pro upgrade pitch (no auto-redirect, lists Modules 7–12 + weekly picks/briefing); free users converting at peak intent moment |
+| Admin user management | `/admin/users` — browse/search all users, filter (Pro/free/active/inactive), grant or revoke Pro manually (note: doesn't touch Stripe — webhook will overwrite if active sub) |
+| Re-engagement email cron | Daily at 10am UTC, sends a single nudge to users 3–14 days post-signup with 0 completions; tracked via `user_profiles.reengagement_sent_at` to send at most once |
 | Onboarding experience | First-time users (0 completions, no track) see a dark welcome card with 3-step orientation and "Start Module 1 →" CTA instead of blank 0% progress bar |
 | Mobile audit | `px-8` → `px-4 sm:px-8` across all sections; hero `text-4xl sm:text-5xl`; CTA banner `p-7 sm:p-12`; dashboard nav secondary links `hidden sm:block`; upgrade grid `grid-cols-1 sm:grid-cols-2`; module complete button full-width |
 | Settings page | `/settings` — change name, change password (min 8 chars, confirm match), danger zone; linked from dashboard nav |
@@ -149,6 +156,10 @@ CRON_SECRET
 - Stripe: currently in **test mode** — switch to live keys when ready to accept real payments
 - Sitemap submitted to Google Search Console — may take days to index
 - `support@firstsalelab.com` needs to be set up in Namecheap Pro Email
+- **SQL migration needed:** run this once in Supabase SQL editor to enable re-engagement cron:
+  ```sql
+  ALTER TABLE user_profiles ADD COLUMN reengagement_sent_at timestamptz;
+  ```
 
 ---
 

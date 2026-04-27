@@ -247,6 +247,7 @@ ecommerce-academy/
 - Modules 7–12: redirect to `/upgrade` if not Pro
 - Intro screen (first visit) → lesson + checklist → complete
 - AdBanner shown between action steps and mistakes (free users only)
+- **Module 6 → Pro pitch:** when a free user completes Module 6, the completion overlay shows a celebration + Pro upgrade pitch instead of the standard "next module" preview; auto-redirect is disabled so the user reads the pitch; CTAs are "Upgrade to Pro $19/mo →" (primary) and "Maybe later · back to dashboard" (secondary)
 
 ### Pro: Weekly Products (`/pro/products`)
 - Pro-gated (redirects to `/upgrade` if not Pro)
@@ -269,6 +270,12 @@ ecommerce-academy/
 - Redirects non-admins to `/dashboard`
 - Total users, active today/this week, new signups, max streak, total completions
 - Module funnel: bar chart with drop-off % per module
+
+### Admin: Users (`/admin/users`)
+- Lists all users with email, name, signup date, completion count, streak, Pro status, last active
+- Search by email/name; filter by All/Pro/Free/Active 7d/Inactive 7d+
+- "Grant Pro" / "Revoke Pro" toggle — useful for comping friends, influencers, refunds outside Stripe
+- ⚠️ Does NOT touch Stripe — if user has active Stripe sub, the next webhook will overwrite a manual revoke. Cancel the subscription in Stripe dashboard for permanent revoke.
 
 ### Privacy Policy (`/privacy`) and Terms of Service (`/terms`)
 - Static server-rendered pages matching the site design
@@ -312,6 +319,7 @@ ecommerce-academy/
 | `is_pro` | boolean | Set by Stripe webhook; revoked on cancellation/payment failure |
 | `stripe_customer_id` | text | Stripe customer ID (set on first checkout) |
 | `stripe_subscription_id` | text | Active Stripe subscription ID |
+| `reengagement_sent_at` | timestamptz | When the 3-day-inactive re-engagement email was sent (NULL = never). Cron uses this to send at most once per user. |
 
 #### `user_progress`
 | Column | Type | Notes |
@@ -467,6 +475,7 @@ Two types of AI-generated content are created automatically and go through an ad
 | Saturday reminder | `GET /api/cron/reminder` | Every Saturday at 09:00 UTC | Emails admin to review/publish |
 | Products newsletter | `GET /api/cron/newsletter` | Every Monday at 08:00 UTC | Emails Pro users |
 | Monthly briefing | `GET /api/cron/briefing` | 1st of each month at 07:00 UTC | Auto-publishes + emails Pro users |
+| Re-engagement | `GET /api/cron/reengagement` | Daily at 10:00 UTC | Nudges users 3–14 days post-signup with 0 completions; once per user via `reengagement_sent_at` |
 
 Cron routes are secured with `Authorization: Bearer <CRON_SECRET>` (Vercel sends this automatically).
 
@@ -669,6 +678,9 @@ Uses the Supabase service role key to bypass RLS. No auth check in the route —
 
 | Date | What changed |
 |------|-------------|
+| 2026-04-27 | **Re-engagement email cron:** New daily cron at 10:00 UTC (`/api/cron/reengagement`); finds users who signed up 3–14 days ago with 0 module completions and sends them one nudge email; tracked via new `user_profiles.reengagement_sent_at` column to ensure at most one email per user. **Run SQL migration:** `ALTER TABLE user_profiles ADD COLUMN reengagement_sent_at timestamptz;` |
+| 2026-04-27 | **Admin user management (`/admin/users`):** Browse all users, search by email/name, filter by Pro/free/active/inactive; grant or revoke Pro manually with a single click. Backed by `GET /api/admin/users` and `POST /api/admin/users/[userId]/pro`. Note: doesn't touch Stripe — webhook will overwrite if user has active sub |
+| 2026-04-27 | **Module 6 → Pro pitch:** When a free user completes Module 6, the slide-up completion overlay now shows a celebration + Pro upgrade pitch (Modules 7–12 preview, weekly picks/briefing, social proof quote, $19/mo CTA) instead of redirecting them to the locked Module 7. Auto-redirect disabled for this case so they have time to read |
 | 2026-04-27 | **Onboarding card fix:** Removed quiz CTA (quiz is already required for signup); card now says "You're all set" with 3 orientation steps (do module → unlock next → first sale) and a single "Start Module 1 →" CTA |
 | 2026-04-27 | **Support email:** `hello@firstsalelab.com` → `support@firstsalelab.com` in settings danger zone, terms of service, and privacy policy (user-facing contact only; transactional from-address stays `hello@`) |
 | 2026-04-27 | **CLAUDE.md index file:** Replaced single-line CLAUDE.md with a compact session brief — tech stack, all pages, business rules, env vars, feature checklist, recent changes, pending work; updated every session |

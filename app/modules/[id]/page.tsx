@@ -169,9 +169,10 @@ export default function ModulePage() {
     setShowCompletion(true);
   }
 
-  // Countdown auto-redirect
+  // Countdown auto-redirect — disabled for Module 6 free users (we want them to read the Pro pitch)
   useEffect(() => {
     if (!showCompletion) return;
+    if (moduleId === 6 && !isPro) return; // Pro pitch overlay handles its own CTAs
     if (countdown <= 0) {
       if (moduleId < 12) router.push(`/modules/${moduleId + 1}`);
       else router.push("/dashboard");
@@ -179,7 +180,7 @@ export default function ModulePage() {
     }
     const t = setTimeout(() => setCountdown(c => c - 1), 1000);
     return () => clearTimeout(t);
-  }, [showCompletion, countdown, moduleId, router]);
+  }, [showCompletion, countdown, moduleId, router, isPro]);
 
   function toggleCheck(i: number) {
     setChecked(prev => { const n = [...prev]; n[i] = !n[i]; return n; });
@@ -312,51 +313,132 @@ export default function ModulePage() {
 
       {/* ── Completion overlay ── */}
       {showCompletion && (
-        <div className="slide-up" style={{ position: "fixed", bottom: 0, left: 0, right: 0, zIndex: 50, background: "#fff", borderRadius: "24px 24px 0 0", padding: "28px 24px 44px", boxShadow: "0 -8px 48px rgba(0,0,0,0.14)", borderTop: "1.5px solid rgba(0,0,0,0.06)" }}>
+        <div className="slide-up" style={{ position: "fixed", bottom: 0, left: 0, right: 0, zIndex: 50, background: "#fff", borderRadius: "24px 24px 0 0", padding: "28px 24px 44px", boxShadow: "0 -8px 48px rgba(0,0,0,0.14)", borderTop: "1.5px solid rgba(0,0,0,0.06)", maxHeight: "92vh", overflowY: "auto" }}>
           <div style={{ maxWidth: 520, margin: "0 auto" }}>
-            {/* Header */}
-            <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 20 }}>
-              <div style={{ width: 44, height: 44, borderRadius: 14, background: "#ecfdf5", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 22, flexShrink: 0 }}>✅</div>
-              <div>
-                <p style={{ fontSize: 16, fontWeight: 800, color: "#09090b", letterSpacing: "-0.3px" }}>Module {moduleId} complete!</p>
-                <p style={{ fontSize: 12, color: "#a1a1aa" }}>{mod?.title}</p>
-              </div>
-            </div>
 
-            {!isLast && nextInfo ? (
+            {/* ── Module 6 → Pro upgrade pitch (free users) ── */}
+            {moduleId === 6 && !isPro ? (
               <>
-                {/* Next module preview */}
-                <div style={{ background: "#f8f8fb", borderRadius: 16, padding: "14px 16px", marginBottom: 16, display: "flex", alignItems: "center", gap: 12 }}>
-                  <span style={{ fontSize: 22 }}>{nextInfo.emoji}</span>
-                  <div style={{ flex: 1 }}>
-                    <p style={{ fontSize: 11, color: "#a1a1aa", marginBottom: 2 }}>Up next · Module {nextId} · {nextInfo.duration}</p>
-                    <p style={{ fontSize: 14, fontWeight: 700, color: "#09090b" }}>{nextInfo.title}</p>
+                {/* Celebration header */}
+                <div style={{ textAlign: "center", marginBottom: 22 }}>
+                  <div style={{ fontSize: 44, marginBottom: 10, lineHeight: 1 }}>🎉</div>
+                  <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.14em", textTransform: "uppercase", color: "#7c3aed", marginBottom: 6 }}>
+                    Foundation complete
+                  </p>
+                  <h2 style={{ fontSize: 22, fontWeight: 900, color: "#09090b", letterSpacing: "-0.5px", marginBottom: 8, lineHeight: 1.2 }}>
+                    You did it, {firstName}!
+                  </h2>
+                  <p style={{ fontSize: 13, color: "#71717a", lineHeight: 1.6, maxWidth: 420, margin: "0 auto" }}>
+                    Modules 1–6 done. Your store is set up, your product is validated, your funnel is live. <strong style={{ color: "#09090b" }}>Now it&apos;s time to drive sales.</strong>
+                  </p>
+                </div>
+
+                {/* Pro pitch card */}
+                <div style={{ background: "linear-gradient(135deg, #1e1b4b 0%, #312e81 50%, #4c1d95 100%)", borderRadius: 18, padding: "22px 20px", position: "relative", overflow: "hidden", marginBottom: 16 }}>
+                  <div className="dot-grid" style={{ position: "absolute", inset: 0, pointerEvents: "none" }} />
+                  <div style={{ position: "absolute", inset: 0, pointerEvents: "none", background: "radial-gradient(ellipse 70% 50% at 50% 0%, rgba(139,92,246,0.4) 0%, transparent 70%)" }} />
+                  <div style={{ position: "relative" }}>
+                    <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 14, flexWrap: "wrap", gap: 6 }}>
+                      <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", color: "#fde68a", background: "rgba(250,204,21,0.15)", border: "1px solid rgba(250,204,21,0.3)", padding: "3px 10px", borderRadius: 99 }}>
+                        ✨ Unlock with Pro
+                      </span>
+                      <span style={{ fontSize: 12, color: "rgba(255,255,255,0.55)", fontWeight: 600 }}>
+                        $19/mo · cancel anytime
+                      </span>
+                    </div>
+
+                    <p style={{ fontSize: 13, fontWeight: 700, color: "#fff", marginBottom: 12 }}>
+                      6 more modules waiting:
+                    </p>
+
+                    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 6, marginBottom: 14 }}>
+                      {[
+                        { e: "📱", t: "TikTok Organic" },
+                        { e: "📣", t: "Paid Ads Launch" },
+                        { e: "📈", t: "Conversion Opt." },
+                        { e: "📧", t: "Email List" },
+                        { e: "💰", t: "Your First Sale" },
+                        { e: "🚀", t: "Scale & Grow" },
+                      ].map((m, i) => (
+                        <div key={i} style={{ display: "flex", alignItems: "center", gap: 7, padding: "7px 10px", background: "rgba(255,255,255,0.07)", border: "1px solid rgba(255,255,255,0.12)", borderRadius: 10 }}>
+                          <span style={{ fontSize: 13 }}>{m.e}</span>
+                          <span style={{ fontSize: 11, color: "rgba(255,255,255,0.85)", fontWeight: 600, letterSpacing: "-0.1px" }}>{m.t}</span>
+                        </div>
+                      ))}
+                    </div>
+
+                    <p style={{ fontSize: 11, color: "rgba(255,255,255,0.55)", lineHeight: 1.5 }}>
+                      Plus 📦 weekly product picks every Monday + 📋 monthly ad strategy briefing — straight to your inbox.
+                    </p>
                   </div>
-                  <span style={{ fontSize: 12, fontWeight: 700, color: "#a1a1aa" }}>{countdown}s</span>
                 </div>
 
-                {/* Countdown bar */}
-                <div style={{ height: 3, borderRadius: 99, background: "#e4e4e7", marginBottom: 16, overflow: "hidden" }}>
-                  <div style={{ height: 3, background: "linear-gradient(90deg, #6366f1, #7c3aed)", width: `${(countdown / 5) * 100}%`, transition: "width 1s linear" }} />
-                </div>
+                {/* Social proof line */}
+                <p style={{ fontSize: 11, color: "#a1a1aa", textAlign: "center", marginBottom: 14, fontStyle: "italic" }}>
+                  &ldquo;The ad module alone saved me from wasting $500.&rdquo; — Luca M.
+                </p>
 
-                <div style={{ display: "flex", gap: 10 }}>
-                  <Link href={`/modules/${nextId}`} style={{ flex: 1, display: "block", textAlign: "center", background: "linear-gradient(135deg, #6366f1, #7c3aed)", color: "#fff", fontWeight: 700, fontSize: 14, padding: "13px", borderRadius: 14, textDecoration: "none", boxShadow: "0 4px 16px rgba(99,102,241,0.3)" }}>
-                    Start Module {nextId} →
-                  </Link>
-                  <Link href="/dashboard" style={{ padding: "13px 18px", borderRadius: 14, background: "#f4f4f5", color: "#52525b", fontWeight: 600, fontSize: 13, textDecoration: "none", whiteSpace: "nowrap" }}>
-                    Dashboard
-                  </Link>
-                </div>
+                {/* CTAs */}
+                <Link href="/upgrade" style={{ display: "block", textAlign: "center", background: "linear-gradient(135deg, #facc15, #f59e0b)", color: "#1c1917", fontWeight: 800, fontSize: 15, padding: "15px", borderRadius: 14, textDecoration: "none", boxShadow: "0 4px 18px rgba(250,204,21,0.4)", letterSpacing: "-0.2px", marginBottom: 10 }}
+                  onMouseEnter={e => { e.currentTarget.style.transform = "translateY(-1px)"; e.currentTarget.style.boxShadow = "0 6px 24px rgba(250,204,21,0.55)"; }}
+                  onMouseLeave={e => { e.currentTarget.style.transform = "translateY(0)"; e.currentTarget.style.boxShadow = "0 4px 18px rgba(250,204,21,0.4)"; }}
+                >
+                  Upgrade to Pro — $19/mo →
+                </Link>
+                <Link href="/dashboard" style={{ display: "block", textAlign: "center", color: "#a1a1aa", fontSize: 13, fontWeight: 500, textDecoration: "none", padding: "6px" }}
+                  onMouseEnter={e => (e.currentTarget.style.color = "#52525b")}
+                  onMouseLeave={e => (e.currentTarget.style.color = "#a1a1aa")}
+                >
+                  Maybe later · back to dashboard
+                </Link>
               </>
             ) : (
               <>
-                <p style={{ fontSize: 14, color: "#71717a", marginBottom: 20, lineHeight: 1.6 }}>
-                  You&apos;ve completed all 12 modules. You have everything you need to start selling.
-                </p>
-                <Link href="/dashboard" style={{ display: "block", textAlign: "center", background: "linear-gradient(135deg, #059669, #047857)", color: "#fff", fontWeight: 700, fontSize: 14, padding: "13px", borderRadius: 14, textDecoration: "none", boxShadow: "0 4px 16px rgba(5,150,105,0.3)" }}>
-                  View your certificate 🏆
-                </Link>
+                {/* Standard completion header */}
+                <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 20 }}>
+                  <div style={{ width: 44, height: 44, borderRadius: 14, background: "#ecfdf5", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 22, flexShrink: 0 }}>✅</div>
+                  <div>
+                    <p style={{ fontSize: 16, fontWeight: 800, color: "#09090b", letterSpacing: "-0.3px" }}>Module {moduleId} complete!</p>
+                    <p style={{ fontSize: 12, color: "#a1a1aa" }}>{mod?.title}</p>
+                  </div>
+                </div>
+
+                {!isLast && nextInfo ? (
+                  <>
+                    {/* Next module preview */}
+                    <div style={{ background: "#f8f8fb", borderRadius: 16, padding: "14px 16px", marginBottom: 16, display: "flex", alignItems: "center", gap: 12 }}>
+                      <span style={{ fontSize: 22 }}>{nextInfo.emoji}</span>
+                      <div style={{ flex: 1 }}>
+                        <p style={{ fontSize: 11, color: "#a1a1aa", marginBottom: 2 }}>Up next · Module {nextId} · {nextInfo.duration}</p>
+                        <p style={{ fontSize: 14, fontWeight: 700, color: "#09090b" }}>{nextInfo.title}</p>
+                      </div>
+                      <span style={{ fontSize: 12, fontWeight: 700, color: "#a1a1aa" }}>{countdown}s</span>
+                    </div>
+
+                    {/* Countdown bar */}
+                    <div style={{ height: 3, borderRadius: 99, background: "#e4e4e7", marginBottom: 16, overflow: "hidden" }}>
+                      <div style={{ height: 3, background: "linear-gradient(90deg, #6366f1, #7c3aed)", width: `${(countdown / 5) * 100}%`, transition: "width 1s linear" }} />
+                    </div>
+
+                    <div style={{ display: "flex", gap: 10 }}>
+                      <Link href={`/modules/${nextId}`} style={{ flex: 1, display: "block", textAlign: "center", background: "linear-gradient(135deg, #6366f1, #7c3aed)", color: "#fff", fontWeight: 700, fontSize: 14, padding: "13px", borderRadius: 14, textDecoration: "none", boxShadow: "0 4px 16px rgba(99,102,241,0.3)" }}>
+                        Start Module {nextId} →
+                      </Link>
+                      <Link href="/dashboard" style={{ padding: "13px 18px", borderRadius: 14, background: "#f4f4f5", color: "#52525b", fontWeight: 600, fontSize: 13, textDecoration: "none", whiteSpace: "nowrap" }}>
+                        Dashboard
+                      </Link>
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    <p style={{ fontSize: 14, color: "#71717a", marginBottom: 20, lineHeight: 1.6 }}>
+                      You&apos;ve completed all 12 modules. You have everything you need to start selling.
+                    </p>
+                    <Link href="/dashboard" style={{ display: "block", textAlign: "center", background: "linear-gradient(135deg, #059669, #047857)", color: "#fff", fontWeight: 700, fontSize: 14, padding: "13px", borderRadius: 14, textDecoration: "none", boxShadow: "0 4px 16px rgba(5,150,105,0.3)" }}>
+                      View your certificate 🏆
+                    </Link>
+                  </>
+                )}
               </>
             )}
           </div>

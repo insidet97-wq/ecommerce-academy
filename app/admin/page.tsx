@@ -96,6 +96,10 @@ export default function AdminPage() {
               onMouseEnter={e => { e.currentTarget.style.background = "#f4f4f5"; e.currentTarget.style.color = "#09090b"; }}
               onMouseLeave={e => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = "#71717a"; }}
             >Content</Link>
+            <Link href="/admin/users" style={{ fontSize: 13, fontWeight: 500, color: "#71717a", textDecoration: "none", padding: "5px 10px", borderRadius: 8 }}
+              onMouseEnter={e => { e.currentTarget.style.background = "#f4f4f5"; e.currentTarget.style.color = "#09090b"; }}
+              onMouseLeave={e => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = "#71717a"; }}
+            >Users</Link>
             <Link href="/dashboard" style={{ fontSize: 13, fontWeight: 500, color: "#6366f1", textDecoration: "none" }}
               onMouseEnter={e => (e.currentTarget.style.color = "#4338ca")}
               onMouseLeave={e => (e.currentTarget.style.color = "#6366f1")}

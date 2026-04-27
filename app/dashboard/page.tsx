@@ -279,6 +279,7 @@ export default function DashboardPage() {
               ...(admin ? [
                 { href: "/admin",         label: "Analytics" },
                 { href: "/admin/content", label: "Content"   },
+                { href: "/admin/users",   label: "Users"     },
               ] : []),
             ].map(item => (
               <Link key={item.href} href={item.href}

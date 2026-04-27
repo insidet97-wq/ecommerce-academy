@@ -340,6 +340,59 @@ export function proWelcomeEmailHTML(firstName: string): string {
 </html>`;
 }
 
+// ── Email: Re-engagement nudge (3 days inactive, 0 completions) ──
+
+export function reengagementEmailHTML(firstName: string): string {
+  const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://firstsalelab.com";
+  return `<!DOCTYPE html>
+<html>
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"></head>
+<body style="margin:0;padding:0;background:#f4f4f8;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="background:#f4f4f8;padding:40px 20px;">
+    <tr><td align="center">
+      <table width="100%" cellpadding="0" cellspacing="0" style="max-width:520px;">
+
+        <tr><td style="background:#1e1b4b;border-radius:20px 20px 0 0;padding:36px 40px;text-align:center;">
+          <div style="font-size:44px;margin-bottom:12px;">🧭</div>
+          <h1 style="margin:0;font-size:22px;font-weight:900;color:#fff;letter-spacing:-0.5px;">Your roadmap is waiting, ${firstName}.</h1>
+        </td></tr>
+
+        <tr><td style="background:#fff;padding:32px 40px;">
+          <p style="margin:0 0 20px;font-size:15px;color:#3f3f46;line-height:1.7;">
+            You signed up to build your first ecommerce store — and the first module takes <strong style="color:#09090b;">just 20 minutes</strong>.
+          </p>
+          <p style="margin:0 0 24px;font-size:14px;color:#52525b;line-height:1.7;">
+            Module 1 — &ldquo;The Rules of the Game&rdquo; — covers everything you need to understand before spending a single dollar. No fluff. One clear task at the end.
+          </p>
+
+          <div style="background:#f5f3ff;border-radius:14px;padding:18px 20px;margin-bottom:24px;border-left:3px solid #6366f1;">
+            <p style="margin:0 0 6px;font-size:11px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:#7c3aed;">⚡ Module 1 covers:</p>
+            <p style="margin:0;font-size:13px;color:#4c1d95;line-height:1.7;">
+              How ecommerce actually works · The 3 levers that drive every sale · The math behind a profitable store · Why most beginners fail
+            </p>
+          </div>
+
+          <div style="text-align:center;">
+            <a href="${SITE_URL}/modules/1"
+              style="display:inline-block;background:#6366f1;color:#fff;font-weight:800;font-size:15px;padding:14px 36px;border-radius:14px;text-decoration:none;letter-spacing:-0.2px;">
+              Start Module 1 →
+            </a>
+            <p style="margin:14px 0 0;font-size:12px;color:#a1a1aa;">Takes about 20 minutes</p>
+          </div>
+        </td></tr>
+
+        <tr><td style="background:#f8f8fb;border-radius:0 0 20px 20px;padding:20px 40px;text-align:center;border-top:1px solid #e4e4e7;">
+          <p style="margin:0 0 4px;font-size:12px;font-weight:700;color:#09090b;">First Sale Lab</p>
+          <p style="margin:0;font-size:11px;color:#a1a1aa;">No longer interested? Just ignore this email — we won&apos;t send another reminder.</p>
+        </td></tr>
+
+      </table>
+    </td></tr>
+  </table>
+</body>
+</html>`;
+}
+
 // ── Shared Supabase admin client factory ──────────────────────
 
 export function getAdminSupabase() {
