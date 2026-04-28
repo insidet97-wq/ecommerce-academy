@@ -43,37 +43,18 @@ export type Briefing = {
   created_at: string;
 };
 
-// ── Internal helper ───────────────────────────────────────────
+// ── Internal AI helper ────────────────────────────────────────
+// Goes through the provider abstraction in `lib/ai/` so this whole file
+// stays provider-agnostic. To swap providers per tier, edit
+// `TIER_CHAINS` in `lib/ai/config.ts` — no changes needed here.
 
-async function callGroq(prompt: string): Promise<string> {
-  const res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${process.env.GROQ_API_KEY}`,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      model: "llama-3.3-70b-versatile",
-      messages: [
-        {
-          role: "system",
-          content:
-            "You are an ecommerce research assistant. Always respond with valid JSON only. No markdown, no code blocks, no explanation — raw JSON only.",
-        },
-        { role: "user", content: prompt },
-      ],
-      temperature: 0.4,
-      response_format: { type: "json_object" },
-    }),
-  });
+import { callAI, type Tier } from "./ai";
 
-  if (!res.ok) {
-    const text = await res.text();
-    throw new Error(`Groq API error ${res.status}: ${text}`);
-  }
+const SYSTEM_PROMPT =
+  "You are an ecommerce research assistant. Always respond with valid JSON only. No markdown, no code blocks, no explanation — raw JSON only.";
 
-  const data = await res.json();
-  return data.choices[0].message.content;
+async function generate(prompt: string, tier: Tier = "default"): Promise<string> {
+  return callAI({ systemPrompt: SYSTEM_PROMPT, userPrompt: prompt, json: true, temperature: 0.4 }, tier);
 }
 
 // ── Blog posts (SEO content, AI-drafted, admin-published) ────
@@ -143,7 +124,7 @@ Return a JSON object:
   }
 }`;
 
-  const raw = await callGroq(prompt);
+  const raw = await generate(prompt);
   const parsed = JSON.parse(raw);
 
   // Defensive: ensure slug is URL-safe
@@ -212,7 +193,8 @@ Return a JSON object:
 
 Each item should be one short sentence — punchy, actionable, no fluff. Reference the specific numbers from the inputs where relevant (e.g. "With only ${input.review_count} reviews, request ..."). Don't pad the lists — better 4 sharp items than 5 weak ones.`;
 
-  const raw = await callGroq(prompt);
+  // Supplier AI analysis is a Pro feature — route through the "pro" tier chain.
+  const raw = await generate(prompt, "pro");
   const parsed = JSON.parse(raw);
   return {
     summary:       String(parsed.summary ?? "").slice(0, 600),
@@ -241,7 +223,7 @@ export type AdCopywriterInput = {
   niche?:          string;
 };
 
-export async function generateAdCopy(input: AdCopywriterInput): Promise<{ variants: AdVariant[] }> {
+export async function generateAdCopy(input: AdCopywriterInput, tier: Tier = "pro"): Promise<{ variants: AdVariant[] }> {
   const prompt = `You are a direct response copywriter trained on Cialdini's 6 principles, Berger's STEPPS, and modern TikTok/Meta hook frameworks. Write 5 ad variants for the following product. Each variant must use a DIFFERENT psychological angle.
 
 Product: ${input.product_name}
@@ -267,7 +249,7 @@ Return JSON:
 
 Keep it punchy. No fluff. Every word earns its place.`;
 
-  const raw = await callGroq(prompt);
+  const raw = await generate(prompt, tier);
   const parsed = JSON.parse(raw);
   const variants = Array.isArray(parsed.variants) ? parsed.variants : [];
   return {
@@ -301,7 +283,7 @@ export type UGCBriefInput = {
   hook_framework?: "Pattern Interrupt" | "Problem Agitation" | "Curiosity Gap" | "Transformation Reveal" | "Social Proof" | "Contrarian";
 };
 
-export async function generateUGCBrief(input: UGCBriefInput): Promise<UGCBrief> {
+export async function generateUGCBrief(input: UGCBriefInput, tier: Tier = "pro"): Promise<UGCBrief> {
   const framework = input.hook_framework ?? "Problem Agitation";
 
   const prompt = `You are an ecommerce ads producer who briefs UGC creators on Billo, Insense, and similar platforms. Generate a complete, ready-to-send brief for the following product. The brief should be specific enough that 3 different creators would produce 3 similar but distinct videos from it.
@@ -325,7 +307,7 @@ Return JSON:
 
 Be specific. References to 'authentic' or 'natural' alone are useless — give concrete style guidance.`;
 
-  const raw = await callGroq(prompt);
+  const raw = await generate(prompt, tier);
   const parsed = JSON.parse(raw);
   return {
     hook_word_for_word: String(parsed.hook_word_for_word ?? "").slice(0, 400),
@@ -361,7 +343,7 @@ export type AdAuditInput = {
   product_context?: string;      // optional product info
 };
 
-export async function auditAd(input: AdAuditInput): Promise<AdAudit> {
+export async function auditAd(input: AdAuditInput, tier: Tier = "pro"): Promise<AdAudit> {
   const prompt = `You are a direct response copywriter performing an audit of someone's ad. Score the ad against Cialdini's 6 principles, identify which hook framework it uses, assess the body and CTA, and provide concrete rewrites.
 
 ${input.product_context ? `Product context: ${input.product_context}\n\n` : ""}AD TO AUDIT:
@@ -394,7 +376,7 @@ Return JSON:
 
 Score conservatively. 'OK' should mean genuinely OK, not a politeness rating. Most beginner ads should score 30-55 overall.`;
 
-  const raw = await callGroq(prompt);
+  const raw = await generate(prompt, tier);
   const parsed = JSON.parse(raw);
 
   const scores = parsed.cialdini_scores ?? {};
@@ -458,7 +440,9 @@ Return a JSON object:
 
 Each item: one sharp sentence. Reference specific things from the user's description where possible. Frame exploitation_angles as actions the user can take ("Position your store as ___ to differentiate from their generic positioning"). Threat level: Low = thin store, easy to beat; Medium = decent operator with gaps; High = serious player, find a niche they don't serve.`;
 
-  const raw = await callGroq(prompt);
+  // Store Autopsy is Growth/Scale Lab exclusive — route through "growth" tier chain
+  // so when the owner upgrades that chain to Claude, this gets the better model.
+  const raw = await generate(prompt, "growth");
   const parsed = JSON.parse(raw);
 
   return {
@@ -507,7 +491,7 @@ Answer in 2-4 short paragraphs. Be direct, specific, and reference the module co
 
 Return a JSON object: { "answer": "your full answer here, with line breaks as \\n\\n between paragraphs" }`;
 
-  const raw = await callGroq(prompt);
+  const raw = await generate(prompt);
   const parsed = JSON.parse(raw);
   return { answer: String(parsed.answer ?? "").slice(0, 2000) };
 }
@@ -560,7 +544,7 @@ Return a JSON object with a "niches" array containing exactly 3 objects:
   ]
 }`;
 
-  const raw = await callGroq(prompt);
+  const raw = await generate(prompt);
   const parsed = JSON.parse(raw);
   return parsed.niches ?? parsed;
 }
@@ -598,7 +582,7 @@ Return a JSON object with a "products" array containing exactly 5 objects, each 
   ]
 }`;
 
-  const raw = await callGroq(prompt);
+  const raw = await generate(prompt);
   const parsed = JSON.parse(raw);
   return parsed.products ?? parsed;
 }
@@ -628,7 +612,7 @@ Return a JSON object with a "product" key containing:
   }
 }`;
 
-  const raw = await callGroq(prompt);
+  const raw = await generate(prompt);
   const parsed = JSON.parse(raw);
   return parsed.product ?? parsed;
 }
@@ -658,7 +642,7 @@ Return a JSON object with a "briefing" key containing:
   }
 }`;
 
-  const raw = await callGroq(prompt);
+  const raw = await generate(prompt);
   const parsed = JSON.parse(raw);
   return parsed.briefing ?? parsed;
 }

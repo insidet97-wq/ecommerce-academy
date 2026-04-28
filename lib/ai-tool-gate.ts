@@ -32,7 +32,8 @@ export type ToolTier = "free" | "pro" | "growth";
 export type GateResult = {
   ok: true;
   user: { id: string; email?: string };
-  tier: ToolTier;
+  /** Only "pro" or "growth" — free users are rejected before this branch. */
+  tier: "pro" | "growth";
   used: number;
   limit: number;
 } | {

@@ -25,7 +25,7 @@ Freemium ecommerce course with **3 tiers**, live at **firstsalelab.com**:
 - **Database + Auth:** Supabase (PostgreSQL, email/password, no email confirmation)
 - **Email:** Resend — from address `hello@firstsalelab.com`
 - **Payments:** Stripe subscriptions + webhooks + billing portal
-- **AI content:** Groq `llama-3.3-70b-versatile` (free tier)
+- **AI content:** Multi-provider abstraction in `lib/ai/`. Currently routes everything to Groq `llama-3.3-70b-versatile` (free tier). Pluggable: OpenAI, Anthropic Claude, Gemini all wired in — flip per-tier provider in `lib/ai/config.ts` `TIER_CHAINS`. Auto-fallback if primary fails.
 - **Ads:** Google AdSense (free users only; pending approval)
 - **Analytics:** Vercel Analytics + GA4 (`G-VT4RZ3JB6L`)
 - **Crons:** Vercel Cron (4 jobs — see README)
@@ -105,7 +105,10 @@ STRIPE_WEBHOOK_SECRET
 NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY
 STRIPE_PRICE_ID                # Pro tier $19/mo (existing)
 STRIPE_PRICE_ID_GROWTH         # Scale Lab tier $49/mo (NEW — must be created in Stripe before users can checkout Growth)
-GROQ_API_KEY
+GROQ_API_KEY                          # primary AI provider (free tier — currently used for everything)
+OPENAI_API_KEY                        # optional fallback / future Pro upgrade
+ANTHROPIC_API_KEY                     # optional fallback / future Scale Lab upgrade (recommended for premium copy)
+GEMINI_API_KEY                        # optional fallback (free tier exists)
 ADMIN_EMAIL=hello@firstsalelab.com
 NEXT_PUBLIC_ADSENSE_SLOT_DASHBOARD   # add when AdSense approved
 NEXT_PUBLIC_ADSENSE_SLOT_MODULE      # add when AdSense approved
@@ -163,6 +166,7 @@ CRON_SECRET
 
 | What | Detail |
 |------|--------|
+| **AI provider abstraction (`lib/ai/`)** | Refactored single `callGroq()` into a multi-provider system. New `lib/ai/index.ts` exports `callAI(req, tier)` that routes through `TIER_CHAINS` (in `lib/ai/config.ts`). Providers: Groq / OpenAI / Anthropic / Gemini. Fallback chain auto-tries other providers if primary fails (only those with API keys configured run). All existing generators in `lib/perplexity.ts` now go through this abstraction. Tier-aware: `analyzeSupplier` routes through "pro", `analyzeStore` through "growth", AI tools (ad copywriter / UGC brief / ad audit) get the user's actual tier from the API gate. To upgrade Scale Lab quality to Claude later: edit `TIER_CHAINS.growth` in `lib/ai/config.ts` — single line change. New optional env vars: `OPENAI_API_KEY`, `ANTHROPIC_API_KEY`, `GEMINI_API_KEY` |
 | **3 new AI tools (Pro + Scale Lab)** | Added to `/tools` as tabs 6-8: ✍️ Ad Copywriter (5 variants per run, different psychological angles), 🎬 UGC Brief Generator (complete creator brief with hook/shot list/reference styles/do-not list), 🧐 Ad Auditor (scores against Cialdini's 6 + identifies hook framework + concrete rewrites). All gated: free locked, Pro 5/day per tool, Growth 50/day per tool. New shared `lib/ai-tool-gate.ts` helper handles tier check + rate limiting + logging. New shared `useAuthTier` hook for client tier detection. New shared `<AIToolLockCard>` for free/anon users. All runs logged to new `ai_tool_log` table. Tools page max-width bumped to 960px nav / 880px main; grid switched to `auto-fill minmax(140px,1fr)` so 9 tabs flow naturally |
 | **Admin dashboards expanded** | `/admin` now shows MRR by tier, churn risk, signups (7d/30d), active 7d/today, full conversion funnel (signups → M1 → M6 → M12 → M24), recent 10 signups with tier badges. Module funnel covers all 24 modules. New `/admin/email` with open/click/bounce rates per email type + top-clicked URLs. New `/admin/leads` for Niche Picker leads with drip-stage filter |
 | **Store Autopsy (Growth-exclusive)** | New `🔍 Store Autopsy` tool — 6th tab on `/tools`. User pastes a competitor URL + describes what they observed, Groq returns structured teardown: 2-3 sentence summary, offer analysis, hook strategy, social proof analysis, conversion gaps, exploitation angles, threat level (Low/Medium/High). Free/Pro users see locked card → upgrade CTA. Server-side gate on `is_growth` |

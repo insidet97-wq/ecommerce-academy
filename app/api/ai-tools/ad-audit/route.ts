@@ -39,7 +39,7 @@ export async function POST(request: Request) {
   };
 
   try {
-    const audit = await auditAd(input);
+    const audit = await auditAd(input, gate.tier);
     await logAITool(supabase, gate.user.id, "ad_audit", input, audit);
     return NextResponse.json({ success: true, audit, used: gate.used + 1, limit: gate.limit, tier: gate.tier });
   } catch (err) {
