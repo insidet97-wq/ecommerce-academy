@@ -527,9 +527,9 @@ export default function Home() {
   /* ── Marketing landing page (non-logged-in) ── */
 
   const faqItems = [
-    { q: "Is this actually free?", a: "Modules 1–6 are completely free — no credit card, no trial. Modules 7–12 are part of First Sale Lab Pro at $19/month, which covers traffic, ads, conversions, and scaling. Pro members also get weekly winning product picks every Monday and a monthly ad strategy update. You can complete the full beginner foundation before deciding if Pro is right for you." },
+    { q: "Is this actually free?", a: "Modules 1–6 are completely free — no credit card, no trial. The course has 3 tiers: Free (Modules 1–6 — niche, product, store, funnel), Pro at $19/mo (Modules 7–12 — traffic, ads, first sale, plus weekly product picks and a monthly briefing), and Scale Lab at $49/mo (Modules 13–24 — for users who got their first sale and want consistent revenue: diagnose metrics, find real winners, persuasion frameworks, proper ad testing, profitable scaling). You can complete the full beginner foundation for free before deciding if you want to upgrade." },
     { q: "Do I need experience or money to start?", a: "No experience needed at all — that's the point. For budget, you can start learning and building for $0." },
-    { q: "How long does the full course take?", a: "Each module is 20–45 minutes of focused content plus your real-world task. Most people complete the full 12 modules in 3–6 weeks, doing one or two modules per week alongside a job or studies." },
+    { q: "How long does the full course take?", a: "Each module is 20–45 minutes of focused content plus your real-world task. Most people complete the foundation (Modules 1–12) in 3–6 weeks, doing one or two per week alongside a job or studies. The advanced Scale Lab tier (Modules 13–24) typically spans 3–6 months because most modules require running 7-day tests before the checklist can be completed." },
     { q: "What's the difference between this and a YouTube playlist?", a: "Structure and accountability. YouTube gives you information. First Sale Lab gives you a sequence — each module builds on the last, you can't skip ahead without completing the task, and you always know exactly what to do next." },
     { q: "What platform do you teach? Shopify, Etsy, Amazon?", a: "We focus on Shopify + your own traffic (TikTok organic and Meta ads). This gives you the most control and the best margins. You own your store, your audience, and your brand." },
     { q: "What if I get stuck on a module?", a: "Each module has a clear checklist of exactly what to do. If you're stuck, re-read the action steps — they're written to be as specific as possible." },
@@ -562,7 +562,7 @@ export default function Home() {
           "@id": "https://firstsalelab.com/#organization",
         },
         "educationalLevel": "Beginner",
-        "teaches": "Shopify dropshipping, product research, TikTok organic traffic, Meta ads, conversion optimisation, email marketing",
+        "teaches": "Shopify dropshipping, niche selection, product research, TikTok organic traffic, Meta ads, conversion optimisation, email marketing, ecommerce metrics (CPA, ROAS, AOV), persuasion copywriting, A/B testing, UGC creative strategy, profitable ad scaling",
         "hasCourseInstance": [
           {
             "@type": "CourseInstance",
@@ -581,11 +581,19 @@ export default function Home() {
           },
           {
             "@type": "Offer",
-            "name": "Pro — All 12 Modules",
+            "name": "Pro — Modules 7–12 + weekly product picks + monthly briefing",
             "price": "19",
             "priceCurrency": "USD",
             "availability": "https://schema.org/InStock",
-            "url": "https://firstsalelab.com/upgrade",
+            "url": "https://firstsalelab.com/upgrade?tier=pro",
+          },
+          {
+            "@type": "Offer",
+            "name": "Scale Lab — Modules 13–24 (advanced ecommerce, predictable revenue)",
+            "price": "49",
+            "priceCurrency": "USD",
+            "availability": "https://schema.org/InStock",
+            "url": "https://firstsalelab.com/upgrade?tier=growth",
           },
         ],
       },
@@ -688,7 +696,7 @@ export default function Home() {
                 style={{ background: "rgba(99,102,241,0.15)", border: "1px solid rgba(99,102,241,0.3)", color: "#a78bfa" }}
               >
                 <span className="w-1.5 h-1.5 rounded-full bg-violet-400 animate-pulse" />
-                Modules 1–6 free · Pro from $19/mo
+                Modules 1–6 free · Pro $19/mo · Scale Lab $49/mo
               </span>
             </div>
 
@@ -820,10 +828,10 @@ export default function Home() {
           <div className="text-center mb-12">
             <p className="text-xs font-bold tracking-[0.12em] uppercase mb-3" style={{ color: "#6366f1" }}>The curriculum</p>
             <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4" style={{ letterSpacing: "-0.025em" }}>
-              12 modules. One clear path.
+              From zero to your first sale.
             </h2>
-            <p className="text-base text-gray-500">
-              Every module builds on the last. Complete a task, unlock the next step.
+            <p className="text-base text-gray-500" style={{ maxWidth: 540, margin: "0 auto" }}>
+              12 modules to launch. Every module builds on the last — complete a task, unlock the next step.
             </p>
           </div>
 
@@ -851,6 +859,46 @@ export default function Home() {
                 </span>
               </HoverCard>
             ))}
+          </div>
+
+          {/* ── Scale Lab teaser — 12 advanced modules for after first sale ── */}
+          <div className="mb-10">
+            <div
+              className="rounded-2xl p-6 sm:p-8"
+              style={{ background: "linear-gradient(135deg, #0c0a09 0%, #1c1917 100%)", border: "1.5px solid rgba(250,204,21,0.25)", position: "relative", overflow: "hidden" }}
+            >
+              <div className="dot-grid" style={{ position: "absolute", inset: 0, pointerEvents: "none" }} />
+              <div style={{ position: "absolute", top: -200, right: -100, width: 400, height: 400, background: "radial-gradient(circle, rgba(250,204,21,0.12) 0%, transparent 70%)", pointerEvents: "none" }} />
+              <div style={{ position: "relative" }}>
+                <div className="flex items-center gap-2 mb-3 flex-wrap">
+                  <span className="text-xs font-bold uppercase tracking-[0.14em]" style={{ color: "#fde68a" }}>🚀 Scale Lab</span>
+                  <span className="text-xs font-medium" style={{ color: "rgba(255,255,255,0.45)" }}>· $49/mo · for after your first sale</span>
+                </div>
+                <h3 className="text-xl sm:text-2xl font-extrabold mb-3" style={{ color: "#fff", letterSpacing: "-0.4px", lineHeight: 1.2 }}>
+                  Made your first sales? Now make them predictable.
+                </h3>
+                <p className="text-sm sm:text-base mb-5" style={{ color: "rgba(255,255,255,0.6)", lineHeight: 1.65, maxWidth: 600 }}>
+                  12 advanced modules (13–24) for users who got past the first sale and want consistent revenue. Real winners vs fake signals, persuasion psychology (Cialdini), proper ad testing (ICE framework), UGC at scale, and a 30-day scaling plan with kill triggers.
+                </p>
+                <div className="grid grid-cols-2 md:grid-cols-5 gap-2 mb-5">
+                  {[
+                    { e: "🔬", t: "Diagnose" },
+                    { e: "🎯", t: "Validate" },
+                    { e: "🧠", t: "Persuade" },
+                    { e: "🧪", t: "Test" },
+                    { e: "🚀", t: "Scale" },
+                  ].map(p => (
+                    <div key={p.t} className="rounded-xl px-3 py-2 flex items-center gap-2" style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(253,224,71,0.15)" }}>
+                      <span className="text-base">{p.e}</span>
+                      <span className="text-xs font-semibold" style={{ color: "rgba(255,255,255,0.85)" }}>{p.t}</span>
+                    </div>
+                  ))}
+                </div>
+                <p className="text-xs italic mb-0" style={{ color: "rgba(255,255,255,0.45)" }}>
+                  Built on Cialdini, Hormozi, Sean Ellis, Hopkins, Berger. Pure execution — zero theory.
+                </p>
+              </div>
+            </div>
           </div>
 
           <div className="text-center">
@@ -993,54 +1041,47 @@ export default function Home() {
         </div>
       </section>
 
-      {/* ── FREE VS PRO COMPARISON ── */}
+      {/* ── 3-TIER PRICING (Free / Pro / Scale Lab) ── */}
       <section className="px-4 sm:px-8 py-16 sm:py-20" style={{ background: "#f7f7fb" }}>
-        <div className="max-w-4xl mx-auto">
+        <div className="max-w-6xl mx-auto">
           <div className="text-center mb-12">
-            <p className="text-xs font-bold tracking-[0.12em] uppercase mb-3" style={{ color: "#6366f1" }}>Free vs Pro</p>
+            <p className="text-xs font-bold tracking-[0.12em] uppercase mb-3" style={{ color: "#6366f1" }}>3 tiers</p>
             <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4" style={{ letterSpacing: "-0.025em" }}>
-              Start free. Upgrade when you&apos;re ready.
+              Start free. Upgrade when you outgrow it.
             </h2>
-            <p className="text-base text-gray-500">
-              No pressure. Modules 1–6 are yours forever. Pro adds the tools that turn learners into sellers.
+            <p className="text-base text-gray-500" style={{ maxWidth: 560, margin: "0 auto" }}>
+              Modules 1–6 are yours forever. Pro adds the path to your first sale. Scale Lab takes random sales and makes them predictable.
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-5 items-start">
+          <div className="pricing-grid" style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 14, alignItems: "stretch" }}>
 
-            {/* FREE column */}
-            <div className="rounded-3xl border border-gray-200 bg-white p-8">
+            {/* ── FREE column ── */}
+            <div className="rounded-3xl border border-gray-200 bg-white p-7 flex flex-col">
               <p className="text-xs font-bold tracking-[0.1em] uppercase text-gray-400 mb-1">Free</p>
               <p className="text-3xl font-extrabold text-gray-900 mb-1" style={{ letterSpacing: "-0.04em" }}>$0</p>
-              <p className="text-sm text-gray-400 mb-8">No credit card. Ever.</p>
-              <div className="space-y-4 mb-8">
+              <p className="text-xs text-gray-400 mb-6">No credit card. Ever.</p>
+              <p className="text-sm text-gray-600 leading-relaxed mb-5">The foundation — pick your niche, validate a product, build your store and first funnel.</p>
+
+              <ul className="space-y-2.5 mb-6 flex-1" style={{ listStyle: "none", padding: 0 }}>
                 {[
-                  "Module 1–6 — full beginner foundation",
-                  "Niche research + winning product formula",
-                  "Customer avatar framework",
-                  "Shopify store setup walkthrough",
-                  "Your first sales funnel",
+                  "Module 1: The Rules of the Game",
+                  "Module 2: Find Your Niche",
+                  "Module 3: Find Your Winning Product",
+                  "Module 4: Know Your Customer",
+                  "Module 5: Build Your Shopify Store",
+                  "Module 6: Build Your First Sales Funnel",
                   "Progress tracking & daily streaks",
                 ].map(item => (
-                  <div key={item} className="flex items-start gap-3">
-                    <span className="text-sm font-bold mt-0.5 flex-shrink-0" style={{ color: "#22c55e" }}>✓</span>
-                    <p className="text-sm text-gray-600 leading-relaxed">{item}</p>
-                  </div>
+                  <li key={item} className="flex items-start gap-2 text-xs text-gray-600 leading-relaxed">
+                    <span className="font-bold flex-shrink-0 mt-0.5" style={{ color: "#22c55e" }}>✓</span>{item}
+                  </li>
                 ))}
-                {[
-                  "Modules 7–12 (traffic, ads, scaling)",
-                  "Weekly winning product picks",
-                  "Monthly ad strategy updates",
-                ].map(item => (
-                  <div key={item} className="flex items-start gap-3">
-                    <span className="text-sm font-bold mt-0.5 flex-shrink-0 text-gray-300">✕</span>
-                    <p className="text-sm text-gray-300 leading-relaxed">{item}</p>
-                  </div>
-                ))}
-              </div>
+              </ul>
+
               <Link
                 href="/quiz"
-                className="block w-full text-center text-sm font-bold py-3.5 rounded-xl"
+                className="block w-full text-center text-sm font-bold py-3 rounded-xl"
                 style={{ border: "1.5px solid #e5e7eb", color: "#374151", background: "#f9fafb" }}
                 onMouseEnter={e => { e.currentTarget.style.background = "#f3f4f6"; e.currentTarget.style.borderColor = "#d1d5db"; }}
                 onMouseLeave={e => { e.currentTarget.style.background = "#f9fafb"; e.currentTarget.style.borderColor = "#e5e7eb"; }}
@@ -1049,93 +1090,121 @@ export default function Home() {
               </Link>
             </div>
 
-            {/* PRO column */}
+            {/* ── PRO column ── */}
             <div
-              className="rounded-3xl p-8 relative overflow-hidden"
+              className="rounded-3xl p-7 relative overflow-hidden flex flex-col"
               style={{ background: "linear-gradient(160deg, #1e1b4b 0%, #312e81 60%, #4c1d95 100%)", border: "1.5px solid rgba(139,92,246,0.4)" }}
             >
-              {/* Glow */}
               <div className="absolute pointer-events-none" style={{ top: "-40%", left: "50%", transform: "translateX(-50%)", width: "400px", height: "300px", background: "radial-gradient(ellipse, rgba(139,92,246,0.35) 0%, transparent 70%)" }} />
-              <div className="relative z-10">
-                <div className="flex items-center gap-2 mb-1">
-                  <p className="text-xs font-bold tracking-[0.1em] uppercase" style={{ color: "rgba(196,181,253,0.7)" }}>Pro</p>
+              <div className="relative z-10 flex flex-col flex-1">
+                <div className="flex items-center gap-2 mb-1 flex-wrap">
+                  <p className="text-xs font-bold tracking-[0.1em] uppercase" style={{ color: "rgba(196,181,253,0.85)" }}>✨ Pro</p>
                   <span className="text-xs font-bold px-2 py-0.5 rounded-full" style={{ background: "rgba(250,204,21,0.15)", color: "#fde68a", border: "1px solid rgba(250,204,21,0.25)" }}>Most popular</span>
                 </div>
-                <p className="text-3xl font-extrabold text-white mb-1" style={{ letterSpacing: "-0.04em" }}>$19<span className="text-base font-medium" style={{ color: "rgba(255,255,255,0.4)" }}>/month</span></p>
-                <p className="text-sm mb-8" style={{ color: "rgba(255,255,255,0.35)" }}>Cancel anytime. No questions asked.</p>
+                <p className="text-3xl font-extrabold text-white mb-1" style={{ letterSpacing: "-0.04em" }}>$19<span className="text-base font-medium" style={{ color: "rgba(255,255,255,0.4)" }}>/mo</span></p>
+                <p className="text-xs mb-6" style={{ color: "rgba(255,255,255,0.35)" }}>Cancel anytime · no questions</p>
+                <p className="text-sm leading-relaxed mb-5" style={{ color: "rgba(255,255,255,0.78)" }}>Everything you need to launch and make your first sale. Modules 7–12 cover ads, traffic, conversions.</p>
 
-                <div className="space-y-4 mb-8">
-                  {/* Standard items */}
+                <ul className="space-y-2.5 mb-5" style={{ listStyle: "none", padding: 0 }}>
                   {[
                     "Everything in Free",
-                    "Modules 7–12 — traffic, ads, conversions & scaling",
+                    "Modules 7–12 — traffic, ads, conversions, first sale",
                     "TikTok organic growth playbook",
                     "Step-by-step paid ads launch guide",
                     "Email list building from scratch",
+                    "📦 Weekly product picks (every Monday)",
+                    "📋 Monthly ad strategy briefing",
                     "Ad-free experience",
                   ].map(item => (
-                    <div key={item} className="flex items-start gap-3">
-                      <span className="text-sm font-bold mt-0.5 flex-shrink-0" style={{ color: "#a78bfa" }}>✓</span>
-                      <p className="text-sm leading-relaxed" style={{ color: "rgba(255,255,255,0.75)" }}>{item}</p>
-                    </div>
+                    <li key={item} className="flex items-start gap-2 text-xs leading-relaxed" style={{ color: "rgba(255,255,255,0.78)" }}>
+                      <span className="font-bold flex-shrink-0 mt-0.5" style={{ color: "#a78bfa" }}>✓</span>{item}
+                    </li>
                   ))}
+                </ul>
 
-                  {/* Divider */}
-                  <div style={{ height: "1px", background: "rgba(255,255,255,0.08)", margin: "8px 0" }} />
-
-                  {/* Weekly picks — hero feature */}
-                  <div className="rounded-2xl p-4" style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(139,92,246,0.35)" }}>
-                    <div className="flex items-start gap-3">
-                      <span className="text-xl flex-shrink-0">📦</span>
-                      <div>
-                        <p className="text-sm font-bold text-white mb-1">This week&apos;s winning products</p>
-                        <p className="text-xs leading-relaxed" style={{ color: "rgba(255,255,255,0.55)" }}>
-                          Every Monday: 5 AI-researched trending products with AliExpress cost, sell price, margin %, target audience, and a ready-to-use ad hook.
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Monthly briefing — hero feature */}
-                  <div className="rounded-2xl p-4" style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(139,92,246,0.35)" }}>
-                    <div className="flex items-start gap-3">
-                      <span className="text-xl flex-shrink-0">📋</span>
-                      <div>
-                        <p className="text-sm font-bold text-white mb-1">
-                          {new Date().toLocaleDateString("en-US", { month: "long", year: "numeric" })} Ad Strategy Update
-                        </p>
-                        <p className="text-xs leading-relaxed" style={{ color: "rgba(255,255,255,0.55)" }}>
-                          Every 1st of the month: what&apos;s actually working on Meta &amp; TikTok right now, the trending niche to watch, one tactic to add and one to drop — straight to your inbox.
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                </div>
+                <div className="flex-1" />
 
                 <Link
                   href="/quiz"
-                  className="block w-full text-center text-sm font-extrabold py-4 rounded-xl"
+                  className="block w-full text-center text-sm font-extrabold py-3.5 rounded-xl"
                   style={{ background: "linear-gradient(135deg, #facc15 0%, #f59e0b 100%)", color: "#1c1917", letterSpacing: "-0.01em" }}
                   onMouseEnter={e => { e.currentTarget.style.opacity = "0.92"; }}
                   onMouseLeave={e => { e.currentTarget.style.opacity = "1"; }}
                 >
-                  Get started — upgrade after Module 6 →
+                  Start free → upgrade after Module 6
                 </Link>
-                <p className="text-center text-xs mt-3" style={{ color: "rgba(255,255,255,0.25)" }}>Start free today · Pro unlocks after you&apos;ve built the foundation</p>
               </div>
             </div>
+
+            {/* ── SCALE LAB column ── */}
+            <div
+              className="rounded-3xl p-7 relative overflow-hidden flex flex-col"
+              style={{ background: "linear-gradient(160deg, #0c0a09 0%, #1c1917 60%, #292524 100%)", border: "1.5px solid rgba(250,204,21,0.4)" }}
+            >
+              <div className="absolute pointer-events-none" style={{ top: "-40%", left: "50%", transform: "translateX(-50%)", width: "400px", height: "300px", background: "radial-gradient(ellipse, rgba(250,204,21,0.18) 0%, transparent 70%)" }} />
+              <div className="relative z-10 flex flex-col flex-1">
+                <div className="flex items-center gap-2 mb-1 flex-wrap">
+                  <p className="text-xs font-bold tracking-[0.1em] uppercase" style={{ color: "#fde68a" }}>🚀 Scale Lab</p>
+                  <span className="text-xs font-bold px-2 py-0.5 rounded-full" style={{ background: "rgba(250,204,21,0.15)", color: "#fde68a", border: "1px solid rgba(250,204,21,0.4)" }}>Most powerful</span>
+                </div>
+                <p className="text-3xl font-extrabold text-white mb-1" style={{ letterSpacing: "-0.04em" }}>$49<span className="text-base font-medium" style={{ color: "rgba(255,255,255,0.4)" }}>/mo</span></p>
+                <p className="text-xs mb-6" style={{ color: "rgba(255,255,255,0.35)" }}>For users who got their first sale</p>
+                <p className="text-sm leading-relaxed mb-5" style={{ color: "rgba(255,255,255,0.78)" }}>Turn random sales into predictable revenue. Modules 13–24 — the operator&apos;s playbook.</p>
+
+                <ul className="space-y-2.5 mb-5" style={{ listStyle: "none", padding: 0 }}>
+                  {[
+                    "Everything in Pro",
+                    "Modules 13–24 — 12 advanced modules",
+                    "🔬 Diagnose: why first sales don't repeat",
+                    "🎯 Validate: real winners vs fake signals",
+                    "🧠 Persuade: Cialdini's 6 + UGC at scale",
+                    "🧪 Test: ICE framework + sample size discipline",
+                    "🚀 Scale: 30-day plan with kill triggers",
+                    "Built on Cialdini, Hormozi, Sean Ellis, Hopkins",
+                  ].map(item => (
+                    <li key={item} className="flex items-start gap-2 text-xs leading-relaxed" style={{ color: "rgba(255,255,255,0.78)" }}>
+                      <span className="font-bold flex-shrink-0 mt-0.5" style={{ color: "#fde68a" }}>✓</span>{item}
+                    </li>
+                  ))}
+                </ul>
+
+                <div className="flex-1" />
+
+                <Link
+                  href="/quiz"
+                  className="block w-full text-center text-sm font-extrabold py-3.5 rounded-xl"
+                  style={{ background: "linear-gradient(135deg, #facc15 0%, #f59e0b 100%)", color: "#1c1917", letterSpacing: "-0.01em" }}
+                  onMouseEnter={e => { e.currentTarget.style.opacity = "0.92"; }}
+                  onMouseLeave={e => { e.currentTarget.style.opacity = "1"; }}
+                >
+                  Start free → upgrade when ready
+                </Link>
+              </div>
+            </div>
+
           </div>
+
+          <p className="text-center text-xs mt-6" style={{ color: "#a1a1aa" }}>
+            All tiers start with the same 5-minute quiz. No credit card to start. Upgrade in-product whenever you outgrow your tier.
+          </p>
         </div>
+
+        {/* Mobile: stack the 3-tier grid */}
+        <style jsx>{`
+          @media (max-width: 800px) {
+            .pricing-grid { grid-template-columns: 1fr !important; }
+          }
+        `}</style>
       </section>
 
       {/* ── STATS ── */}
       <section className="px-4 sm:px-8 py-16" style={{ background: "#f7f7fb" }}>
         <div className="max-w-3xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
           {[
-            { n: "12",   label: "Focused modules",          sub: "20–45 min each",         color: "#4f46e5" },
-            { n: "Free", label: "To get started",           sub: "Modules 1–6 included",    color: "#7c3aed" },
-            { n: "3×",   label: "Minimum margin rule",      sub: "Built into Module 3",     color: "#a855f7" },
-            { n: "1st",  label: "Sale is your only goal",   sub: "Not theory — reality",    color: "#6366f1" },
+            { n: "24",   label: "Focused modules",          sub: "20–50 min each",                color: "#4f46e5" },
+            { n: "3",    label: "Tiers",                    sub: "Free · Pro · Scale Lab",        color: "#7c3aed" },
+            { n: "Free", label: "To get started",           sub: "Modules 1–6 included",          color: "#a855f7" },
+            { n: "1st",  label: "Sale is the only goal",    sub: "Then we make it repeat",        color: "#6366f1" },
           ].map((s) => (
             <div key={s.n} className="bg-white rounded-2xl p-6 border border-gray-100">
               <p className="text-4xl font-extrabold mb-1" style={{ color: s.color, letterSpacing: "-0.04em" }}>{s.n}</p>
@@ -1157,7 +1226,7 @@ export default function Home() {
             {[
               {
                 q: "Is this actually free?",
-                a: "Modules 1–6 are completely free — no credit card, no trial. Modules 7–12 are part of First Sale Lab Pro at $19/month, which covers traffic, ads, conversions, and scaling. Pro members also get weekly winning product picks every Monday and a monthly ad strategy update. You can complete the full beginner foundation before deciding if Pro is right for you.",
+                a: "Modules 1–6 are completely free — no credit card, no trial. The course has 3 tiers: Free (Modules 1–6 — niche, product, store, funnel), Pro at $19/mo (Modules 7–12 — traffic, ads, first sale, plus weekly product picks and a monthly briefing), and Scale Lab at $49/mo (Modules 13–24 — for users who got their first sale and want consistent revenue: diagnose metrics, find real winners, persuasion frameworks, proper ad testing, profitable scaling). You can complete the full beginner foundation for free before deciding if you want to upgrade.",
               },
               {
                 q: "Do I need experience or money to start?",
@@ -1165,7 +1234,7 @@ export default function Home() {
               },
               {
                 q: "How long does the full course take?",
-                a: "Each module is 20–45 minutes of focused content plus your real-world task. Most people complete the full 12 modules in 3–6 weeks, doing one or two modules per week alongside a job or studies.",
+                a: "Each module is 20–45 minutes of focused content plus your real-world task. Most people complete the foundation (Modules 1–12) in 3–6 weeks, doing one or two per week alongside a job or studies. The advanced Scale Lab tier (Modules 13–24) typically spans 3–6 months because most modules require running 7-day tests before the checklist can be completed.",
               },
               {
                 q: "What's the difference between this and a YouTube playlist?",
@@ -1237,7 +1306,7 @@ export default function Home() {
               </p>
               <GlowButton href="/quiz">Build my free ecommerce plan →</GlowButton>
               <p className="mt-5 text-xs" style={{ color: "rgba(255,255,255,0.3)" }}>
-                No credit card · Modules 1–6 free · Pro from $19/mo
+                No credit card · Modules 1–6 free · Pro $19/mo · Scale Lab $49/mo
               </p>
             </div>
           </div>
