@@ -20,6 +20,13 @@ export type AIRequest = {
   temperature?: number;
   /** Override the default model for the chosen provider. */
   model?: string;
+  /**
+   * URLs the model should fetch and read as context. Currently only Gemini
+   * supports this natively (via the `url_context` tool); other providers
+   * silently ignore this field. The URL should also appear in the prompt text
+   * (Gemini picks them up from there).
+   */
+  urls?: string[];
 };
 
 /** A single (provider, model) pair. */

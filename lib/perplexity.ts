@@ -415,14 +415,20 @@ export type StoreAutopsy = {
   threat_level:      "Low" | "Medium" | "High"; // how hard to compete
 };
 
-export async function analyzeStore(input: { url: string; description: string; niche?: string }): Promise<StoreAutopsy> {
+export async function analyzeStore(input: { url: string; description?: string; niche?: string }): Promise<StoreAutopsy> {
+  const hasNotes = !!(input.description && input.description.trim().length > 0);
+
   const prompt = `You are an expert ecommerce competitive analyst. The user wants a teardown of a competitor store so they can either out-compete them or find gaps in the market.
 
 Competitor URL: ${input.url}
-${input.niche ? `Their niche: ${input.niche}\n` : ""}User's description of what they observed on the store:
+${input.niche ? `Their niche: ${input.niche}\n` : ""}${hasNotes ? `User's notes from the store / their ads:
 ${input.description}
 
-You don't have web access — base your analysis ENTIRELY on the user's description plus what's plausible for a typical store in this niche. Don't make up specifics ("their hero image is...") that the user didn't mention. Instead, work with the patterns they describe and frame your analysis as:
+` : ""}IMPORTANT: When you have access to fetch the URL above, base your analysis on what's actually on the page (offer, pricing, hero image, social proof count, guarantees, copy, etc.). If you also have user notes, treat them as supplementary context (e.g. ads they've seen off-site).
+
+If you cannot fetch the URL${hasNotes ? " and only have the user's notes" : ""}, base your analysis on ${hasNotes ? "the notes plus" : ""} what's plausible for a typical store in this niche. Don't fabricate specifics you can't confirm — frame uncertain observations as "likely" or "appears to".
+
+For every section, ground your bullets in concrete observations. Frame your analysis as:
 - What they're doing well (and how that signals their strategy)
 - What they're missing (and how that creates opening for the user)
 - Specific angles the user could exploit
@@ -440,9 +446,20 @@ Return a JSON object:
 
 Each item: one sharp sentence. Reference specific things from the user's description where possible. Frame exploitation_angles as actions the user can take ("Position your store as ___ to differentiate from their generic positioning"). Threat level: Low = thin store, easy to beat; Medium = decent operator with gaps; High = serious player, find a niche they don't serve.`;
 
-  // Store Autopsy is Growth/Scale Lab exclusive — route through "growth" tier chain
-  // so when the owner upgrades that chain to Claude, this gets the better model.
-  const raw = await generate(prompt, "growth");
+  // Store Autopsy is Growth/Scale Lab exclusive — route through "growth" tier chain.
+  // Pass the URL so Gemini's url_context tool fetches the page directly.
+  // If Gemini fails (URL blocked, JS-only SPA, etc.) the chain falls through to
+  // Groq, which will see only the prompt + notes (graceful degradation).
+  const raw = await callAI(
+    {
+      systemPrompt: SYSTEM_PROMPT,
+      userPrompt:   prompt,
+      json:         true,
+      temperature:  0.4,
+      urls:         [input.url],
+    },
+    "growth",
+  );
   const parsed = JSON.parse(raw);
 
   return {

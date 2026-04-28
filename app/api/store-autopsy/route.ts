@@ -42,20 +42,25 @@ export async function POST(request: Request) {
   }
 
   const body = await request.json().catch(() => null);
-  if (!body?.url || !body?.description) {
-    return NextResponse.json({ error: "Missing required fields (url, description)" }, { status: 400 });
+  if (!body?.url) {
+    return NextResponse.json({ error: "Paste a competitor URL" }, { status: 400 });
   }
 
-  // Truncate inputs
+  const rawUrl = String(body.url).trim();
+  // Light URL sanity check — Gemini's url_context tool needs a real URL
+  try {
+    const u = new URL(rawUrl);
+    if (!["http:", "https:"].includes(u.protocol)) throw new Error("bad protocol");
+  } catch {
+    return NextResponse.json({ error: "That doesn't look like a valid URL (must start with https://)" }, { status: 400 });
+  }
+
+  // Truncate inputs. description + niche are optional now — Gemini fetches the URL.
   const input = {
-    url:         String(body.url).slice(0, 500),
-    description: String(body.description).slice(0, 3000),
-    niche:       body.niche ? String(body.niche).slice(0, 200) : undefined,
+    url:         rawUrl.slice(0, 500),
+    description: body.description ? String(body.description).slice(0, 3000) : undefined,
+    niche:       body.niche       ? String(body.niche).slice(0, 200)        : undefined,
   };
-
-  if (input.description.length < 50) {
-    return NextResponse.json({ error: "Tell us more about what you observed (at least a few sentences)" }, { status: 400 });
-  }
 
   try {
     const autopsy = await analyzeStore(input);

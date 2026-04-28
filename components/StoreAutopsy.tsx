@@ -71,7 +71,7 @@ export default function StoreAutopsy() {
   }, []);
 
   async function handleAnalyze() {
-    if (!url.trim() || description.trim().length < 50) return;
+    if (!url.trim()) return;
     setAnalyzing(true);
     setError("");
     setAutopsy(null);
@@ -159,7 +159,7 @@ export default function StoreAutopsy() {
       <div style={{ background: "#0c0a09", color: "#fde68a", border: "1px solid rgba(250,204,21,0.3)", borderRadius: 12, padding: "10px 14px", marginBottom: 18, display: "flex", alignItems: "center", gap: 10 }}>
         <span style={{ fontSize: 18 }}>🚀</span>
         <p style={{ fontSize: 12, lineHeight: 1.5, margin: 0 }}>
-          <strong>Scale Lab · Store Autopsy.</strong> Paste a competitor URL + what you observed on the store, AI returns a teardown.
+          <strong>Scale Lab · Store Autopsy.</strong> Paste a URL — AI fetches the page and returns a teardown. Notes optional (great place to add ads you've seen off-site).
         </p>
       </div>
 
@@ -195,13 +195,13 @@ export default function StoreAutopsy() {
           </div>
 
           <div style={{ marginBottom: 18 }}>
-            <label style={{ display: "block", fontSize: 13, fontWeight: 700, color: "#09090b", marginBottom: 4 }}>What did you observe on the store?</label>
-            <p style={{ fontSize: 11, color: "#a1a1aa", marginBottom: 8 }}>The AI doesn&apos;t see the URL — describe their offer, prices, bundles, hero image, hook, reviews count, ad creative if you&apos;ve seen it. Minimum a few sentences.</p>
+            <label style={{ display: "block", fontSize: 13, fontWeight: 700, color: "#09090b", marginBottom: 4 }}>Notes (optional)</label>
+            <p style={{ fontSize: 11, color: "#a1a1aa", marginBottom: 8 }}>The AI fetches the URL directly. Use this box for things AI can&apos;t see: ads you&apos;ve spotted on Meta/TikTok, founder backstory, anything off-site. Leave blank to let the AI work from just the page.</p>
             <textarea
               value={description}
               onChange={e => setDescription(e.target.value)}
-              rows={6}
-              placeholder="e.g. They sell a $40 dog joint supplement. Free shipping over $50. Bundle of 3 at 15% off. Review count is 2,300+. Hero shows old dogs running. Hook: 'Watch your dog play like they're 5 again'. They run a 30-day guarantee. Ads I've seen on Meta show before/after of older dogs."
+              rows={5}
+              placeholder="Optional. e.g. 'I've seen their Meta ads show before/after of older dogs. Founder posts daily on TikTok. Their reviews look filtered — only 5-stars on the homepage but 3-star avg on Trustpilot.'"
               style={{ width: "100%", padding: "10px 14px", borderRadius: 10, border: "1.5px solid #e4e4e7", fontSize: 13, color: "#09090b", outline: "none", boxSizing: "border-box", resize: "vertical", fontFamily: "inherit", lineHeight: 1.55 }}
               onFocus={e => (e.currentTarget.style.borderColor = "#0c0a09")}
               onBlur={e => (e.currentTarget.style.borderColor = "#e4e4e7")}
@@ -211,18 +211,18 @@ export default function StoreAutopsy() {
 
           <button
             onClick={handleAnalyze}
-            disabled={analyzing || !url.trim() || description.trim().length < 50}
+            disabled={analyzing || !url.trim()}
             style={{
               width: "100%",
-              background: analyzing || !url.trim() || description.trim().length < 50 ? "#e4e4e7" : "linear-gradient(135deg, #1c1917 0%, #0c0a09 100%)",
-              color: analyzing || !url.trim() || description.trim().length < 50 ? "#a1a1aa" : "#fde68a",
+              background: analyzing || !url.trim() ? "#e4e4e7" : "linear-gradient(135deg, #1c1917 0%, #0c0a09 100%)",
+              color: analyzing || !url.trim() ? "#a1a1aa" : "#fde68a",
               fontWeight: 800, fontSize: 14,
               padding: "14px 28px", borderRadius: 14, border: "none",
-              cursor: analyzing || !url.trim() || description.trim().length < 50 ? "not-allowed" : "pointer",
+              cursor: analyzing || !url.trim() ? "not-allowed" : "pointer",
               letterSpacing: "-0.2px",
             }}
           >
-            {analyzing ? "🤖 Analysing the store…" : "🔍 Run Store Autopsy →"}
+            {analyzing ? "🤖 Fetching the page + analysing…" : "🔍 Run Store Autopsy →"}
           </button>
 
           {error && (
