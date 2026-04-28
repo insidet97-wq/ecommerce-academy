@@ -30,6 +30,17 @@ import { isAdmin } from "./admin";
 
 export type ToolTier = "free" | "pro" | "growth";
 
+/**
+ * The 4 AI tools that share the rate-limit + logging infrastructure.
+ * Add new tools here and they automatically:
+ *   - get rate-limited per the tier table above
+ *   - get logged to ai_tool_log
+ *   - get a usage row on /api/ai-tools/usage for the UI counter
+ */
+export type AITool = "ad_copywriter" | "ugc_brief" | "ad_audit" | "store_autopsy";
+
+export const AI_TOOLS: AITool[] = ["ad_copywriter", "ugc_brief", "ad_audit", "store_autopsy"];
+
 export type GateResult = {
   ok: true;
   user: { id: string; email?: string };
@@ -56,7 +67,7 @@ export type GateResult = {
 export async function gateAITool(
   supabase: SupabaseClient,
   token: string | undefined,
-  tool: "ad_copywriter" | "ugc_brief" | "ad_audit",
+  tool: AITool,
 ): Promise<GateResult> {
   if (!token) return { ok: false, status: 401, error: "Log in to use AI tools." };
 
@@ -120,7 +131,7 @@ export async function gateAITool(
 export async function logAITool(
   supabase: SupabaseClient,
   userId: string,
-  tool: "ad_copywriter" | "ugc_brief" | "ad_audit",
+  tool: AITool,
   input: unknown,
   output: unknown,
 ): Promise<void> {

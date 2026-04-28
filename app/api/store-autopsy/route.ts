@@ -1,44 +1,42 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import { analyzeStore } from "@/lib/perplexity";
-import { isAdmin } from "@/lib/admin";
+import { gateAITool, logAITool } from "@/lib/ai-tool-gate";
 
 export const dynamic = "force-dynamic";
 
 /**
  * POST /api/store-autopsy
- * Body: { url, description, niche? }
+ * Body: { url, description?, niche? }
  *
- * Growth-tier exclusive. Sends competitor info to Groq and returns a
- * structured teardown. Server-side gate ensures free/Pro users can't
- * bypass the UI lock.
+ * Growth-tier exclusive. Routes through the shared `gateAITool` so it gets
+ * the same rate-limit (20/day) + logging (`ai_tool_log`) as the other AI tools,
+ * then explicitly rejects Pro users since this is Growth-only.
+ *
+ * Calls Gemini's url_context tool via analyzeStore() to fetch + analyse the URL.
  */
 export async function POST(request: Request) {
-  const token = request.headers.get("authorization")?.replace("Bearer ", "");
-  if (!token) return NextResponse.json({ error: "Log in to use Store Autopsy" }, { status: 401 });
-
   const supabase = createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.SUPABASE_SERVICE_ROLE_KEY!,
     { auth: { autoRefreshToken: false, persistSession: false } }
   );
 
-  const { data: { user } } = await supabase.auth.getUser(token);
-  if (!user) return NextResponse.json({ error: "Invalid session" }, { status: 401 });
-
-  // Growth / admin gate
-  const admin = isAdmin(user.email);
-  let isGrowth = false;
-  if (!admin) {
-    const { data: profile } = await supabase
-      .from("user_profiles")
-      .select("is_growth")
-      .eq("id", user.id)
-      .single();
-    isGrowth = profile?.is_growth ?? false;
+  const token = request.headers.get("authorization")?.replace("Bearer ", "");
+  const gate  = await gateAITool(supabase, token, "store_autopsy");
+  if (!gate.ok) {
+    return NextResponse.json(
+      { error: gate.error, upgrade: gate.upgrade, rateLimited: gate.rateLimited, tier: gate.tier, limit: gate.limit },
+      { status: gate.status },
+    );
   }
-  if (!admin && !isGrowth) {
-    return NextResponse.json({ error: "Store Autopsy is a Scale Lab feature.", upgrade: true }, { status: 403 });
+
+  // Growth-only: Pro users got past the gate (they're paid) but this tool isn't theirs
+  if (gate.tier !== "growth") {
+    return NextResponse.json(
+      { error: "Store Autopsy is a Scale Lab exclusive. Upgrade from Pro to Scale Lab to unlock.", upgrade: true, tier: gate.tier },
+      { status: 403 },
+    );
   }
 
   const body = await request.json().catch(() => null);
@@ -64,7 +62,8 @@ export async function POST(request: Request) {
 
   try {
     const autopsy = await analyzeStore(input);
-    return NextResponse.json({ success: true, autopsy });
+    await logAITool(supabase, gate.user.id, "store_autopsy", input, autopsy);
+    return NextResponse.json({ success: true, autopsy, used: gate.used + 1, limit: gate.limit, tier: gate.tier });
   } catch (err) {
     console.error("Store autopsy error:", err);
     return NextResponse.json({ error: "Analysis failed. Try again in a moment." }, { status: 500 });

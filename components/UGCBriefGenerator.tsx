@@ -8,6 +8,7 @@
 import { useState } from "react";
 import { supabase } from "@/lib/supabase";
 import { useAuthTier } from "@/lib/useAuthTier";
+import { useAIToolUsage } from "@/lib/useAIToolUsage";
 import AIToolLockCard from "./AIToolLockCard";
 
 const FRAMEWORKS = ["Pattern Interrupt", "Problem Agitation", "Curiosity Gap", "Transformation Reveal", "Social Proof", "Contrarian"] as const;
@@ -35,7 +36,7 @@ export default function UGCBriefGenerator() {
   const [loading,  setLoading]  = useState(false);
   const [brief,    setBrief]    = useState<Brief | null>(null);
   const [error,    setError]    = useState("");
-  const [usage,    setUsage]    = useState<{ used: number; limit: number } | null>(null);
+  const { usage, refresh: refreshUsage, bump: bumpUsage } = useAIToolUsage("ugc_brief");
 
   if (tier === "unknown" || tier === "anon" || tier === "free") {
     return (
@@ -77,11 +78,11 @@ export default function UGCBriefGenerator() {
       const data = await res.json();
       if (!res.ok) {
         setError(data.error ?? "Failed to generate.");
-        if (typeof data.limit === "number") setUsage({ used: data.limit, limit: data.limit });
+        if (data.rateLimited) refreshUsage();
         return;
       }
       setBrief(data.brief);
-      setUsage({ used: data.used, limit: data.limit });
+      bumpUsage();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to generate.");
     } finally {

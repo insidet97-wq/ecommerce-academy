@@ -8,6 +8,7 @@
 import { useState } from "react";
 import { supabase } from "@/lib/supabase";
 import { useAuthTier } from "@/lib/useAuthTier";
+import { useAIToolUsage } from "@/lib/useAIToolUsage";
 import AIToolLockCard from "./AIToolLockCard";
 
 type Audit = {
@@ -45,7 +46,7 @@ export default function AdAuditor() {
   const [loading,  setLoading]  = useState(false);
   const [audit,    setAudit]    = useState<Audit | null>(null);
   const [error,    setError]    = useState("");
-  const [usage,    setUsage]    = useState<{ used: number; limit: number } | null>(null);
+  const { usage, refresh: refreshUsage, bump: bumpUsage } = useAIToolUsage("ad_audit");
 
   if (tier === "unknown" || tier === "anon" || tier === "free") {
     return (
@@ -85,11 +86,11 @@ export default function AdAuditor() {
       const data = await res.json();
       if (!res.ok) {
         setError(data.error ?? "Failed to audit.");
-        if (typeof data.limit === "number") setUsage({ used: data.limit, limit: data.limit });
+        if (data.rateLimited) refreshUsage();
         return;
       }
       setAudit(data.audit);
-      setUsage({ used: data.used, limit: data.limit });
+      bumpUsage();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to audit.");
     } finally {

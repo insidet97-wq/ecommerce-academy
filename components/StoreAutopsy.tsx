@@ -20,6 +20,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { supabase } from "@/lib/supabase";
 import { isAdmin } from "@/lib/admin";
+import { useAIToolUsage } from "@/lib/useAIToolUsage";
 
 type Autopsy = {
   summary: string;
@@ -49,6 +50,7 @@ export default function StoreAutopsy() {
   const [analyzing, setAnalyzing] = useState(false);
   const [autopsy,   setAutopsy]   = useState<Autopsy | null>(null);
   const [error,     setError]     = useState("");
+  const { usage, refresh: refreshUsage, bump: bumpUsage } = useAIToolUsage("store_autopsy");
 
   useEffect(() => {
     let active = true;
@@ -85,8 +87,12 @@ export default function StoreAutopsy() {
         body: JSON.stringify({ url: url.trim(), niche: niche.trim() || undefined, description: description.trim() }),
       });
       const data = await res.json();
-      if (!res.ok) throw new Error(data.error ?? "Analysis failed");
+      if (!res.ok) {
+        if (data.rateLimited) refreshUsage();
+        throw new Error(data.error ?? "Analysis failed");
+      }
       setAutopsy(data.autopsy);
+      bumpUsage();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Analysis failed");
     } finally {
@@ -156,11 +162,14 @@ export default function StoreAutopsy() {
   return (
     <div>
       {/* Header notice */}
-      <div style={{ background: "#0c0a09", color: "#fde68a", border: "1px solid rgba(250,204,21,0.3)", borderRadius: 12, padding: "10px 14px", marginBottom: 18, display: "flex", alignItems: "center", gap: 10 }}>
-        <span style={{ fontSize: 18 }}>🚀</span>
-        <p style={{ fontSize: 12, lineHeight: 1.5, margin: 0 }}>
-          <strong>Scale Lab · Store Autopsy.</strong> Paste a URL — AI fetches the page and returns a teardown. Notes optional (great place to add ads you've seen off-site).
+      <div style={{ background: "#0c0a09", color: "#fde68a", border: "1px solid rgba(250,204,21,0.3)", borderRadius: 12, padding: "10px 14px", marginBottom: 18, display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 8 }}>
+        <p style={{ fontSize: 12, lineHeight: 1.5, margin: 0, display: "flex", alignItems: "center", gap: 8 }}>
+          <span style={{ fontSize: 16 }}>🚀</span>
+          <span><strong>Scale Lab · Store Autopsy.</strong> Paste a URL — AI fetches the page and returns a teardown. Notes optional.</span>
         </p>
+        {usage && (
+          <p style={{ fontSize: 11, opacity: 0.7, margin: 0 }}>{usage.used} / {usage.limit} runs today</p>
+        )}
       </div>
 
       {!autopsy ? (
