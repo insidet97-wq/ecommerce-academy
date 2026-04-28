@@ -7,18 +7,33 @@ import { isAdmin } from "@/lib/admin";
 import Link from "next/link";
 
 const MODULE_TITLES: Record<number, { emoji: string; title: string }> = {
+  // FREE
   1:  { emoji: "🎮", title: "The Rules of the Game"         },
   2:  { emoji: "🎯", title: "Find Your Niche"               },
   3:  { emoji: "🏆", title: "Find Your Winning Product"     },
   4:  { emoji: "🧠", title: "Know Your Customer"            },
   5:  { emoji: "🛒", title: "Build Your Shopify Store"      },
   6:  { emoji: "⚡", title: "Build Your First Sales Funnel" },
+  // PRO
   7:  { emoji: "📱", title: "Drive Traffic: TikTok Organic" },
   8:  { emoji: "📣", title: "Run Your First Paid Ad"        },
   9:  { emoji: "📈", title: "Conversion Optimisation"       },
   10: { emoji: "📧", title: "Build Your Email List"         },
   11: { emoji: "💰", title: "Make Your First Sale"          },
   12: { emoji: "🚀", title: "Scale and Grow"                },
+  // SCALE LAB
+  13: { emoji: "🔬", title: "Why Your First Sales Won't Repeat" },
+  14: { emoji: "📊", title: "The Numbers That Actually Matter"  },
+  15: { emoji: "💸", title: "The Profit Audit"                  },
+  16: { emoji: "🎯", title: "Real Winners vs Fake Signals"      },
+  17: { emoji: "🎁", title: "Engineering the Offer"             },
+  18: { emoji: "💰", title: "Increasing AOV Without Cost"       },
+  19: { emoji: "🧠", title: "Persuasion Foundations"            },
+  20: { emoji: "🪝", title: "The Hook Library"                  },
+  21: { emoji: "🎬", title: "UGC at Scale"                      },
+  22: { emoji: "🧪", title: "How to Test Ads Properly"          },
+  23: { emoji: "⚖️", title: "Killing, Iterating, or Scaling"    },
+  24: { emoji: "🚀", title: "Scaling Without Destroying ROAS"   },
 };
 
 type AnalyticsData = {
@@ -247,10 +262,13 @@ export default function AdminPage() {
 
           <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
             {Array.from({ length: 24 }, (_, i) => i + 1).map(id => {
-              const count = perModule[id] ?? 0;
-              const pct   = Math.round((count / maxCompletions) * 100);
-              const dropPct = id > 1 ? Math.round(((data.perModule[id-1] - count) / Math.max(1, data.perModule[id-1])) * 100) : 0;
-              const mod   = MODULE_TITLES[id];
+              const count    = perModule[id] ?? 0;
+              const prevCount = id > 1 ? (perModule[id - 1] ?? 0) : 0;
+              const pct      = Math.round((count / maxCompletions) * 100);
+              const dropPct  = id > 1 && prevCount > 0
+                ? Math.round(((prevCount - count) / prevCount) * 100)
+                : 0;
+              const mod      = MODULE_TITLES[id] ?? { emoji: "📦", title: `Module ${id}` };
               const barColor = pct > 60 ? "#6366f1" : pct > 35 ? "#7c3aed" : pct > 15 ? "#a855f7" : "#d8b4fe";
 
               return (
