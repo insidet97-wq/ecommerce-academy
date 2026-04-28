@@ -120,9 +120,12 @@ export default function AdminPage() {
     );
   }
 
-  const maxCompletions = Math.max(1, ...Object.values(data.perModule));
+  const perModule     = data.perModule ?? {};
+  const allCompletions = Object.values(perModule).filter((n): n is number => typeof n === "number");
+  const maxCompletions = allCompletions.length > 0 ? Math.max(1, ...allCompletions) : 1;
+  const m1Completions  = typeof perModule[1] === "number" ? perModule[1] : 0;
   const completionRate = data.totalUsers > 0
-    ? Math.round((data.perModule[1] / data.totalUsers) * 100)
+    ? Math.round((m1Completions / data.totalUsers) * 100)
     : 0;
 
   return (
@@ -244,7 +247,7 @@ export default function AdminPage() {
 
           <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
             {Array.from({ length: 24 }, (_, i) => i + 1).map(id => {
-              const count = data.perModule[id] ?? 0;
+              const count = perModule[id] ?? 0;
               const pct   = Math.round((count / maxCompletions) * 100);
               const dropPct = id > 1 ? Math.round(((data.perModule[id-1] - count) / Math.max(1, data.perModule[id-1])) * 100) : 0;
               const mod   = MODULE_TITLES[id];
