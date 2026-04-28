@@ -327,7 +327,7 @@ export const modules: Module[] = [
       { label: "Canva — free logo and graphics", url: "https://www.canva.com" },
       { label: "DSers — dropshipping fulfillment", url: "https://www.dsers.com" },
       { label: "Judge.me — product reviews app", url: "https://judge.me" },
-      { label: "Loox — photo reviews app", url: "https://loox.app" },
+      { label: "Loox — photo reviews app", url: "https://loox.io/app/FSL30" },
     ],
   },
 
@@ -1154,7 +1154,7 @@ export const modules: Module[] = [
     resources: [
       { label: "Influence: The Psychology of Persuasion (Cialdini)", url: "https://www.influenceatwork.com/" },
       { label: "Pre-Suasion (Cialdini) — sequel on framing", url: "https://www.amazon.com/Pre-Suasion-Revolutionary-Way-Influence-Persuade/dp/1501109790" },
-      { label: "Loox — photo & video reviews", url: "https://loox.app" },
+      { label: "Loox — photo & video reviews", url: "https://loox.io/app/FSL30" },
       { label: "Judge.me — review imports + photo reviews (free tier)", url: "https://judge.me" },
     ],
   },
@@ -1268,7 +1268,7 @@ export const modules: Module[] = [
       { label: "Insense — paid creator network", url: "https://insense.pro/" },
       { label: "Trend.io — TikTok-focused UGC", url: "https://trend.io/" },
       { label: "Capcut — free video editor for variant cuts", url: "https://www.capcut.com/" },
-      { label: "Loox — for customer-generated UGC", url: "https://loox.app" },
+      { label: "Loox — for customer-generated UGC", url: "https://loox.io/app/FSL30" },
     ],
   },
 

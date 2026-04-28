@@ -593,14 +593,15 @@ Both prompts use `response_format: { type: "json_object" }` which enforces valid
 
 Affiliate/referral links are used in `lib/modules.ts` resource arrays. Current active links:
 
-| Tool | Module | Link |
-|------|--------|------|
+| Tool | Module(s) | Link |
+|------|-----------|------|
 | Shopify | 5 | `https://shopify.pxf.io/3k9Wjr` |
-| ReConvert | 6 | `https://apps.shopify.com/reconvert-upsell-cross-sell?mref=bfgeliiu` |
+| ReConvert | 6, 18 | `https://apps.shopify.com/reconvert-upsell-cross-sell?mref=bfgeliiu` |
 | AutoDS | 3 | `https://platform.autods.com/register?ref=NTI2MjAyMQ==` |
 | Privy | 10 | `https://go.privy.com/NYUtfS6` |
+| Loox | 5, 19, 21 | `https://loox.io/app/FSL30` |
 
-Pending (application submitted or program unavailable): Klaviyo, Jungle Scout, Triple Whale, Canva, Loox, Zipify Pages, AdSpy.
+Pending (application submitted or program unavailable): Klaviyo, Jungle Scout, Triple Whale, Canva, Zipify Pages, AdSpy.
 
 When a new affiliate link is received, update the matching resource URL in `lib/modules.ts` AND add it to `lib/resources.ts` so it appears on `/resources` too.
 
@@ -781,6 +782,7 @@ Uses the Supabase service role key to bypass RLS. No auth check in the route —
 
 | Date | What changed |
 |------|-------------|
+| 2026-04-28 | **Loox affiliate link wired in:** `https://loox.io/app/FSL30`. Replaced the non-affiliate `loox.app` URL in `lib/resources.ts` (Store Building card on `/resources`) and 3 places in `lib/modules.ts` (Module 5 store building, Module 19 persuasion principles, Module 21 UGC at scale). README affiliate table updated — Loox moved from "pending" to active |
 | 2026-04-28 | **🚀 Scale Lab tier launched (12 new modules, 3-tier ladder).** New Growth tier at $49/mo gates modules 13-24 (covering diagnose/validate/persuade/test/scale phases — based on Cialdini, Hormozi, Sean Ellis, Hopkins, Berger). Tier ladder is now Free → Pro $19/mo → Scale Lab $49/mo. Code changes: added `Tier` type to `lib/modules.ts` and `tier` field to existing modules + 12 new module objects (1500+ lines added); new `is_growth` column on `user_profiles`; `/api/stripe/checkout` accepts `tier` param routing to `STRIPE_PRICE_ID` or `STRIPE_PRICE_ID_GROWTH` (new env var); webhook reads `metadata.tier` to set the right flag and dispatch the right welcome email; new `growthWelcomeEmailHTML` template; new `POST /api/admin/users/[userId]/growth` endpoint mirroring the Pro one; `/upgrade` page rewritten as a 3-tier comparison with `?tier=pro\|growth` deep-linking and a toggle; Module 12 completion now shows a Scale Lab pitch overlay (mirrors Module 6 → Pro pattern); Dashboard module list grouped visually by tier with section headers; Admin `/admin/users` shows Free/Pro/Scale Lab status + Grant/Revoke buttons for both tiers + filter for Scale Lab. **Required SQL migration (only step needed now):** `ALTER TABLE user_profiles ADD COLUMN IF NOT EXISTS is_growth boolean NOT NULL DEFAULT false;`. Stripe Scale Lab product setup is **deferred** — paired with the future flip to Stripe live mode (Pro is also still in test mode). Until Stripe is live, owner can grant Growth manually via `/admin/users` for testing |
 | 2026-04-27 | **AdSense slots configured (all 3):** Owner created 3 separate ad units in AdSense (`Content`, `Dashboard`, `Modules`) and added their slot IDs to Vercel env vars `NEXT_PUBLIC_ADSENSE_SLOT_CONTENT`, `_DASHBOARD`, `_MODULE`. Site itself is still in "Getting ready" approval status — once it flips to "Ready", ads fill automatically. Per-placement reporting now possible in AdSense dashboard. **`ads.txt`** is correctly served at `www.firstsalelab.com/ads.txt` (200 OK) but apex redirects to www so AdSense's "Ads.txt status" check may lag — monitor; re-register as `www.firstsalelab.com` if still "Not found" after 48h |
 | 2026-04-27 | **Tools / Blog / Resources promoted to landing + ads added:** `/tools` link added to marketing nav and footer (anonymous accessible — already was, just wasn't linked). New `components/UserAdBanner.tsx` wraps `AdBanner` and handles Pro detection on public pages where we don't already have it in state. AdSense banners now render on `/tools` (after the panel), `/resources` (after the list), `/blog` (after the post list), and `/blog/[slug]` (between article body and CTA card) — all controlled by new `NEXT_PUBLIC_ADSENSE_SLOT_CONTENT` env var. `sitemap.ts` and `robots.ts` updated to include `/tools` and `/resources`. Supplier Validator also got a new top-of-form Pro tease banner so the upsell appears even before users calculate |

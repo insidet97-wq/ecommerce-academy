@@ -117,7 +117,7 @@ export const resources: Resource[] = [
     category: "Store Building",
     name: "Loox",
     description: "Photo and video review app for Shopify. Import reviews, display them beautifully and boost trust instantly.",
-    url: "https://loox.app",
+    url: "https://loox.io/app/FSL30",
     emoji: "⭐",
     free: false,
     freeTier: "14-day free trial",
