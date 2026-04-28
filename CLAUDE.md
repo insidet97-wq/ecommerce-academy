@@ -150,6 +150,9 @@ CRON_SECRET
 - [x] Admin MRR + funnel + email + leads dashboards
 - [x] Store Autopsy (Growth-tier exclusive AI tool — competitor teardown)
 - [x] AI Q&A assistant per module (tier-rate-limited: 3 free / 10 Pro / 50 Growth per module per 24h)
+- [x] AI Ad Copywriter (✨ Pro/🚀 Growth) — 5 ad variants across psychological angles, rate-limited 5/50 per day
+- [x] UGC Brief Generator (✨ Pro/🚀 Growth) — complete creator brief with hook + shot list + reference styles
+- [x] AI Ad Auditor (✨ Pro/🚀 Growth) — scores ad on Cialdini's 6 + identifies hook framework + provides rewrites
 - [x] Annual plan code prep (`STRIPE_PRICE_ID_ANNUAL` + `_GROWTH_ANNUAL` env vars; Stripe products to be created with live mode)
 - [x] Referral program: code generation + capture on signup + dashboard widget + Stripe webhook flags conversion
 - [x] Affiliate links: Shopify, ReConvert, AutoDS, Privy, Loox
@@ -160,6 +163,7 @@ CRON_SECRET
 
 | What | Detail |
 |------|--------|
+| **3 new AI tools (Pro + Scale Lab)** | Added to `/tools` as tabs 6-8: ✍️ Ad Copywriter (5 variants per run, different psychological angles), 🎬 UGC Brief Generator (complete creator brief with hook/shot list/reference styles/do-not list), 🧐 Ad Auditor (scores against Cialdini's 6 + identifies hook framework + concrete rewrites). All gated: free locked, Pro 5/day per tool, Growth 50/day per tool. New shared `lib/ai-tool-gate.ts` helper handles tier check + rate limiting + logging. New shared `useAuthTier` hook for client tier detection. New shared `<AIToolLockCard>` for free/anon users. All runs logged to new `ai_tool_log` table. Tools page max-width bumped to 960px nav / 880px main; grid switched to `auto-fill minmax(140px,1fr)` so 9 tabs flow naturally |
 | **Admin dashboards expanded** | `/admin` now shows MRR by tier, churn risk, signups (7d/30d), active 7d/today, full conversion funnel (signups → M1 → M6 → M12 → M24), recent 10 signups with tier badges. Module funnel covers all 24 modules. New `/admin/email` with open/click/bounce rates per email type + top-clicked URLs. New `/admin/leads` for Niche Picker leads with drip-stage filter |
 | **Store Autopsy (Growth-exclusive)** | New `🔍 Store Autopsy` tool — 6th tab on `/tools`. User pastes a competitor URL + describes what they observed, Groq returns structured teardown: 2-3 sentence summary, offer analysis, hook strategy, social proof analysis, conversion gaps, exploitation angles, threat level (Low/Medium/High). Free/Pro users see locked card → upgrade CTA. Server-side gate on `is_growth` |
 | **AI Q&A assistant per module** | Embedded `<ModuleQA>` widget on every module page. Student types a question, Groq answers using ONLY that module's content as context. Rate-limited per tier per module per 24h: Free 3, Pro 10, Growth/admin 50. Logged to new `module_qa_log` table for rate-limiting + future analysis |
@@ -254,7 +258,7 @@ When ready to take real payments, do all in one batch:
   );
   CREATE INDEX IF NOT EXISTS referrals_referrer_id_idx ON referrals (referrer_id);
 
-  -- 🔄 NEW (Module Q&A log — rate-limiting for the AI assistant)
+  -- Module Q&A log — rate-limiting for the AI assistant (already done)
   CREATE TABLE IF NOT EXISTS module_qa_log (
     id          uuid PRIMARY KEY DEFAULT gen_random_uuid(),
     user_id     uuid NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
@@ -264,6 +268,17 @@ When ready to take real payments, do all in one batch:
     created_at  timestamptz NOT NULL DEFAULT now()
   );
   CREATE INDEX IF NOT EXISTS module_qa_log_user_module_idx ON module_qa_log (user_id, module_id, created_at DESC);
+
+  -- 🔄 NEW (AI tools log — rate-limiting + Vault feature later)
+  CREATE TABLE IF NOT EXISTS ai_tool_log (
+    id          uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id     uuid NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+    tool        text NOT NULL,        -- 'ad_copywriter' | 'ugc_brief' | 'ad_audit'
+    input       jsonb,
+    output      jsonb,
+    created_at  timestamptz NOT NULL DEFAULT now()
+  );
+  CREATE INDEX IF NOT EXISTS ai_tool_log_user_tool_idx ON ai_tool_log (user_id, tool, created_at DESC);
 
   -- Re-engagement email tracking (used by /api/cron/reengagement)
   ALTER TABLE user_profiles ADD COLUMN IF NOT EXISTS reengagement_sent_at timestamptz;

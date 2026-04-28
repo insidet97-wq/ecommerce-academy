@@ -223,6 +223,204 @@ Each item should be one short sentence — punchy, actionable, no fluff. Referen
   };
 }
 
+// ── AI Ad Copywriter ─────────────────────────────────────────
+
+export type AdVariant = {
+  angle:  string;       // e.g. "Reciprocity", "Curiosity Gap", "Transformation Reveal"
+  hook:   string;       // first 3 seconds, scroll-stopping
+  body:   string;       // the rest of the script
+  cta:    string;       // call to action
+  why_it_works: string; // 1-sentence explanation tying back to a framework
+};
+
+export type AdCopywriterInput = {
+  product_name:    string;
+  who_its_for:     string;     // target customer
+  main_benefit:    string;     // transformation or main value
+  what_makes_it_unique?: string;
+  niche?:          string;
+};
+
+export async function generateAdCopy(input: AdCopywriterInput): Promise<{ variants: AdVariant[] }> {
+  const prompt = `You are a direct response copywriter trained on Cialdini's 6 principles, Berger's STEPPS, and modern TikTok/Meta hook frameworks. Write 5 ad variants for the following product. Each variant must use a DIFFERENT psychological angle.
+
+Product: ${input.product_name}
+Target customer: ${input.who_its_for}
+Main benefit / transformation: ${input.main_benefit}
+${input.what_makes_it_unique ? `What makes it unique: ${input.what_makes_it_unique}\n` : ""}${input.niche ? `Niche: ${input.niche}\n` : ""}
+Use these 5 angles, one per variant (assign in order):
+1. Curiosity Gap — pose a question that demands resolution
+2. Problem Agitation — name the pain immediately, viscerally
+3. Transformation Reveal — show after, then explain how
+4. Social Proof Opener — lead with a number, badge, or quote
+5. Contrarian — challenge a common belief
+
+Each variant needs:
+- "angle": the angle name (one of the 5 above)
+- "hook": first 3-second opener (must work muted, from 3 feet away). One short sentence, max 12 words.
+- "body": 30-50 words. Spoken naturally, like a human talking. No corporate-speak.
+- "cta": one short sentence that drives action. Specific, not generic.
+- "why_it_works": one sentence tying back to the framework (Cialdini principle, STEPPS component, etc.)
+
+Return JSON:
+{ "variants": [ {...}, {...}, {...}, {...}, {...} ] }
+
+Keep it punchy. No fluff. Every word earns its place.`;
+
+  const raw = await callGroq(prompt);
+  const parsed = JSON.parse(raw);
+  const variants = Array.isArray(parsed.variants) ? parsed.variants : [];
+  return {
+    variants: variants.slice(0, 5).map((v: Record<string, unknown>) => ({
+      angle:        String(v.angle ?? "").slice(0, 80),
+      hook:         String(v.hook  ?? "").slice(0, 200),
+      body:         String(v.body  ?? "").slice(0, 800),
+      cta:          String(v.cta   ?? "").slice(0, 200),
+      why_it_works: String(v.why_it_works ?? "").slice(0, 300),
+    })),
+  };
+}
+
+// ── UGC Creator Brief Generator ──────────────────────────────
+
+export type UGCBrief = {
+  hook_word_for_word: string;
+  pain_to_dramatize:  string;
+  transformation:     string;
+  cta:                string;
+  format_specs:       string;
+  shot_list:          string[];
+  reference_styles:   string[];
+  do_not:             string[];
+};
+
+export type UGCBriefInput = {
+  product_name:   string;
+  target_customer: string;
+  main_benefit:   string;
+  hook_framework?: "Pattern Interrupt" | "Problem Agitation" | "Curiosity Gap" | "Transformation Reveal" | "Social Proof" | "Contrarian";
+};
+
+export async function generateUGCBrief(input: UGCBriefInput): Promise<UGCBrief> {
+  const framework = input.hook_framework ?? "Problem Agitation";
+
+  const prompt = `You are an ecommerce ads producer who briefs UGC creators on Billo, Insense, and similar platforms. Generate a complete, ready-to-send brief for the following product. The brief should be specific enough that 3 different creators would produce 3 similar but distinct videos from it.
+
+Product: ${input.product_name}
+Target customer: ${input.target_customer}
+Main benefit: ${input.main_benefit}
+Hook framework to use: ${framework}
+
+Return JSON:
+{
+  "hook_word_for_word": "The exact opening line the creator should say in the first 3 seconds. Must use the ${framework} framework. Specific, scroll-stopping, works muted.",
+  "pain_to_dramatize": "The specific pain point or moment of frustration the creator should physically act out (e.g. 'shows themselves struggling to fall asleep, tossing in bed at 2am')",
+  "transformation": "The specific 'after' moment to show — what changes for them",
+  "cta": "Word-for-word what the creator says at the end. One short sentence.",
+  "format_specs": "Vertical 9:16, 15-30 seconds, natural lighting, no music (we'll add it), no overlay text needed",
+  "shot_list": ["Shot 1: ...", "Shot 2: ...", "Shot 3: ...", "Shot 4: ..."],
+  "reference_styles": ["3 specific style references — e.g. 'Lo-fi iPhone footage like Olipop ads', 'Authentic over-the-shoulder demo', 'Get-ready-with-me confessional style'"],
+  "do_not": ["3-5 things the creator should NOT do — common pitfalls"]
+}
+
+Be specific. References to 'authentic' or 'natural' alone are useless — give concrete style guidance.`;
+
+  const raw = await callGroq(prompt);
+  const parsed = JSON.parse(raw);
+  return {
+    hook_word_for_word: String(parsed.hook_word_for_word ?? "").slice(0, 400),
+    pain_to_dramatize:  String(parsed.pain_to_dramatize  ?? "").slice(0, 400),
+    transformation:     String(parsed.transformation     ?? "").slice(0, 400),
+    cta:                String(parsed.cta                ?? "").slice(0, 200),
+    format_specs:       String(parsed.format_specs       ?? "").slice(0, 400),
+    shot_list:          Array.isArray(parsed.shot_list)        ? parsed.shot_list.slice(0, 8).map(String)        : [],
+    reference_styles:   Array.isArray(parsed.reference_styles) ? parsed.reference_styles.slice(0, 5).map(String) : [],
+    do_not:             Array.isArray(parsed.do_not)           ? parsed.do_not.slice(0, 6).map(String)           : [],
+  };
+}
+
+// ── AI Ad Audit ──────────────────────────────────────────────
+
+export type AdAudit = {
+  hook_framework:    string;       // identified hook framework
+  hook_strength:     "Strong" | "OK" | "Weak";
+  cialdini_scores: { reciprocity: number; commitment: number; social_proof: number; authority: number; liking: number; scarcity: number }; // each 0-2
+  body_assessment:   string;
+  cta_assessment:    string;
+  overall_score:     number;       // 0-100
+  rewrites: {
+    hook_rewrite: string;
+    body_rewrite: string;
+    cta_rewrite:  string;
+  };
+  improvements: string[];
+};
+
+export type AdAuditInput = {
+  ad_text:        string;        // user pastes their ad copy/script
+  product_context?: string;      // optional product info
+};
+
+export async function auditAd(input: AdAuditInput): Promise<AdAudit> {
+  const prompt = `You are a direct response copywriter performing an audit of someone's ad. Score the ad against Cialdini's 6 principles, identify which hook framework it uses, assess the body and CTA, and provide concrete rewrites.
+
+${input.product_context ? `Product context: ${input.product_context}\n\n` : ""}AD TO AUDIT:
+"""
+${input.ad_text}
+"""
+
+Return JSON:
+{
+  "hook_framework": "Identify which framework the hook uses: 'Pattern Interrupt', 'Problem Agitation', 'Curiosity Gap', 'Transformation Reveal', 'Social Proof Opener', 'Contrarian', or 'None / Generic' if it doesn't use one",
+  "hook_strength": "Strong" | "OK" | "Weak",
+  "cialdini_scores": {
+    "reciprocity":   0-2,
+    "commitment":    0-2,
+    "social_proof":  0-2,
+    "authority":     0-2,
+    "liking":        0-2,
+    "scarcity":      0-2
+  },
+  "body_assessment": "1-2 sentences on the body of the ad — what's working, what's not",
+  "cta_assessment": "1 sentence on the CTA — specific, generic, missing?",
+  "overall_score": 0-100,
+  "rewrites": {
+    "hook_rewrite": "A specific, improved hook applying a strong framework",
+    "body_rewrite": "An improved body weaving in 2-3 missing Cialdini principles",
+    "cta_rewrite": "An improved CTA that's specific and action-oriented"
+  },
+  "improvements": ["3-5 specific concrete improvements the user should make"]
+}
+
+Score conservatively. 'OK' should mean genuinely OK, not a politeness rating. Most beginner ads should score 30-55 overall.`;
+
+  const raw = await callGroq(prompt);
+  const parsed = JSON.parse(raw);
+
+  const scores = parsed.cialdini_scores ?? {};
+  return {
+    hook_framework: String(parsed.hook_framework ?? "None / Generic").slice(0, 80),
+    hook_strength:  ["Strong", "OK", "Weak"].includes(parsed.hook_strength) ? parsed.hook_strength : "OK",
+    cialdini_scores: {
+      reciprocity:  Math.max(0, Math.min(2, Number(scores.reciprocity)  || 0)),
+      commitment:   Math.max(0, Math.min(2, Number(scores.commitment)   || 0)),
+      social_proof: Math.max(0, Math.min(2, Number(scores.social_proof) || 0)),
+      authority:    Math.max(0, Math.min(2, Number(scores.authority)    || 0)),
+      liking:       Math.max(0, Math.min(2, Number(scores.liking)       || 0)),
+      scarcity:     Math.max(0, Math.min(2, Number(scores.scarcity)     || 0)),
+    },
+    body_assessment: String(parsed.body_assessment ?? "").slice(0, 500),
+    cta_assessment:  String(parsed.cta_assessment  ?? "").slice(0, 300),
+    overall_score:   Math.max(0, Math.min(100, Number(parsed.overall_score) || 0)),
+    rewrites: {
+      hook_rewrite: String(parsed.rewrites?.hook_rewrite ?? "").slice(0, 300),
+      body_rewrite: String(parsed.rewrites?.body_rewrite ?? "").slice(0, 800),
+      cta_rewrite:  String(parsed.rewrites?.cta_rewrite  ?? "").slice(0, 200),
+    },
+    improvements: Array.isArray(parsed.improvements) ? parsed.improvements.slice(0, 6).map(String) : [],
+  };
+}
+
 // ── Store Autopsy (Growth-only Pro feature) ──────────────────
 
 export type StoreAutopsy = {

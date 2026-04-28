@@ -5,13 +5,16 @@ import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import SupplierValidator from "@/components/SupplierValidator";
 import StoreAutopsy from "@/components/StoreAutopsy";
+import AdCopywriter from "@/components/AdCopywriter";
+import UGCBriefGenerator from "@/components/UGCBriefGenerator";
+import AdAuditor from "@/components/AdAuditor";
 import UserAdBanner from "@/components/UserAdBanner";
 
 /* ── Design tokens ── */
 const INDIGO = "#6366f1";
 const GRAD   = "linear-gradient(135deg, #6366f1 0%, #7c3aed 100%)";
 
-type Tool = "profit" | "validation" | "roas" | "checklist" | "supplier" | "autopsy";
+type Tool = "profit" | "validation" | "roas" | "checklist" | "supplier" | "autopsy" | "copywriter" | "ugc-brief" | "ad-audit";
 
 /* ════════════════════════════════════════════
    Shared UI primitives
@@ -587,15 +590,20 @@ function LaunchChecklist() {
    Main page
 ════════════════════════════════════════════ */
 const TOOLS_META: { id: Tool; emoji: string; label: string; tagline: string }[] = [
+  // Free calculators
   { id: "profit",     emoji: "💰", label: "Profit Calculator",  tagline: "Is your margin healthy?" },
   { id: "validation", emoji: "🎯", label: "Validation Score",   tagline: "Score your product idea /100" },
   { id: "roas",       emoji: "📈", label: "Break-Even ROAS",    tagline: "Find your ad profit threshold" },
   { id: "checklist",  emoji: "✅", label: "Launch Checklist",   tagline: "24 items before going live" },
   { id: "supplier",   emoji: "🏭", label: "Supplier Validator", tagline: "Score any supplier 0–100" },
-  { id: "autopsy",    emoji: "🔍", label: "Store Autopsy",      tagline: "🚀 Scale Lab · competitor teardown" },
+  // AI tools (Pro / Scale Lab)
+  { id: "copywriter", emoji: "✍️", label: "Ad Copywriter",       tagline: "✨ Pro · 5 variants per run" },
+  { id: "ugc-brief",  emoji: "🎬", label: "UGC Brief",            tagline: "✨ Pro · creator-ready brief" },
+  { id: "ad-audit",   emoji: "🧐", label: "Ad Auditor",           tagline: "✨ Pro · score + rewrites" },
+  { id: "autopsy",    emoji: "🔍", label: "Store Autopsy",       tagline: "🚀 Scale Lab · competitor teardown" },
 ];
 
-const VALID_TOOLS: Tool[] = ["profit", "validation", "roas", "checklist", "supplier", "autopsy"];
+const VALID_TOOLS: Tool[] = ["profit", "validation", "roas", "checklist", "supplier", "autopsy", "copywriter", "ugc-brief", "ad-audit"];
 
 // useSearchParams must be wrapped in a Suspense boundary in Next.js App Router,
 // otherwise the build fails with "useSearchParams() should be wrapped in a
@@ -617,7 +625,7 @@ function ToolsPageInner() {
         background: "rgba(255,255,255,0.85)", backdropFilter: "blur(12px)",
         borderBottom: "1px solid rgba(0,0,0,0.06)", position: "sticky", top: 0, zIndex: 40,
       }}>
-        <div style={{ maxWidth: 760, margin: "0 auto", padding: "0 24px", height: 60, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+        <div style={{ maxWidth: 960, margin: "0 auto", padding: "0 24px", height: 60, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
           <Link href="/" style={{ fontWeight: 700, fontSize: 15, color: "#09090b", textDecoration: "none", letterSpacing: "-0.3px" }}>
             First Sale Lab
           </Link>
@@ -651,7 +659,7 @@ function ToolsPageInner() {
         </div>
       </div>
 
-      <main style={{ maxWidth: 760, margin: "0 auto", padding: "28px 24px 80px" }}>
+      <main style={{ maxWidth: 880, margin: "0 auto", padding: "28px 24px 80px" }}>
 
         {/* Tool selector */}
         <div className="fade-up tool-selector" style={{ display: "grid", gap: 10, marginBottom: 24 }}>
@@ -707,6 +715,9 @@ function ToolsPageInner() {
           {active === "checklist"  && <LaunchChecklist />}
           {active === "supplier"   && <SupplierValidator />}
           {active === "autopsy"    && <StoreAutopsy />}
+          {active === "copywriter" && <AdCopywriter />}
+          {active === "ugc-brief"  && <UGCBriefGenerator />}
+          {active === "ad-audit"   && <AdAuditor />}
         </div>
 
         {/* Ad — shown to free / anonymous users only */}

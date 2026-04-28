@@ -77,12 +77,9 @@ body {
 }
 
 /* ── Responsive grid helpers ── */
-.tool-selector { grid-template-columns: repeat(6, 1fr); }
+/* Tool selector auto-fills based on width — handles any tool count gracefully */
+.tool-selector { grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); }
 .calc-grid     { grid-template-columns: repeat(2, 1fr); }
-
-@media (max-width: 1000px) {
-  .tool-selector { grid-template-columns: repeat(3, 1fr); }
-}
 
 @media (max-width: 600px) {
   .tool-selector { grid-template-columns: repeat(2, 1fr) !important; }
