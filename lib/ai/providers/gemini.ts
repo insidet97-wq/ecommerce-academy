@@ -50,7 +50,17 @@ export async function callGemini(req: AIRequest, model: string): Promise<string>
 
   if (!res.ok) {
     const text = await res.text();
-    throw new Error(`Gemini API error ${res.status}: ${text.slice(0, 300)}`);
+    // Try to surface the structured error code/message Google returns
+    // ({"error":{"code":429,"message":"...","status":"RESOURCE_EXHAUSTED"}})
+    // so the orchestrator's warn log tells us *why* (quota? bad model name?
+    // tool not allowed on this tier?) instead of just truncating at 300 chars.
+    let detail = text.slice(0, 600);
+    try {
+      const parsed = JSON.parse(text);
+      const e = parsed?.error;
+      if (e) detail = `${e.status ?? ""} ${e.message ?? ""} (code ${e.code ?? "?"})`.trim();
+    } catch { /* keep raw text */ }
+    throw new Error(`Gemini API error ${res.status}: ${detail}${useUrlContext ? " [url_context=on]" : ""}`);
   }
 
   const data = await res.json();

@@ -82,7 +82,18 @@ export async function POST(request: Request) {
     }
   }
 
-  let payload: { type: string; data?: { email_id?: string; to?: string[]; subject?: string; tags?: { name: string; value: string }[]; click?: { link?: string } } };
+  // Resend has shipped two payload shapes for `tags`:
+  //   - Older: array of { name, value } objects
+  //   - Newer: a flat { key: value } object
+  // We accept both so the webhook keeps working through their migration.
+  type ResendData = {
+    email_id?: string;
+    to?:      string[];
+    subject?: string;
+    tags?:    { name: string; value: string }[] | Record<string, string>;
+    click?:   { link?: string };
+  };
+  let payload: { type: string; data?: ResendData };
   try {
     payload = JSON.parse(rawBody);
   } catch {
@@ -92,9 +103,16 @@ export async function POST(request: Request) {
   const supabase = getAdminSupabase();
   const data = payload.data ?? {};
 
-  // Pull user_id and type from tags (we set these when sending)
+  // Pull user_id and type from tags (we set these when sending). Tolerant of
+  // both the array-of-{name,value} and the flat-object shapes.
   const tagMap: Record<string, string> = {};
-  (data.tags ?? []).forEach(t => { tagMap[t.name] = t.value; });
+  if (Array.isArray(data.tags)) {
+    data.tags.forEach(t => { if (t?.name) tagMap[t.name] = t.value; });
+  } else if (data.tags && typeof data.tags === "object") {
+    for (const [k, v] of Object.entries(data.tags)) {
+      if (typeof v === "string") tagMap[k] = v;
+    }
+  }
 
   const toEmail = data.to?.[0] ?? null;
 
