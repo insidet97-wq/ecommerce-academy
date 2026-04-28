@@ -183,22 +183,33 @@ CRON_SECRET
 
 ## Pending / known issues
 
-- **Google AdSense:** site approval still pending (status "Getting ready" as of last check). All three slot IDs ARE configured in Vercel (`NEXT_PUBLIC_ADSENSE_SLOT_DASHBOARD`, `_MODULE`, `_CONTENT`) — separate ad units in AdSense for per-placement reporting. Once site flips to "Ready", ads will fill automatically; no code changes needed. Verify in incognito (not as admin — admins are ad-free)
-- **AdSense `ads.txt`:** showed "Not found" in the dashboard despite the file being correctly served at `https://www.firstsalelab.com/ads.txt`. The apex (`firstsalelab.com`) returns a 307 → www redirect; AdSense crawlers usually follow but the status can lag 24–72h. If still "Not found" 48h after first noticing, register `www.firstsalelab.com` as a separate site in AdSense
-- **Stripe:** currently in **test mode** — switch to live keys when ready to accept real payments
-- **Resend webhook:** Vercel env var `RESEND_WEBHOOK_SECRET` set, webhook endpoint configured in Resend dashboard
-- Sitemap submitted to Google Search Console — may take days to index
-- `support@firstsalelab.com` needs to be set up in Namecheap Pro Email
-- **SQL migrations needed** — run all of these once in the Supabase SQL editor:
+### 🔄 Scale Lab tier — manual steps the owner is doing now (2026-04-28)
+1. **SQL migration in Supabase** — `ALTER TABLE user_profiles ADD COLUMN IF NOT EXISTS is_growth boolean NOT NULL DEFAULT false;` (also included in the SQL block below)
+2. **Stripe** — create a new Product called "Scale Lab" with a $49/mo recurring Price; copy the `price_xxxx...` ID
+3. **Vercel env var** — add `STRIPE_PRICE_ID_GROWTH` with the value from step 2; redeploy
+
+Until all 3 are done, `/upgrade` Scale Lab button will return a 500 with "Missing Stripe price ID for tier growth". The rest of the tier (gating, pitch overlay, admin tools) works fine without these — owner can manually grant Growth via `/admin/users` for testing.
+
+### ⏳ External waiting (no action needed)
+- **Google AdSense site approval:** "Getting ready" as of last check. All three slot IDs configured in Vercel (`NEXT_PUBLIC_ADSENSE_SLOT_DASHBOARD`, `_MODULE`, `_CONTENT`). Once Google approves, ads fill automatically. Verify in incognito (admins are ad-free).
+- **AdSense `ads.txt`:** showed "Not found" despite file being correct at `https://www.firstsalelab.com/ads.txt`. The apex returns 307 → www; AdSense crawlers usually follow but status can lag 24–72h. Register `www.firstsalelab.com` as a separate site only if still "Not found" after 48h.
+- **Sitemap** submitted to Google Search Console — indexing takes days.
+
+### 🛠 Owner-action operational items
+- **Stripe** is in **test mode** — switch to live keys when ready for real payments.
+- **`support@firstsalelab.com`** mailbox needs to be set up in Namecheap Pro Email (already referenced in settings, terms, privacy).
+- **Resend webhook** — endpoint configured, `RESEND_WEBHOOK_SECRET` set in Vercel ✅
+
+### 📜 Full SQL migrations (run all once in the Supabase SQL editor — `IF NOT EXISTS` makes them safe to re-run)
   ```sql
+  -- 🔄 NEW (Scale Lab tier — owner is running this 2026-04-28)
+  ALTER TABLE user_profiles ADD COLUMN IF NOT EXISTS is_growth boolean NOT NULL DEFAULT false;
+
   -- Re-engagement email tracking (used by /api/cron/reengagement)
-  ALTER TABLE user_profiles ADD COLUMN reengagement_sent_at timestamptz;
+  ALTER TABLE user_profiles ADD COLUMN IF NOT EXISTS reengagement_sent_at timestamptz;
 
   -- Streak-save email tracking (used by /api/cron/streak-save)
-  ALTER TABLE user_profiles ADD COLUMN streak_save_email_date date;
-
-  -- Scale Lab (Growth) tier (used by /upgrade?tier=growth + Stripe webhook)
-  ALTER TABLE user_profiles ADD COLUMN IF NOT EXISTS is_growth boolean NOT NULL DEFAULT false;
+  ALTER TABLE user_profiles ADD COLUMN IF NOT EXISTS streak_save_email_date date;
 
   -- Email events log (used by /api/webhooks/resend)
   CREATE TABLE email_events (

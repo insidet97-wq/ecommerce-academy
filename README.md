@@ -229,25 +229,40 @@ ecommerce-academy/
 - Protected (redirects to `/login` if not authenticated)
 - **Onboarding card** for brand-new users (no quiz taken yet, 0 completions): replaces the greeting/progress bar with a dark welcome hero showing 3 steps + quiz CTA + "Skip to Module 1" fallback
 - Progress card, streak badge, "Up next" dominant card (shown after first action or quiz completion)
-- Module list: modules 7–12 show "✨ Pro" badge and "Unlock →" button if free user
-- Upgrade CTA banner at bottom for free users
+- **Module list grouped visually by tier** with section headers: "Free Modules" / "✨ Pro Modules · $19/mo" / "🚀 Scale Lab · $49/mo"
+- Modules 7–12 show "✨ Pro" badge and "Unlock →" button if free user
+- Modules 13–24 show "🚀 Scale Lab" badge in black/gold and "Unlock →" button if not Growth
+- **Tier-aware upgrade CTA banner** at bottom: free users see Pro pitch ($19), Pro-without-Growth users see Scale Lab pitch ($49)
 - Pro users see "📦 Picks" and "📋 Briefings" in nav; secondary nav links (`hidden sm:block`) collapse on mobile
-- Admin users see "Analytics" and "Content" in nav
-- `?upgraded=true` param triggers green "Welcome to Pro!" banner
+- Admin users see "Analytics", "Content", "Users", "Blog" in nav
+- `?upgraded=pro` triggers purple "Welcome to Pro!" banner; `?upgraded=growth` triggers black/gold "Welcome to Scale Lab!" banner
 
-### Upgrade Page (`/upgrade`)
-- Dark hero, $19/month pricing card
-- Free vs Pro comparison table
-- Pro module previews (7–12)
-- Redirects to `/dashboard` if user is already Pro
-- Checkout button → calls `/api/stripe/checkout` → redirects to Stripe
+### Upgrade Page (`/upgrade?tier=pro|growth`)
+- Dark hero, **3-tier comparison grid**: Free / Pro $19/mo / Scale Lab $49/mo
+- Click-to-toggle cards; deep-linkable via `?tier=pro` or `?tier=growth`
+- Pro users landing here see Scale Lab pre-selected (their natural next step)
+- Growth users redirect to `/dashboard` (already on top tier)
+- Checkout button passes `{ tier }` to `/api/stripe/checkout`; server routes to the right Stripe Price ID
+- Mobile: 3-column grid stacks to 1 column under 800px
 
-### Module Pages (`/modules/1–12`)
+### Module Pages (`/modules/1–24`)
 - Modules 1–6: free (sequential unlock)
 - Modules 7–12: redirect to `/upgrade` if not Pro
+- Modules 13–24 (Scale Lab): redirect to `/upgrade?tier=growth` if not Growth
 - Intro screen (first visit) → lesson + checklist → complete
 - AdBanner shown between action steps and mistakes (free users only)
 - **Module 6 → Pro pitch:** when a free user completes Module 6, the completion overlay shows a celebration + Pro upgrade pitch instead of the standard "next module" preview; auto-redirect is disabled so the user reads the pitch; CTAs are "Upgrade to Pro $19/mo →" (primary) and "Maybe later · back to dashboard" (secondary)
+- **Module 12 → Scale Lab pitch:** when a Pro user (without Growth) completes Module 12, the completion overlay shows a black/gold celebration + Scale Lab upgrade pitch listing all 12 advanced modules; CTAs are "Upgrade to Scale Lab $49/mo →" and "Maybe later"
+
+### Scale Lab Modules (`/modules/13–24`)
+The Growth tier curriculum — advanced ecommerce education for users who already got their first sale and want consistent revenue. 5 phases:
+- **Phase 1 — Diagnose** (M13–15): Why first sales don't repeat, the 8 metrics that matter, the profit audit
+- **Phase 2 — Validate** (M16–18): Real winners vs fake signals, engineering the offer (Hormozi value equation), AOV mechanics
+- **Phase 3 — Persuade** (M19–21): Cialdini's 6 principles, hook library + STEPPS, UGC at scale
+- **Phase 4 — Test** (M22–23): ICE prioritization (Sean Ellis), kill / iterate / scale matrix
+- **Phase 5 — Scale** (M24): 30-day scaling plan with kill triggers, retention layer, LTV multipliers
+
+Source attributions throughout: Cialdini *Influence*, Hormozi *$100M Offers*, Sean Ellis *Hacking Growth*, Stefan Thomke *Experimentation Works*, Berger *Contagious*, Hopkins *Scientific Advertising*, Allan Dib *1-Page Marketing Plan*, Tanner Larsson *Ecommerce Evolved*. Full draft document at `docs/growth-tier-curriculum.md`.
 
 ### Pro: Weekly Products (`/pro/products`)
 - Pro-gated (redirects to `/upgrade` if not Pro)
@@ -272,10 +287,17 @@ ecommerce-academy/
 - Module funnel: bar chart with drop-off % per module
 
 ### Admin: Users (`/admin/users`)
-- Lists all users with email, name, signup date, completion count, streak, Pro status, last active
-- Search by email/name; filter by All/Pro/Free/Active 7d/Inactive 7d+
-- "Grant Pro" / "Revoke Pro" toggle — useful for comping friends, influencers, refunds outside Stripe
+- Lists all users with email, name, signup date, completion count, streak, **tier (Free / ✨ Pro / 🚀 Scale Lab)**, last active
+- Search by email/name; filter by All / 🚀 Scale Lab / ✨ Pro / Free / Active 7d / Inactive 7d+
+- **Two action buttons per row:** Grant/Revoke **Pro** + Grant/Revoke **Growth**
+- Granting Growth automatically grants Pro (Growth includes Pro) — confirmation dialog warns the admin
+- Useful for comping friends, influencers, refunds outside Stripe, paid course bundles
 - ⚠️ Does NOT touch Stripe — if user has active Stripe sub, the next webhook will overwrite a manual revoke. Cancel the subscription in Stripe dashboard for permanent revoke.
+
+API endpoints:
+- `GET /api/admin/users` — list all users with tier flags
+- `POST /api/admin/users/[userId]/pro` — body `{ is_pro: boolean }`
+- `POST /api/admin/users/[userId]/growth` — body `{ is_growth: boolean }` (granting also sets `is_pro=true`)
 
 ### Privacy Policy (`/privacy`) and Terms of Service (`/terms`)
 - Static server-rendered pages matching the site design
@@ -456,28 +478,42 @@ Emails are sent **fire-and-forget** (no `await`) so they never block the user.
 
 ---
 
-## Stripe Pro Subscription
+## Stripe Subscriptions (Pro & Scale Lab)
+
+### Two Stripe Products
+| Tier | Price ID env var | Price | What it grants |
+|---|---|---|---|
+| Pro | `STRIPE_PRICE_ID` | $19/mo | Modules 7-12, weekly product picks, monthly briefing, ad-free |
+| Scale Lab (Growth) | `STRIPE_PRICE_ID_GROWTH` | $49/mo | Everything in Pro + Modules 13-24 |
+
+Both are recurring monthly subscriptions. Owner manually creates the Products + Prices in Stripe; the price IDs go into Vercel env vars.
 
 ### Flow
-1. Free user clicks "Upgrade" → lands on `/upgrade`
-2. Clicks "Get Pro" → `POST /api/stripe/checkout` creates a Checkout session with `metadata.userId`
-3. User completes payment on Stripe's hosted page
-4. Stripe redirects to `firstsalelab.com/dashboard?upgraded=true`
-5. Simultaneously, Stripe fires `checkout.session.completed` webhook → `/api/stripe/webhook`
-6. Webhook upserts `user_profiles`: sets `is_pro = true`, `stripe_customer_id`, `stripe_subscription_id`
-7. Dashboard detects `?upgraded=true`, shows green banner, forces Pro UI optimistically (race condition handled)
+1. User clicks "Upgrade" on dashboard or hits `/upgrade?tier=pro|growth`
+2. `/upgrade` shows 3-tier comparison; user picks tier
+3. Click → `POST /api/stripe/checkout` with `{ userId, email, tier }`
+4. Server reads `tier` and uses `STRIPE_PRICE_ID` (Pro) or `STRIPE_PRICE_ID_GROWTH` (Growth)
+5. Checkout session created with `metadata: { userId, tier }`
+6. User completes payment on Stripe's hosted page
+7. Stripe redirects to `firstsalelab.com/dashboard?upgraded=pro` or `?upgraded=growth`
+8. Simultaneously, Stripe fires `checkout.session.completed` webhook
+9. Webhook reads `metadata.tier`:
+   - Pro → `is_pro = true`
+   - Growth → `is_pro = true` AND `is_growth = true` (Growth includes Pro)
+10. Webhook fires the matching welcome email (`proWelcomeEmailHTML` or `growthWelcomeEmailHTML`)
+11. Dashboard detects `?upgraded=...` and shows the matching banner with optimistic state
 
 ### Webhook
 - **URL:** `https://www.firstsalelab.com/api/stripe/webhook` (must use `www` subdomain — the apex redirects and Stripe won't follow 307s)
 - **Verified with:** `stripe.webhooks.constructEvent(body, sig, STRIPE_WEBHOOK_SECRET)`
 - **Events handled:**
-  - `checkout.session.completed` → grant Pro
-  - `customer.subscription.deleted` → revoke Pro
-  - `invoice.payment_failed` → revoke Pro
+  - `checkout.session.completed` → grants the tier in `metadata.tier` (defaults to Pro)
+  - `customer.subscription.deleted` → reads `sub.metadata.tier`; revokes the matching tier (Growth cancellation revokes both `is_pro` and `is_growth`)
+  - `invoice.payment_failed` → revokes both `is_pro` and `is_growth` for safety
 - Uses **upsert** (not update) so it works even if the user has no profile row yet
 
 ### Billing Portal
-- Pro users with a `stripe_customer_id` see a "Billing" button in the dashboard nav
+- Pro/Growth users with a `stripe_customer_id` see a "Billing" button in the dashboard nav
 - Calls `POST /api/stripe/portal` → creates a Stripe Billing Portal session → redirects user
 
 ### TypeScript Note
