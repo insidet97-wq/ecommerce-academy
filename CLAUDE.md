@@ -80,6 +80,21 @@ Freemium ecommerce course with **3 tiers**, live at **firstsalelab.com**:
 
 ---
 
+## AI provider state (current as of 2026-04-28)
+
+| Provider | Status | Used by |
+|---|---|---|
+| **Groq** | Free tier, primary for most flows | Free crons (Niche Picker, blog, briefings), Pro tier AI tools, Supplier AI Analysis (all tiers), Module Q&A (all tiers) |
+| **Gemini** | **Paid tier 1** (billing attached, $5/mo budget alert, 30 req/min cap per region) | Growth-tier AI tools: Ad Copywriter, UGC Brief, Ad Auditor, Store Autopsy (with `url_context` for URL fetching) |
+| **OpenAI** | Not configured | — (slot in fallback chain if `OPENAI_API_KEY` is set later) |
+| **Anthropic** | Not configured | — (slot reserved for future Scale Lab upgrade to Claude Sonnet) |
+
+Cost ceiling: ~$5/month (budget alert kills it well before that). Realistic cost: pennies/month at current scale. Fallback: any Gemini 429 → silently uses Groq → user gets a result.
+
+To upgrade Scale Lab to Claude later: add `ANTHROPIC_API_KEY` to Vercel + edit `TIER_CHAINS.growth` in `lib/ai/config.ts` to put Anthropic first. Single-line change.
+
+---
+
 ## Key business rules (never change without asking)
 
 - **No refunds** — explicitly requested by owner; terms say "all payments are non-refundable"
@@ -166,6 +181,7 @@ CRON_SECRET
 
 | What | Detail |
 |------|--------|
+| **Gemini paid tier provisioned + cost caps locked in** | Owner-action work (no code changes; config only). After hitting `RESOURCE_EXHAUSTED limit:0` on the free tier (URL Context tool is paid-tier-only — undocumented Google gating), set up: (1) New Google Cloud project "First Sale Lab" via aistudio.google.com/apikey with billing attached. (2) `$5/month` budget alert in Cloud Billing with 50%/90%/100% email thresholds. (3) Hard quota cap: `GenerateContent request limit per minute for a region` set to **30** across all 43 regions. Token-count cap deemed unnecessary — request cap + budget alert is enough. (4) New `GEMINI_API_KEY` rotated into Vercel (Production + Preview). The fallback chain still routes 429s to Groq, so even if all caps hit at once the user gets a result. Worst-case monthly cost: single-digit dollars. Realistic: pennies. **Decision left as-is:** Growth users get Gemini on the 4 premium AI tools (Ad Copywriter, UGC Brief, Ad Auditor, Store Autopsy with url_context); Supplier AI Analysis stays on Groq via hardcoded `"pro"` tier (shared between Pro and Growth); Module Q&A + crons stay on Groq via `"default"`. Cleanest mental model: "Gemini powers the premium AI tools, Groq powers shared infrastructure" |
 | **Better Gemini error surfacing + Resend webhook tags fix** | Two log-level fixes: (1) Gemini provider now parses Google's structured error envelope so `[ai] gemini/...failed` warnings show the actual `RESOURCE_EXHAUSTED (code 429)` / `INVALID_ARGUMENT` / etc. instead of a truncated 300-char string — makes it possible to diagnose whether a 429 is quota, billing-not-attached, or tool-not-allowed. Also tags the line with `[url_context=on]` when applicable. (2) Resend webhook was crashing on `(data.tags ?? []).forEach` because Resend now ships tags as a flat `{key: value}` object instead of the older `[{name, value}]` array — handler now accepts both shapes |
 | **AI tool usage counter pills + Store Autopsy rate-limited** | Every AI tool now shows a pre-fetched "X / Y runs today" pill in its header (was previously only visible after the first run, since `usage` was filled from the response). New endpoint `GET /api/ai-tools/usage` returns `{ tier, usage: { ad_copywriter, ugc_brief, ad_audit, store_autopsy } }` for the authenticated user. New shared hook `lib/useAIToolUsage.ts` pre-fetches on mount + exposes `bump()` (optimistic +1 after a successful run) and `refresh()` (re-fetch after a 429). Store Autopsy was the only AI tool without rate limiting — now routed through `gateAITool` (20/day for Growth) + logged to `ai_tool_log`. New `AITool` type union + `AI_TOOLS` array in `lib/ai-tool-gate.ts` so future tools auto-appear in the usage endpoint |
 | **Store Autopsy now reads the URL directly (Gemini URL Context)** | The Store Autopsy tool no longer asks users to describe what they observed — Gemini 2.0 Flash now fetches the competitor URL and analyses the actual page content. New `urls?: string[]` field on `AIRequest` (in `lib/ai/types.ts`); Gemini provider attaches the `url_context` tool when present (`lib/ai/providers/gemini.ts`); other providers ignore it. Notes textarea is now optional and reframed as "things AI can't see" (off-site ads, founder behaviour, Trustpilot vs on-site reviews, etc.). If Gemini fails (URL blocked, JS-only SPA, key missing), the chain falls through to Groq with whatever notes the user wrote — graceful degradation. URL validation added to the API route (rejects non-http(s)). When using `url_context`, Gemini's native JSON mime type isn't reliably combinable, so the provider switches to prompt-engineered JSON + fence stripping (mirrors the Anthropic provider) |
