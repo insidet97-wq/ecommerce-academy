@@ -11,7 +11,10 @@
 
 ## What this project is
 
-Freemium ecommerce course — 12 modules, modules 1–6 free, 7–12 behind a $19/month Pro subscription. Live at **firstsalelab.com**.
+Freemium ecommerce course with **3 tiers**, live at **firstsalelab.com**:
+- **Free** — Modules 1–6 (foundation: niche, product, store, funnel)
+- **Pro** $19/mo — Modules 7–12 + weekly product picks + monthly briefing (launch + first sale)
+- **Scale Lab** (Growth) $49/mo — Modules 13–24 — operator playbook for turning random sales into predictable revenue
 
 ---
 
@@ -44,9 +47,9 @@ Freemium ecommerce course — 12 modules, modules 1–6 free, 7–12 behind a $1
 | `/signup` | Signup → welcome email → redirect to module | No |
 | `/forgot-password` | Send reset email | No |
 | `/reset-password` | Handle reset link | No |
-| `/dashboard` | Main app: progress, streak, onboarding, module list | Yes |
-| `/modules/[1-12]` | Individual module (intro → lesson → checklist → complete) | Yes |
-| `/upgrade` | Pro paywall — dark hero, pricing, Stripe checkout | Yes |
+| `/dashboard` | Main app: progress, streak, onboarding, module list (grouped by tier) | Yes |
+| `/modules/[1-24]` | Individual module — modules 1-6 free, 7-12 Pro, 13-24 Growth | Yes |
+| `/upgrade?tier=pro\|growth` | 3-tier comparison + Stripe checkout (auto-selects tier from query param) | Yes |
 | `/settings` | Change name, change password, danger zone | Yes |
 | `/tools` | Curated tools page | Yes |
 | `/resources` | Curated resources page | Yes |
@@ -78,7 +81,7 @@ Freemium ecommerce course — 12 modules, modules 1–6 free, 7–12 behind a $1
 ## Key business rules (never change without asking)
 
 - **No refunds** — explicitly requested by owner; terms say "all payments are non-refundable"
-- **Modules 1–6 free, 7–12 Pro** — gating is `id > 6 && !isPro`
+- **3 tiers:** Free (M1–6) → Pro $19/mo (M7–12) → Scale Lab/Growth $49/mo (M13–24). Gating: M7–12 require `is_pro`, M13–24 require `is_growth`. Growth implies Pro (when granted, both flags go true)
 - **Admin email:** `insidet97@gmail.com` — bypass all Pro gating, extra nav links
 - **Quiz is required** before signup (quiz → signup flow, not the other way round)
 - **From email:** `hello@firstsalelab.com` (verified in Resend — do not change)
@@ -98,6 +101,8 @@ RESEND_API_KEY
 STRIPE_SECRET_KEY
 STRIPE_WEBHOOK_SECRET
 NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY
+STRIPE_PRICE_ID                # Pro tier $19/mo (existing)
+STRIPE_PRICE_ID_GROWTH         # Scale Lab tier $49/mo (NEW — must be created in Stripe before users can checkout Growth)
 GROQ_API_KEY
 ADMIN_EMAIL=hello@firstsalelab.com
 NEXT_PUBLIC_ADSENSE_SLOT_DASHBOARD   # add when AdSense approved
@@ -110,7 +115,7 @@ CRON_SECRET
 
 ## What's been built (complete feature list)
 
-- [x] 12 fully-written modules with content, checklist, steps, common mistakes, resources
+- [x] **24 fully-written modules** across 3 tiers (Free 1-6, Pro 7-12, Scale Lab 13-24) — content, checklist, steps, common mistakes, resources
 - [x] Sequential unlock logic + quiz pre-unlock (startModule)
 - [x] Daily streak tracking (`streak_days`, `last_active`)
 - [x] Pro gating (Stripe subscription, webhook, billing portal)
@@ -148,6 +153,7 @@ CRON_SECRET
 
 | What | Detail |
 |------|--------|
+| **🚀 Scale Lab tier launched (12 new modules + 3-tier ladder)** | New $49/mo Growth tier with 12 advanced modules (13-24) covering diagnose/validate/persuade/test/scale phases. Added `Tier` type + `tier` field to Module. New `is_growth` column on `user_profiles`. Stripe checkout accepts `tier` param (`pro`/`growth`); webhook dispatches matching welcome email and sets correct flags via `metadata.tier`. New env var `STRIPE_PRICE_ID_GROWTH`. New `/api/admin/users/[userId]/growth` endpoint. `/upgrade` rewritten as 3-tier comparison with toggle. Module 12 → Growth pitch overlay (mirrors Module 6 → Pro). Dashboard module list grouped by tier with Scale Lab styled in black/gold. New `growthWelcomeEmailHTML` template. Admin `/admin/users` shows tier (Free/Pro/Scale Lab) + Grant/Revoke buttons for both tiers, filter chips include "🚀 Scale Lab" |
 | Tools/Blog/Resources promoted + ads | `/tools` now in marketing landing nav and footer (anonymous accessible). New `components/UserAdBanner.tsx` wrapper handles Pro detection on public pages. AdSense banners added to `/tools` (after panel), `/resources` (after list), `/blog` (after post list), `/blog/[slug]` (between article body and CTA). All gated by `NEXT_PUBLIC_ADSENSE_SLOT_CONTENT` env var. Sitemap + robots updated to include `/tools` and `/resources` |
 | Supplier Validator AI tease | Pro AI feature now also surfaced **before** the user calculates — banner at the top of the validator: Pro/admin users see a confirmation pill ("Pro · AI analysis enabled"); free/anonymous users see a clickable yellow upsell card linking to `/upgrade` or `/signup`. Plus the existing post-calculation Pro CTA stays |
 | Supplier Validator + Pro AI Analysis | Free 0–100 scoring calculator (5 categories) at `/tools?tool=supplier` and embedded in Module 3. Pro-only AI layer at `POST /api/supplier-ai-analysis` calls Groq with the user's inputs and returns: 2–3 sentence summary, 3–5 red flags, 5–7 verification questions, 3–5 likely issues, 8–10 pre-order checklist items. UI shows "🤖 Run AI analysis" button for Pro/admin users; locked Pro CTA card for free/anonymous (links to `/upgrade` or `/signup`). Optional save to `supplier_validations` table |
@@ -190,6 +196,9 @@ CRON_SECRET
 
   -- Streak-save email tracking (used by /api/cron/streak-save)
   ALTER TABLE user_profiles ADD COLUMN streak_save_email_date date;
+
+  -- Scale Lab (Growth) tier (used by /upgrade?tier=growth + Stripe webhook)
+  ALTER TABLE user_profiles ADD COLUMN IF NOT EXISTS is_growth boolean NOT NULL DEFAULT false;
 
   -- Email events log (used by /api/webhooks/resend)
   CREATE TABLE email_events (

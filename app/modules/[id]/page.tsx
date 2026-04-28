@@ -103,6 +103,7 @@ export default function ModulePage() {
   const [showCompletion, setShowCompletion] = useState(false);
   const [countdown, setCountdown] = useState(5);
   const [isPro,     setIsPro]     = useState(false);
+  const [isGrowth,  setIsGrowth]  = useState(false);
 
   useEffect(() => {
     async function load() {
@@ -111,10 +112,10 @@ export default function ModulePage() {
       setUserId(user.id);
       setUserEmail(user.email ?? "");
 
-      // Fetch first name + Pro status
+      // Fetch first name + Pro/Growth status
       const { data: profile } = await supabase
         .from("user_profiles")
-        .select("first_name, is_pro")
+        .select("first_name, is_pro, is_growth")
         .eq("id", user.id)
         .single();
       setFirstName(profile?.first_name || user.email?.split("@")[0] || "there");
@@ -127,12 +128,20 @@ export default function ModulePage() {
       const doneIds = (data ?? []).map((r: { module_id: number }) => r.module_id);
       setCompleted(doneIds);
 
-      const admin   = isAdmin(user.email);
-      const userPro = (profile?.is_pro ?? false) || admin;
+      const admin    = isAdmin(user.email);
+      const userPro  = (profile?.is_pro    ?? false) || admin;
+      const userGrowth = (profile?.is_growth ?? false) || admin;
       setIsPro(userPro);
+      setIsGrowth(userGrowth);
 
-      // Pro gate: modules 7–12 require Pro subscription
-      if (moduleId > 6 && !userPro && !admin) {
+      // Tier gates:
+      //   Modules 7–12  → require Pro
+      //   Modules 13–24 → require Growth (Scale Lab)
+      if (moduleId > 12 && !userGrowth) {
+        router.push("/upgrade?tier=growth");
+        return;
+      }
+      if (moduleId > 6 && moduleId <= 12 && !userPro) {
         router.push("/upgrade");
         return;
       }
@@ -173,7 +182,8 @@ export default function ModulePage() {
   // Countdown auto-redirect — disabled for Module 6 free users (we want them to read the Pro pitch)
   useEffect(() => {
     if (!showCompletion) return;
-    if (moduleId === 6 && !isPro) return; // Pro pitch overlay handles its own CTAs
+    if (moduleId === 6  && !isPro)    return; // Pro pitch overlay handles its own CTAs
+    if (moduleId === 12 && !isGrowth) return; // Growth pitch overlay handles its own CTAs
     if (countdown <= 0) {
       if (moduleId < 12) router.push(`/modules/${moduleId + 1}`);
       else router.push("/dashboard");
@@ -291,21 +301,36 @@ export default function ModulePage() {
     );
   }
   const checkedCount = checked.filter(Boolean).length;
-  const isLast       = moduleId === 12;
+  // M12 is "last" for Pro users without Growth (they see the Scale Lab pitch above instead).
+  // M24 is "last" for Growth users (they get the certificate).
+  const isLast       = moduleId === 24 || (moduleId === 12 && !isGrowth);
   const nextId       = moduleId + 1;
 
   const NEXT_TITLES: Record<number, { emoji: string; title: string; duration: string }> = {
-    1:  { emoji: "🎯", title: "Find Your Niche",               duration: "~25 min" },
-    2:  { emoji: "🏆", title: "Find Your Winning Product",     duration: "~30 min" },
-    3:  { emoji: "🧠", title: "Know Your Customer",            duration: "~25 min" },
-    4:  { emoji: "🛒", title: "Build Your Shopify Store",      duration: "~45 min" },
-    5:  { emoji: "⚡", title: "Build Your First Sales Funnel", duration: "~35 min" },
-    6:  { emoji: "📱", title: "Drive Traffic: TikTok Organic", duration: "~30 min" },
-    7:  { emoji: "📣", title: "Run Your First Paid Ad",        duration: "~40 min" },
-    8:  { emoji: "📈", title: "Conversion Optimisation",       duration: "~30 min" },
-    9:  { emoji: "📧", title: "Build Your Email List",         duration: "~35 min" },
-    10: { emoji: "💰", title: "Make Your First Sale",          duration: "~20 min" },
-    11: { emoji: "🚀", title: "Scale and Grow",                duration: "~25 min" },
+    1:  { emoji: "🎯", title: "Find Your Niche",                  duration: "~25 min" },
+    2:  { emoji: "🏆", title: "Find Your Winning Product",        duration: "~30 min" },
+    3:  { emoji: "🧠", title: "Know Your Customer",               duration: "~25 min" },
+    4:  { emoji: "🛒", title: "Build Your Shopify Store",         duration: "~45 min" },
+    5:  { emoji: "⚡", title: "Build Your First Sales Funnel",    duration: "~35 min" },
+    6:  { emoji: "📱", title: "Drive Traffic: TikTok Organic",    duration: "~30 min" },
+    7:  { emoji: "📣", title: "Run Your First Paid Ad",           duration: "~40 min" },
+    8:  { emoji: "📈", title: "Conversion Optimisation",          duration: "~30 min" },
+    9:  { emoji: "📧", title: "Build Your Email List",            duration: "~35 min" },
+    10: { emoji: "💰", title: "Make Your First Sale",             duration: "~20 min" },
+    11: { emoji: "🚀", title: "Scale and Grow",                   duration: "~25 min" },
+    // Scale Lab continuation — only Growth users see these prompts after completing M12+
+    12: { emoji: "🔬", title: "Why Your First Sales Won't Repeat", duration: "~30 min" },
+    13: { emoji: "📊", title: "The Numbers That Actually Matter",  duration: "~40 min" },
+    14: { emoji: "💸", title: "The Profit Audit",                  duration: "~35 min" },
+    15: { emoji: "🎯", title: "Real Winners vs Fake Signals",      duration: "~35 min" },
+    16: { emoji: "🎁", title: "Engineering the Offer",             duration: "~40 min" },
+    17: { emoji: "💰", title: "Increasing AOV Without Cost",       duration: "~30 min" },
+    18: { emoji: "🧠", title: "Persuasion Foundations",            duration: "~45 min" },
+    19: { emoji: "🪝", title: "The Hook Library",                  duration: "~40 min" },
+    20: { emoji: "🎬", title: "UGC at Scale",                      duration: "~45 min" },
+    21: { emoji: "🧪", title: "How to Test Ads Properly",          duration: "~40 min" },
+    22: { emoji: "⚖️", title: "Killing, Iterating, or Scaling",    duration: "~35 min" },
+    23: { emoji: "🚀", title: "Scaling Without Destroying ROAS",   duration: "~50 min" },
   };
   const nextInfo = NEXT_TITLES[moduleId];
 
@@ -385,6 +410,87 @@ export default function ModulePage() {
                   onMouseLeave={e => { e.currentTarget.style.transform = "translateY(0)"; e.currentTarget.style.boxShadow = "0 4px 18px rgba(250,204,21,0.4)"; }}
                 >
                   Upgrade to Pro — $19/mo →
+                </Link>
+                <Link href="/dashboard" style={{ display: "block", textAlign: "center", color: "#a1a1aa", fontSize: 13, fontWeight: 500, textDecoration: "none", padding: "6px" }}
+                  onMouseEnter={e => (e.currentTarget.style.color = "#52525b")}
+                  onMouseLeave={e => (e.currentTarget.style.color = "#a1a1aa")}
+                >
+                  Maybe later · back to dashboard
+                </Link>
+              </>
+            ) : moduleId === 12 && !isGrowth ? (
+              <>
+                {/* ── Module 12 → Scale Lab pitch (Pro users without Growth) ── */}
+                <div style={{ textAlign: "center", marginBottom: 22 }}>
+                  <div style={{ fontSize: 44, marginBottom: 10, lineHeight: 1 }}>🏆</div>
+                  <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.14em", textTransform: "uppercase", color: "#0c0a09", marginBottom: 6 }}>
+                    First Sale Lab complete
+                  </p>
+                  <h2 style={{ fontSize: 22, fontWeight: 900, color: "#09090b", letterSpacing: "-0.5px", marginBottom: 8, lineHeight: 1.2 }}>
+                    You finished it, {firstName}.
+                  </h2>
+                  <p style={{ fontSize: 13, color: "#71717a", lineHeight: 1.6, maxWidth: 420, margin: "0 auto" }}>
+                    All 12 modules done. Most people who start a Shopify store never get this far. <strong style={{ color: "#09090b" }}>Now the real work begins — turning random sales into predictable revenue.</strong>
+                  </p>
+                </div>
+
+                {/* Scale Lab pitch card */}
+                <div style={{ background: "linear-gradient(135deg, #0c0a09 0%, #1c1917 100%)", borderRadius: 18, padding: "22px 20px", position: "relative", overflow: "hidden", marginBottom: 16 }}>
+                  <div className="dot-grid" style={{ position: "absolute", inset: 0, pointerEvents: "none" }} />
+                  <div style={{ position: "absolute", inset: 0, pointerEvents: "none", background: "radial-gradient(ellipse 70% 50% at 50% 0%, rgba(250,204,21,0.2) 0%, transparent 70%)" }} />
+                  <div style={{ position: "relative" }}>
+                    <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 14, flexWrap: "wrap", gap: 6 }}>
+                      <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", color: "#fde68a", background: "rgba(250,204,21,0.15)", border: "1px solid rgba(250,204,21,0.3)", padding: "3px 10px", borderRadius: 99 }}>
+                        🚀 Unlock with Scale Lab
+                      </span>
+                      <span style={{ fontSize: 12, color: "rgba(255,255,255,0.55)", fontWeight: 600 }}>
+                        $49/mo · cancel anytime
+                      </span>
+                    </div>
+
+                    <p style={{ fontSize: 13, fontWeight: 700, color: "#fff", marginBottom: 12 }}>
+                      12 advanced modules waiting:
+                    </p>
+
+                    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 6, marginBottom: 14 }}>
+                      {[
+                        { e: "🔬", t: "Why Sales Don't Repeat" },
+                        { e: "📊", t: "Metrics Mastery" },
+                        { e: "💸", t: "Profit Audit" },
+                        { e: "🎯", t: "Real vs Fake Winners" },
+                        { e: "🎁", t: "Engineering Offers" },
+                        { e: "💰", t: "AOV Mechanics" },
+                        { e: "🧠", t: "Cialdini's 6" },
+                        { e: "🪝", t: "Hook Library" },
+                        { e: "🎬", t: "UGC at Scale" },
+                        { e: "🧪", t: "Proper Ad Testing" },
+                        { e: "⚖️", t: "Kill / Iterate / Scale" },
+                        { e: "🚀", t: "Scaling Without Breaking" },
+                      ].map((m, i) => (
+                        <div key={i} style={{ display: "flex", alignItems: "center", gap: 7, padding: "7px 10px", background: "rgba(255,255,255,0.05)", border: "1px solid rgba(253,224,71,0.15)", borderRadius: 10 }}>
+                          <span style={{ fontSize: 13 }}>{m.e}</span>
+                          <span style={{ fontSize: 11, color: "rgba(255,255,255,0.85)", fontWeight: 600, letterSpacing: "-0.1px" }}>{m.t}</span>
+                        </div>
+                      ))}
+                    </div>
+
+                    <p style={{ fontSize: 11, color: "rgba(255,255,255,0.6)", lineHeight: 1.5 }}>
+                      Built on Cialdini, Hormozi, Sean Ellis, and 2026 ecommerce reality. Every module is action — no theory.
+                    </p>
+                  </div>
+                </div>
+
+                {/* Social proof / value line */}
+                <p style={{ fontSize: 11, color: "#a1a1aa", textAlign: "center", marginBottom: 14, fontStyle: "italic" }}>
+                  &ldquo;Module 16 alone made me realise 4 of my 'winners' were lottery wins.&rdquo;
+                </p>
+
+                {/* CTAs */}
+                <Link href="/upgrade?tier=growth" style={{ display: "block", textAlign: "center", background: "linear-gradient(135deg, #facc15, #f59e0b)", color: "#1c1917", fontWeight: 800, fontSize: 15, padding: "15px", borderRadius: 14, textDecoration: "none", boxShadow: "0 4px 18px rgba(250,204,21,0.4)", letterSpacing: "-0.2px", marginBottom: 10 }}
+                  onMouseEnter={e => { e.currentTarget.style.transform = "translateY(-1px)"; e.currentTarget.style.boxShadow = "0 6px 24px rgba(250,204,21,0.55)"; }}
+                  onMouseLeave={e => { e.currentTarget.style.transform = "translateY(0)"; e.currentTarget.style.boxShadow = "0 4px 18px rgba(250,204,21,0.4)"; }}
+                >
+                  Upgrade to Scale Lab — $49/mo →
                 </Link>
                 <Link href="/dashboard" style={{ display: "block", textAlign: "center", color: "#a1a1aa", fontSize: 13, fontWeight: 500, textDecoration: "none", padding: "6px" }}
                   onMouseEnter={e => (e.currentTarget.style.color = "#52525b")}

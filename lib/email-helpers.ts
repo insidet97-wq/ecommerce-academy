@@ -755,6 +755,105 @@ export function reengagementEmailHTML(firstName: string): string {
 </html>`;
 }
 
+// ── Email: Growth (Scale Lab) welcome ─────────────────────────
+
+export function growthWelcomeEmailHTML(firstName: string): string {
+  const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://firstsalelab.com";
+
+  return `<!DOCTYPE html>
+<html>
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"></head>
+<body style="margin:0;padding:0;background:#f4f4f8;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="background:#f4f4f8;padding:40px 20px;">
+    <tr><td align="center">
+      <table width="100%" cellpadding="0" cellspacing="0" style="max-width:560px;">
+
+        <!-- Header -->
+        <tr><td style="background:#0c0a09;border-radius:20px 20px 0 0;padding:42px 40px 36px;text-align:center;">
+          <p style="margin:0 0 8px;font-size:11px;font-weight:700;letter-spacing:0.18em;text-transform:uppercase;color:#fde68a;">Scale Lab</p>
+          <div style="font-size:48px;line-height:1;margin-bottom:12px;">🚀</div>
+          <h1 style="margin:0 0 8px;font-size:26px;font-weight:900;color:#fff;letter-spacing:-0.6px;line-height:1.2;">You&apos;re in, ${firstName}.</h1>
+          <p style="margin:0;font-size:14px;color:rgba(255,255,255,0.55);">Welcome to the Growth Tier</p>
+        </td></tr>
+
+        <!-- Body -->
+        <tr><td style="background:#fff;padding:36px 40px;">
+          <p style="margin:0 0 18px;font-size:15px;color:#3f3f46;line-height:1.7;">
+            You made the upgrade most operators never make — from <em>I had a sale</em> to <em>I&apos;m running a real business</em>.
+          </p>
+          <p style="margin:0 0 22px;font-size:14px;color:#52525b;line-height:1.7;">
+            The Growth Tier (modules 13–24) is built for one thing: turning random sales into predictable revenue. By the end you&apos;ll know exactly what daily ad spend produces what daily sales — and why.
+          </p>
+
+          <!-- 5-phase journey -->
+          <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:22px;">
+            <tr><td style="background:#f5f3ff;border-radius:14px;padding:20px 22px;border:1px solid #ede9fe;">
+              <p style="margin:0 0 14px;font-size:11px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:#7c3aed;">Your 12-module roadmap</p>
+              <table width="100%" cellpadding="0" cellspacing="0">
+                <tr>
+                  <td style="padding:6px 0;font-size:13px;color:#4c1d95;"><strong>🔬 Diagnose (M13–15)</strong> — why first sales don&apos;t repeat, the 8 metrics that matter, the profit audit</td>
+                </tr>
+                <tr>
+                  <td style="padding:6px 0;font-size:13px;color:#4c1d95;"><strong>🎯 Validate (M16–18)</strong> — real winners vs fake signals, engineering offers, increasing AOV</td>
+                </tr>
+                <tr>
+                  <td style="padding:6px 0;font-size:13px;color:#4c1d95;"><strong>🧠 Persuade (M19–21)</strong> — Cialdini&apos;s 6, hook library, UGC at scale</td>
+                </tr>
+                <tr>
+                  <td style="padding:6px 0;font-size:13px;color:#4c1d95;"><strong>🧪 Test (M22–23)</strong> — proper experimentation, kill/iterate/scale matrix</td>
+                </tr>
+                <tr>
+                  <td style="padding:6px 0;font-size:13px;color:#4c1d95;"><strong>🚀 Scale (M24)</strong> — 30-day scaling plan with kill triggers</td>
+                </tr>
+              </table>
+            </td></tr>
+          </table>
+
+          <!-- What's still active from Pro -->
+          <table width="100%" cellpadding="0" cellspacing="6" style="margin-bottom:22px;">
+            <tr>
+              <td width="50%" style="vertical-align:top;">
+                <div style="background:#f0fdf4;border-radius:12px;padding:14px 16px;border:1px solid #bbf7d0;">
+                  <p style="margin:0 0 4px;font-size:18px;">📦</p>
+                  <p style="margin:0 0 2px;font-size:12px;font-weight:800;color:#09090b;">Weekly product picks</p>
+                  <p style="margin:0;font-size:11px;color:#52525b;line-height:1.5;">Every Monday — included in Growth.</p>
+                </div>
+              </td>
+              <td width="50%" style="vertical-align:top;padding-left:6px;">
+                <div style="background:#eff6ff;border-radius:12px;padding:14px 16px;border:1px solid #bfdbfe;">
+                  <p style="margin:0 0 4px;font-size:18px;">📋</p>
+                  <p style="margin:0 0 2px;font-size:12px;font-weight:800;color:#09090b;">Monthly briefing</p>
+                  <p style="margin:0;font-size:11px;color:#52525b;line-height:1.5;">What&apos;s working on Meta &amp; TikTok, every month.</p>
+                </div>
+              </td>
+            </tr>
+          </table>
+
+          <p style="margin:0 0 24px;font-size:13px;color:#71717a;line-height:1.6;font-style:italic;">
+            Module 13 takes ~30 minutes. By the time you finish, you&apos;ll know whether your &ldquo;winners&rdquo; were real or just lucky days.
+          </p>
+
+          <div style="text-align:center;">
+            <a href="${SITE_URL}/modules/13"
+              style="display:inline-block;background:linear-gradient(135deg,#1c1917 0%,#0c0a09 100%);color:#fde68a;font-weight:800;font-size:15px;padding:14px 36px;border-radius:14px;text-decoration:none;letter-spacing:-0.2px;">
+              Start Module 13 →
+            </a>
+          </div>
+        </td></tr>
+
+        <!-- Footer -->
+        <tr><td style="background:#f8f8fb;border-radius:0 0 20px 20px;padding:20px 40px;text-align:center;border-top:1px solid #e4e4e7;">
+          <p style="margin:0 0 4px;font-size:12px;font-weight:700;color:#09090b;">First Sale Lab · Scale Lab tier</p>
+          <p style="margin:0;font-size:11px;color:#a1a1aa;">Reply to this email if you have questions — we read every one.</p>
+        </td></tr>
+
+      </table>
+    </td></tr>
+  </table>
+</body>
+</html>`;
+}
+
 // ── Shared Supabase admin client factory ──────────────────────
 
 export function getAdminSupabase() {

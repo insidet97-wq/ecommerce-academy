@@ -12,6 +12,7 @@ type User = {
   created_at: string;
   first_name: string | null;
   is_pro: boolean;
+  is_growth: boolean;
   streak_days: number;
   last_active: string | null;
   track: string | null;
@@ -42,7 +43,7 @@ export default function AdminUsersPage() {
   const [loading,  setLoading]  = useState(true);
   const [error,    setError]    = useState("");
   const [search,   setSearch]   = useState("");
-  const [filter,   setFilter]   = useState<"all" | "pro" | "free" | "active" | "inactive">("all");
+  const [filter,   setFilter]   = useState<"all" | "pro" | "growth" | "free" | "active" | "inactive">("all");
   const [updating, setUpdating] = useState<string | null>(null);
 
   useEffect(() => {
@@ -85,8 +86,9 @@ export default function AdminUsersPage() {
         if (!hay.includes(q)) return false;
       }
       // Filter
-      if (filter === "pro" && !u.is_pro) return false;
-      if (filter === "free" && u.is_pro) return false;
+      if (filter === "pro"    && !u.is_pro)    return false;
+      if (filter === "growth" && !u.is_growth) return false;
+      if (filter === "free"   && (u.is_pro || u.is_growth)) return false;
       if (filter === "active" && (!u.last_active || u.last_active < weekAgoStr)) return false;
       if (filter === "inactive" && u.last_active && u.last_active >= weekAgoStr) return false;
       // unused but kept to silence the compiler
@@ -96,10 +98,11 @@ export default function AdminUsersPage() {
   }, [users, search, filter]);
 
   const stats = useMemo(() => {
-    const total = users.length;
-    const pro   = users.filter(u => u.is_pro).length;
-    const free  = total - pro;
-    return { total, pro, free };
+    const total  = users.length;
+    const growth = users.filter(u => u.is_growth).length;
+    const pro    = users.filter(u => u.is_pro && !u.is_growth).length;
+    const free   = users.filter(u => !u.is_pro && !u.is_growth).length;
+    return { total, growth, pro, free };
   }, [users]);
 
   async function togglePro(user: User) {
@@ -124,6 +127,35 @@ export default function AdminUsersPage() {
       if (!res.ok) throw new Error(`Update failed (${res.status})`);
 
       setUsers(prev => prev.map(u => (u.id === user.id ? { ...u, is_pro: next } : u)));
+    } catch (err) {
+      alert(`Failed: ${err instanceof Error ? err.message : "unknown"}`);
+    } finally {
+      setUpdating(null);
+    }
+  }
+
+  async function toggleGrowth(user: User) {
+    if (updating) return;
+    const next = !user.is_growth;
+    const verb = next ? "grant" : "revoke";
+    if (!confirm(`Are you sure you want to ${verb} Scale Lab (Growth) for ${user.email}?${next ? "\n\nThis will also grant Pro automatically." : ""}`)) return;
+
+    setUpdating(user.id);
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session?.access_token) throw new Error("No session");
+
+      const res = await fetch(`/api/admin/users/${user.id}/growth`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${session.access_token}`,
+        },
+        body: JSON.stringify({ is_growth: next }),
+      });
+      if (!res.ok) throw new Error(`Update failed (${res.status})`);
+
+      setUsers(prev => prev.map(u => (u.id === user.id ? { ...u, is_growth: next, is_pro: next ? true : u.is_pro } : u)));
     } catch (err) {
       alert(`Failed: ${err instanceof Error ? err.message : "unknown"}`);
     } finally {
@@ -173,7 +205,7 @@ export default function AdminUsersPage() {
         {/* Header */}
         <div style={{ marginBottom: 24 }}>
           <h1 style={{ fontSize: 26, fontWeight: 900, color: "#09090b", letterSpacing: "-0.6px", marginBottom: 4 }}>Users</h1>
-          <p style={{ fontSize: 13, color: "#a1a1aa" }}>{stats.total} total · {stats.pro} Pro · {stats.free} free</p>
+          <p style={{ fontSize: 13, color: "#a1a1aa" }}>{stats.total} total · {stats.growth} Scale Lab · {stats.pro} Pro · {stats.free} free</p>
         </div>
 
         {/* Search + filters */}
@@ -190,6 +222,7 @@ export default function AdminUsersPage() {
           <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
             {[
               { v: "all",      label: "All" },
+              { v: "growth",   label: "🚀 Scale Lab" },
               { v: "pro",      label: "✨ Pro" },
               { v: "free",     label: "Free" },
               { v: "active",   label: "Active 7d" },
@@ -247,7 +280,11 @@ export default function AdminUsersPage() {
                       </td>
                       {/* Status */}
                       <td style={{ padding: "12px 16px" }}>
-                        {u.is_pro ? (
+                        {u.is_growth ? (
+                          <span style={{ fontSize: 11, fontWeight: 700, padding: "3px 9px", borderRadius: 99, background: "#0c0a09", color: "#fde68a", whiteSpace: "nowrap" }}>
+                            🚀 Scale Lab
+                          </span>
+                        ) : u.is_pro ? (
                           <span style={{ fontSize: 11, fontWeight: 700, padding: "3px 9px", borderRadius: 99, background: "linear-gradient(135deg, #facc15, #f59e0b)", color: "#1c1917", whiteSpace: "nowrap" }}>
                             ✨ Pro
                           </span>
@@ -281,23 +318,42 @@ export default function AdminUsersPage() {
                       <td style={{ padding: "12px 16px", fontSize: 12, color: "#71717a", whiteSpace: "nowrap" }}>{formatDate(u.created_at)}</td>
                       {/* Action */}
                       <td style={{ padding: "12px 16px", textAlign: "right" }}>
-                        <button
-                          onClick={() => togglePro(u)}
-                          disabled={updating === u.id}
-                          style={{
-                            fontSize: 11, fontWeight: 700,
-                            padding: "6px 12px", borderRadius: 8,
-                            border: "1.5px solid",
-                            borderColor: u.is_pro ? "#fecaca" : "#c4b5fd",
-                            background:  u.is_pro ? "#fff5f5" : "#f5f3ff",
-                            color:       u.is_pro ? "#dc2626" : "#7c3aed",
-                            cursor: updating === u.id ? "not-allowed" : "pointer",
-                            opacity: updating === u.id ? 0.5 : 1,
-                            whiteSpace: "nowrap",
-                          }}
-                        >
-                          {updating === u.id ? "…" : u.is_pro ? "Revoke Pro" : "Grant Pro"}
-                        </button>
+                        <div style={{ display: "flex", gap: 6, justifyContent: "flex-end", flexWrap: "wrap" }}>
+                          <button
+                            onClick={() => togglePro(u)}
+                            disabled={updating === u.id}
+                            style={{
+                              fontSize: 11, fontWeight: 700,
+                              padding: "6px 10px", borderRadius: 8,
+                              border: "1.5px solid",
+                              borderColor: u.is_pro ? "#fecaca" : "#c4b5fd",
+                              background:  u.is_pro ? "#fff5f5" : "#f5f3ff",
+                              color:       u.is_pro ? "#dc2626" : "#7c3aed",
+                              cursor: updating === u.id ? "not-allowed" : "pointer",
+                              opacity: updating === u.id ? 0.5 : 1,
+                              whiteSpace: "nowrap",
+                            }}
+                          >
+                            {u.is_pro ? "Revoke Pro" : "Grant Pro"}
+                          </button>
+                          <button
+                            onClick={() => toggleGrowth(u)}
+                            disabled={updating === u.id}
+                            style={{
+                              fontSize: 11, fontWeight: 700,
+                              padding: "6px 10px", borderRadius: 8,
+                              border: "1.5px solid",
+                              borderColor: u.is_growth ? "#fca5a5" : "#1c1917",
+                              background:  u.is_growth ? "#fff5f5" : "#0c0a09",
+                              color:       u.is_growth ? "#dc2626" : "#fde68a",
+                              cursor: updating === u.id ? "not-allowed" : "pointer",
+                              opacity: updating === u.id ? 0.5 : 1,
+                              whiteSpace: "nowrap",
+                            }}
+                          >
+                            {u.is_growth ? "Revoke Growth" : "Grant Growth"}
+                          </button>
+                        </div>
                       </td>
                     </tr>
                   ))

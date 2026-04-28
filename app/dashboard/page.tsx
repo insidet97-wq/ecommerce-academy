@@ -20,19 +20,37 @@ const GOAL_LABELS: Record<string, string> = {
   full_time:   "Replace full-time income",
   learn:       "Learn how ecommerce works",
 };
-const MODULES = [
-  { id: 1,  emoji: "🎮", title: "The Rules of the Game",         duration: "~20 min", description: "Understand how ecommerce works before spending $1." },
-  { id: 2,  emoji: "🎯", title: "Find Your Niche",               duration: "~25 min", description: "Choose a specific, passionate, profitable niche." },
-  { id: 3,  emoji: "🏆", title: "Find Your Winning Product",     duration: "~30 min", description: "Validate one product with the 3X margin rule." },
-  { id: 4,  emoji: "🧠", title: "Know Your Customer",            duration: "~25 min", description: "Build a detailed customer avatar." },
-  { id: 5,  emoji: "🛒", title: "Build Your Shopify Store",      duration: "~45 min", description: "Launch a clean, professional store with trust signals." },
-  { id: 6,  emoji: "⚡", title: "Build Your First Sales Funnel", duration: "~35 min", description: "A focused landing page + upsell for your hero product." },
-  { id: 7,  emoji: "📱", title: "Drive Traffic: TikTok Organic", duration: "~30 min", description: "Get eyes on your product for free using TikTok." },
-  { id: 8,  emoji: "📣", title: "Run Your First Paid Ad",        duration: "~40 min", description: "Launch a small Meta or TikTok ad campaign." },
-  { id: 9,  emoji: "📈", title: "Conversion Optimisation",       duration: "~30 min", description: "Squeeze more sales out of the traffic you have." },
-  { id: 10, emoji: "📧", title: "Build Your Email List",         duration: "~35 min", description: "Own a direct line to your audience — forever." },
-  { id: 11, emoji: "💰", title: "Make Your First Sale",          duration: "~20 min", description: "Get everything in place and land your first transaction." },
-  { id: 12, emoji: "🚀", title: "Scale and Grow",                duration: "~25 min", description: "Add recurring income, a second product, a second channel." },
+type Tier = "free" | "pro" | "growth";
+type ModuleListItem = { id: number; emoji: string; title: string; duration: string; description: string; tier: Tier };
+
+const MODULES: ModuleListItem[] = [
+  // FREE
+  { id: 1,  emoji: "🎮", title: "The Rules of the Game",         duration: "~20 min", description: "Understand how ecommerce works before spending $1.",            tier: "free" },
+  { id: 2,  emoji: "🎯", title: "Find Your Niche",               duration: "~25 min", description: "Choose a specific, passionate, profitable niche.",              tier: "free" },
+  { id: 3,  emoji: "🏆", title: "Find Your Winning Product",     duration: "~30 min", description: "Validate one product with the 3X margin rule.",                 tier: "free" },
+  { id: 4,  emoji: "🧠", title: "Know Your Customer",            duration: "~25 min", description: "Build a detailed customer avatar.",                             tier: "free" },
+  { id: 5,  emoji: "🛒", title: "Build Your Shopify Store",      duration: "~45 min", description: "Launch a clean, professional store with trust signals.",        tier: "free" },
+  { id: 6,  emoji: "⚡", title: "Build Your First Sales Funnel", duration: "~35 min", description: "A focused landing page + upsell for your hero product.",        tier: "free" },
+  // PRO
+  { id: 7,  emoji: "📱", title: "Drive Traffic: TikTok Organic", duration: "~30 min", description: "Get eyes on your product for free using TikTok.",               tier: "pro" },
+  { id: 8,  emoji: "📣", title: "Run Your First Paid Ad",        duration: "~40 min", description: "Launch a small Meta or TikTok ad campaign.",                    tier: "pro" },
+  { id: 9,  emoji: "📈", title: "Conversion Optimisation",       duration: "~30 min", description: "Squeeze more sales out of the traffic you have.",               tier: "pro" },
+  { id: 10, emoji: "📧", title: "Build Your Email List",         duration: "~35 min", description: "Own a direct line to your audience — forever.",                tier: "pro" },
+  { id: 11, emoji: "💰", title: "Make Your First Sale",          duration: "~20 min", description: "Get everything in place and land your first transaction.",     tier: "pro" },
+  { id: 12, emoji: "🚀", title: "Scale and Grow",                duration: "~25 min", description: "Add recurring income, a second product, a second channel.",    tier: "pro" },
+  // GROWTH (Scale Lab — modules 13-24)
+  { id: 13, emoji: "🔬", title: "Why Your First Sales Won't Repeat",   duration: "~30 min", description: "Why early sales feel random — survivorship bias and the noise problem at low volume.", tier: "growth" },
+  { id: 14, emoji: "📊", title: "The Numbers That Actually Matter",    duration: "~40 min", description: "The 8 metrics every operator tracks daily — with thresholds.",                          tier: "growth" },
+  { id: 15, emoji: "💸", title: "The Profit Audit",                    duration: "~35 min", description: "Run a true 30-day P&L. Most 'profitable' stores aren't.",                               tier: "growth" },
+  { id: 16, emoji: "🎯", title: "Real Winners vs Fake Signals",        duration: "~35 min", description: "The 100-click rule and the repeatability test for any 'winner'.",                       tier: "growth" },
+  { id: 17, emoji: "🎁", title: "Engineering the Offer",               duration: "~40 min", description: "Stop optimizing the product. Engineer the offer (Hormozi value equation).",            tier: "growth" },
+  { id: 18, emoji: "💰", title: "Increasing AOV Without Cost",         duration: "~30 min", description: "4 mechanisms that lift AOV 25–50% from the same traffic.",                              tier: "growth" },
+  { id: 19, emoji: "🧠", title: "Persuasion Foundations",              duration: "~45 min", description: "Cialdini's 6 principles applied to ads, product page, and email.",                     tier: "growth" },
+  { id: 20, emoji: "🪝", title: "The Hook Library",                    duration: "~40 min", description: "6 hook frameworks. Build 20+ hooks. Find the winner for your product.",                tier: "growth" },
+  { id: 21, emoji: "🎬", title: "UGC at Scale",                        duration: "~45 min", description: "Brief, source, and iterate UGC creators. 8–15 variants/month at $50–150 each.",        tier: "growth" },
+  { id: 22, emoji: "🧪", title: "How to Test Ads Properly",            duration: "~40 min", description: "ICE prioritization, isolation, and proper sample size. Stop guessing.",                tier: "growth" },
+  { id: 23, emoji: "⚖️", title: "Killing, Iterating, or Scaling",      duration: "~35 min", description: "The decision matrix. The 20% scaling rule. Ad fatigue signals.",                       tier: "growth" },
+  { id: 24, emoji: "🚀", title: "Scaling Without Destroying ROAS",     duration: "~50 min", description: "30-day scaling plan, kill triggers, the retention layer (LTV multiplier).",            tier: "growth" },
 ];
 
 function getGreeting() {
@@ -57,7 +75,7 @@ type Profile = {
   track: string | null; start_module: number;
   goal: string | null; first_name: string | null;
   streak_days: number | null; last_active: string | null;
-  is_pro: boolean; stripe_customer_id: string | null;
+  is_pro: boolean; is_growth: boolean; stripe_customer_id: string | null;
 };
 
 /* ── Certificate Modal ── */
@@ -119,7 +137,7 @@ export default function DashboardPage() {
   const [email,          setEmail]          = useState("");
   const [userId,         setUserId]         = useState<string | null>(null);
   const [completed,      setCompleted]      = useState<number[]>([]);
-  const [profile,        setProfile]        = useState<Profile>({ track: null, start_module: 1, goal: null, first_name: null, streak_days: null, last_active: null, is_pro: false, stripe_customer_id: null });
+  const [profile,        setProfile]        = useState<Profile>({ track: null, start_module: 1, goal: null, first_name: null, streak_days: null, last_active: null, is_pro: false, is_growth: false, stripe_customer_id: null });
   const [loading,        setLoading]        = useState(true);
   const [showCert,       setShowCert]       = useState(false);
   const [upgradedBanner, setUpgradedBanner] = useState(false);
@@ -129,12 +147,18 @@ export default function DashboardPage() {
   const closeCert = useCallback(() => setShowCert(false), []);
 
   // When the upgraded banner is shown, force is_pro = true immediately
-  // (webhook may still be in flight when the success redirect lands)
+  // (webhook may still be in flight when the success redirect lands).
+  // Growth upgrades flip both is_pro and is_growth.
+  const [upgradedTier, setUpgradedTier] = useState<"pro" | "growth" | null>(null);
   useEffect(() => {
     if (upgradedBanner) {
-      setProfile(prev => ({ ...prev, is_pro: true }));
+      setProfile(prev => ({
+        ...prev,
+        is_pro: true,
+        is_growth: upgradedTier === "growth" ? true : prev.is_growth,
+      }));
     }
-  }, [upgradedBanner]);
+  }, [upgradedBanner, upgradedTier]);
 
   useEffect(() => {
     async function load() {
@@ -143,16 +167,22 @@ export default function DashboardPage() {
       setEmail(user.email ?? "");
       setUserId(user.id);
 
-      // Check for ?upgraded=true in URL — set Pro optimistically (webhook may still be in flight)
-      const justUpgraded = typeof window !== "undefined" && new URLSearchParams(window.location.search).get("upgraded") === "true";
+      // Check for ?upgraded=<tier> in URL — set tier optimistically (webhook may still be in flight).
+      // Backwards-compat: ?upgraded=true also accepted, treated as Pro.
+      const upgradedParam = typeof window !== "undefined"
+        ? new URLSearchParams(window.location.search).get("upgraded")
+        : null;
+      const justUpgraded = upgradedParam !== null;
+      const upgradedToGrowth = upgradedParam === "growth";
       if (justUpgraded) {
         setUpgradedBanner(true);
+        setUpgradedTier(upgradedToGrowth ? "growth" : "pro");
         window.history.replaceState({}, "", "/dashboard");
       }
 
       const [progressRes, profileRes] = await Promise.all([
         supabase.from("user_progress").select("module_id").eq("user_id", user.id),
-        supabase.from("user_profiles").select("track, start_module, goal, first_name, streak_days, last_active, is_pro, stripe_customer_id").eq("id", user.id).single(),
+        supabase.from("user_profiles").select("track, start_module, goal, first_name, streak_days, last_active, is_pro, is_growth, stripe_customer_id").eq("id", user.id).single(),
       ]);
       setCompleted((progressRes.data ?? []).map((r: { module_id: number }) => r.module_id));
       // Always call setProfile — even if no row exists, use safe defaults
@@ -164,6 +194,7 @@ export default function DashboardPage() {
         streak_days:         profileRes.data?.streak_days         ?? 0,
         last_active:         profileRes.data?.last_active         ?? null,
         is_pro:              (profileRes.data?.is_pro ?? false)   || justUpgraded,
+        is_growth:           (profileRes.data?.is_growth ?? false) || upgradedToGrowth,
         stripe_customer_id:  profileRes.data?.stripe_customer_id ?? null,
       });
       setLoading(false);
@@ -198,15 +229,18 @@ export default function DashboardPage() {
   }
 
   const admin           = isAdmin(email);
-  const isPro           = profile.is_pro || admin;
+  const isPro           = profile.is_pro    || admin;
+  const isGrowth        = profile.is_growth || admin;
   const completedCount  = completed.length;
   const progressPercent = Math.round((completedCount / MODULES.length) * 100);
   const startModule     = profile.start_module ?? 1;
   const firstName       = profile.first_name || email.split("@")[0];
   const trackColor      = profile.track ? (TRACK_COLORS[profile.track] ?? "#4f46e5") : "#4f46e5";
-  const isProGated      = (id: number) => id > 6 && !isPro;
+  const isProGated      = (id: number) => id > 6  && id <= 12 && !isPro;
+  const isGrowthGated   = (id: number) => id > 12 && !isGrowth;
+  const isTierGated     = (id: number) => isProGated(id) || isGrowthGated(id);
   const isUnlocked      = (id: number) => {
-    if (isProGated(id)) return false;
+    if (isTierGated(id)) return false;
     return admin || id <= startModule || completed.includes(id - 1);
   };
   const nextModule      = MODULES.find(m => !completed.includes(m.id) && isUnlocked(m.id));
@@ -233,12 +267,23 @@ export default function DashboardPage() {
 
       {/* ── Upgraded success banner ── */}
       {upgradedBanner && (
-        <div style={{ background: "linear-gradient(135deg, #4c1d95, #6d28d9)", padding: "14px 24px", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12, flexWrap: "wrap" }}>
+        <div style={{
+          background: upgradedTier === "growth"
+            ? "linear-gradient(135deg, #0c0a09, #292524)"
+            : "linear-gradient(135deg, #4c1d95, #6d28d9)",
+          padding: "14px 24px", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12, flexWrap: "wrap",
+        }}>
           <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-            <span style={{ fontSize: 20 }}>🎉</span>
+            <span style={{ fontSize: 20 }}>{upgradedTier === "growth" ? "🚀" : "🎉"}</span>
             <div>
-              <p style={{ fontSize: 14, fontWeight: 700, color: "#fff" }}>Welcome to First Sale Lab Pro!</p>
-              <p style={{ fontSize: 12, color: "rgba(255,255,255,0.65)" }}>All 12 modules are now unlocked. Let&apos;s get that first sale.</p>
+              <p style={{ fontSize: 14, fontWeight: 700, color: "#fff" }}>
+                {upgradedTier === "growth" ? "Welcome to Scale Lab!" : "Welcome to First Sale Lab Pro!"}
+              </p>
+              <p style={{ fontSize: 12, color: "rgba(255,255,255,0.65)" }}>
+                {upgradedTier === "growth"
+                  ? "All 24 modules unlocked. Time to make your sales predictable."
+                  : "All 12 modules are now unlocked. Let’s get that first sale."}
+              </p>
             </div>
           </div>
           <button onClick={() => setUpgradedBanner(false)} style={{ background: "rgba(255,255,255,0.15)", color: "#fff", border: "none", borderRadius: 8, padding: "6px 14px", fontSize: 12, fontWeight: 600, cursor: "pointer", flexShrink: 0 }}>
@@ -522,45 +567,87 @@ export default function DashboardPage() {
             )}
           </div>
           <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-            {MODULES.map(mod => {
-              const isDone    = completed.includes(mod.id);
-              const proGated  = isProGated(mod.id);
-              const unlocked  = isUnlocked(mod.id);
-              const isNext    = nextModule?.id === mod.id;
-              const isSkipped = mod.id < startModule && !isDone;
+            {MODULES.map((mod, idx) => {
+              const isDone        = completed.includes(mod.id);
+              const proGated      = isProGated(mod.id);
+              const growthGated   = isGrowthGated(mod.id);
+              const tierGated     = proGated || growthGated;
+              const unlocked      = isUnlocked(mod.id);
+              const isNext        = nextModule?.id === mod.id;
+              const isSkipped     = mod.id < startModule && !isDone;
+
+              // Tier section header — shows above the first module of each tier
+              const prevTier = idx > 0 ? MODULES[idx - 1].tier : null;
+              const showTierHeader = mod.tier !== prevTier;
+              const tierHeaderText =
+                mod.tier === "pro"    ? `✨ Pro Modules · $19/mo` :
+                mod.tier === "growth" ? `🚀 Scale Lab · $49/mo` :
+                                        `Free Modules`;
+              const tierHeaderColor = mod.tier === "growth" ? "#0c0a09" : mod.tier === "pro" ? "#7c3aed" : "#71717a";
+
               return (
-                <ModuleCard key={mod.id} unlocked={unlocked}>
-                  <div style={{ background: proGated ? "#fafafa" : "#fff", borderRadius: 18, border: `1.5px solid ${proGated ? "rgba(124,58,237,0.12)" : isNext ? "#c7d2fe" : isDone ? "#d1fae5" : "rgba(0,0,0,0.06)"}`, padding: "14px 16px", display: "flex", alignItems: "center", gap: 14, opacity: (!unlocked && !proGated) ? 0.45 : 1 }}>
-                    <div style={{ width: 44, height: 44, borderRadius: 14, flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 20, background: isDone ? "#ecfdf5" : isNext ? "#eef2ff" : proGated ? "#f5f3ff" : "#f4f4f5" }}>
-                      {isDone ? "✅" : mod.emoji}
+                <div key={mod.id}>
+                  {showTierHeader && (
+                    <div style={{ display: "flex", alignItems: "center", gap: 10, marginTop: idx === 0 ? 0 : 16, marginBottom: 8 }}>
+                      <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: tierHeaderColor, margin: 0 }}>
+                        {tierHeaderText}
+                      </p>
+                      <div style={{ flex: 1, height: 1, background: "#e4e4e7" }} />
                     </div>
-                    <div style={{ flex: 1, minWidth: 0 }}>
-                      <div style={{ display: "flex", alignItems: "center", gap: 6, flexWrap: "wrap", marginBottom: 2 }}>
-                        <span style={{ fontSize: 13, fontWeight: 600, color: isDone ? "#a1a1aa" : proGated ? "#71717a" : "#09090b", textDecoration: isDone ? "line-through" : "none" }}>{mod.title}</span>
-                        {isNext && <span style={{ fontSize: 10, fontWeight: 700, padding: "2px 7px", borderRadius: 99, background: trackColor, color: "#fff" }}>Up next</span>}
-                        {isSkipped && <span style={{ fontSize: 10, fontWeight: 600, padding: "2px 7px", borderRadius: 99, background: "#fffbeb", color: "#d97706", border: "1px solid #fde68a" }}>Pre-unlocked</span>}
-                        {proGated && <span style={{ fontSize: 10, fontWeight: 700, padding: "2px 7px", borderRadius: 99, background: "linear-gradient(135deg, #6366f1, #7c3aed)", color: "#fff" }}>✨ Pro</span>}
+                  )}
+
+                  <ModuleCard unlocked={unlocked}>
+                    <div style={{
+                      background:    growthGated ? "#fafaf9" : proGated ? "#fafafa" : "#fff",
+                      borderRadius:  18,
+                      border:        `1.5px solid ${growthGated ? "rgba(28,25,23,0.12)" : proGated ? "rgba(124,58,237,0.12)" : isNext ? "#c7d2fe" : isDone ? "#d1fae5" : "rgba(0,0,0,0.06)"}`,
+                      padding:       "14px 16px",
+                      display:       "flex",
+                      alignItems:    "center",
+                      gap:           14,
+                      opacity:       (!unlocked && !tierGated) ? 0.45 : 1,
+                    }}>
+                      <div style={{
+                        width: 44, height: 44, borderRadius: 14, flexShrink: 0,
+                        display: "flex", alignItems: "center", justifyContent: "center",
+                        fontSize: 20,
+                        background: isDone ? "#ecfdf5" : isNext ? "#eef2ff" : growthGated ? "#fef3c7" : proGated ? "#f5f3ff" : "#f4f4f5",
+                      }}>
+                        {isDone ? "✅" : mod.emoji}
                       </div>
-                      <p style={{ fontSize: 12, color: "#a1a1aa" }}>{mod.duration} · {mod.description}</p>
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <div style={{ display: "flex", alignItems: "center", gap: 6, flexWrap: "wrap", marginBottom: 2 }}>
+                          <span style={{ fontSize: 13, fontWeight: 600, color: isDone ? "#a1a1aa" : tierGated ? "#71717a" : "#09090b", textDecoration: isDone ? "line-through" : "none" }}>{mod.title}</span>
+                          {isNext     && <span style={{ fontSize: 10, fontWeight: 700, padding: "2px 7px", borderRadius: 99, background: trackColor, color: "#fff" }}>Up next</span>}
+                          {isSkipped  && <span style={{ fontSize: 10, fontWeight: 600, padding: "2px 7px", borderRadius: 99, background: "#fffbeb", color: "#d97706", border: "1px solid #fde68a" }}>Pre-unlocked</span>}
+                          {proGated   && <span style={{ fontSize: 10, fontWeight: 700, padding: "2px 7px", borderRadius: 99, background: "linear-gradient(135deg, #6366f1, #7c3aed)", color: "#fff" }}>✨ Pro</span>}
+                          {growthGated && <span style={{ fontSize: 10, fontWeight: 700, padding: "2px 7px", borderRadius: 99, background: "#0c0a09", color: "#fde68a" }}>🚀 Scale Lab</span>}
+                        </div>
+                        <p style={{ fontSize: 12, color: "#a1a1aa" }}>{mod.duration} · {mod.description}</p>
+                      </div>
+                      {growthGated ? (
+                        <Link href="/upgrade?tier=growth" style={{ fontSize: 11, fontWeight: 700, flexShrink: 0, padding: "7px 14px", borderRadius: 10, textDecoration: "none", background: "#0c0a09", color: "#fde68a", whiteSpace: "nowrap" }}>
+                          Unlock →
+                        </Link>
+                      ) : proGated ? (
+                        <Link href="/upgrade" style={{ fontSize: 11, fontWeight: 700, flexShrink: 0, padding: "7px 14px", borderRadius: 10, textDecoration: "none", background: "linear-gradient(135deg, #f5f3ff, #ede9fe)", color: "#7c3aed", border: "1px solid #c4b5fd", whiteSpace: "nowrap" }}>
+                          Unlock →
+                        </Link>
+                      ) : !unlocked ? (
+                        <span style={{ fontSize: 16, flexShrink: 0, color: "#d4d4d8" }}>🔒</span>
+                      ) : (
+                        <Link href={`/modules/${mod.id}`} style={{ fontSize: 12, fontWeight: 700, flexShrink: 0, padding: "7px 16px", borderRadius: 10, textDecoration: "none", background: isDone ? "#ecfdf5" : isNext ? trackColor : "#f4f4f5", color: isDone ? "#16a34a" : isNext ? "#fff" : "#52525b" }}>
+                          {isDone ? "Review" : "Start →"}
+                        </Link>
+                      )}
                     </div>
-                    {proGated ? (
-                      <Link href="/upgrade" style={{ fontSize: 11, fontWeight: 700, flexShrink: 0, padding: "7px 14px", borderRadius: 10, textDecoration: "none", background: "linear-gradient(135deg, #f5f3ff, #ede9fe)", color: "#7c3aed", border: "1px solid #c4b5fd", whiteSpace: "nowrap" }}>
-                        Unlock →
-                      </Link>
-                    ) : !unlocked ? (
-                      <span style={{ fontSize: 16, flexShrink: 0, color: "#d4d4d8" }}>🔒</span>
-                    ) : (
-                      <Link href={`/modules/${mod.id}`} style={{ fontSize: 12, fontWeight: 700, flexShrink: 0, padding: "7px 16px", borderRadius: 10, textDecoration: "none", background: isDone ? "#ecfdf5" : isNext ? trackColor : "#f4f4f5", color: isDone ? "#16a34a" : isNext ? "#fff" : "#52525b" }}>
-                        {isDone ? "Review" : "Start →"}
-                      </Link>
-                    )}
-                  </div>
-                </ModuleCard>
+                  </ModuleCard>
+                </div>
               );
             })}
           </div>
 
-          {/* ── Upgrade CTA banner (free users) ── */}
+          {/* ── Upgrade CTA banner — Free users see Pro pitch ── */}
           {!isPro && (
             <div style={{ marginTop: 20, background: "linear-gradient(135deg, #1e1b4b, #4c1d95)", borderRadius: 20, padding: "24px 24px", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 16, flexWrap: "wrap", position: "relative", overflow: "hidden" }}>
               <div className="dot-grid" style={{ position: "absolute", inset: 0, pointerEvents: "none" }} />
@@ -574,6 +661,26 @@ export default function DashboardPage() {
               </div>
               <Link href="/upgrade" style={{ flexShrink: 0, background: "linear-gradient(135deg, #facc15, #f59e0b)", color: "#1c1917", fontWeight: 800, fontSize: 13, padding: "11px 22px", borderRadius: 12, textDecoration: "none", boxShadow: "0 4px 16px rgba(250,204,21,0.35)", position: "relative", whiteSpace: "nowrap" }}>
                 Upgrade for $19/mo →
+              </Link>
+            </div>
+          )}
+
+          {/* ── Upgrade CTA banner — Pro users (not Growth) see Scale Lab pitch ── */}
+          {isPro && !isGrowth && (
+            <div style={{ marginTop: 20, background: "linear-gradient(135deg, #0c0a09 0%, #1c1917 100%)", borderRadius: 20, padding: "24px 24px", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 16, flexWrap: "wrap", position: "relative", overflow: "hidden" }}>
+              <div className="dot-grid" style={{ position: "absolute", inset: 0, pointerEvents: "none" }} />
+              <div style={{ position: "absolute", inset: 0, pointerEvents: "none", background: "radial-gradient(ellipse 60% 50% at 50% 0%, rgba(250,204,21,0.18) 0%, transparent 70%)" }} />
+              <div style={{ position: "relative" }}>
+                <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.14em", textTransform: "uppercase", color: "#fde68a", marginBottom: 6 }}>🚀 Scale Lab</p>
+                <p style={{ fontSize: 15, fontWeight: 800, color: "#fff", letterSpacing: "-0.3px", marginBottom: 4 }}>
+                  Made your first sales? Now make them predictable.
+                </p>
+                <p style={{ fontSize: 12, color: "rgba(255,255,255,0.55)" }}>
+                  Modules 13–24: real winners vs fake signals, persuasion, UGC at scale, profitable scaling.
+                </p>
+              </div>
+              <Link href="/upgrade?tier=growth" style={{ flexShrink: 0, background: "linear-gradient(135deg, #facc15, #f59e0b)", color: "#1c1917", fontWeight: 800, fontSize: 13, padding: "11px 22px", borderRadius: 12, textDecoration: "none", boxShadow: "0 4px 16px rgba(250,204,21,0.35)", position: "relative", whiteSpace: "nowrap" }}>
+                Upgrade to Growth — $49/mo →
               </Link>
             </div>
           )}

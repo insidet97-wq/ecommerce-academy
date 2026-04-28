@@ -1,5 +1,9 @@
+export type Tier = "free" | "pro" | "growth";
+
 export type Module = {
   id: number;
+  /** Tier required to access this module. Defaults to "free" if missing. */
+  tier?: Tier;
   title: string;
   duration: string;
   objective: string;
@@ -9,6 +13,13 @@ export type Module = {
   checklist: string[];
   resources?: { label: string; url: string }[];
 };
+
+/** Returns the tier required to access a module. Defaults to "free". */
+export function tierForModule(id: number): Tier {
+  if (id <= 6)  return "free";
+  if (id <= 12) return "pro";
+  return "growth";
+}
 
 export const modules: Module[] = [
   // ─────────────────────────────────────────────
@@ -742,6 +753,694 @@ export const modules: Module[] = [
       { label: "Shopify Analytics — revenue and customer data", url: "https://www.shopify.com/analytics" },
       { label: "Triple Whale — advanced ecommerce attribution", url: "https://www.triplewhale.com" },
       { label: "Jungle Scout — Amazon product research", url: "https://www.junglescout.com" },
+    ],
+  },
+
+  // ─────────────────────────────────────────────
+  // SCALE LAB — GROWTH MODULES (13–24)
+  // For users who got their first sale and want consistent revenue.
+  // Tier: "growth" ($49/month, gated by user_profiles.is_growth)
+  // ─────────────────────────────────────────────
+
+  {
+    id: 13,
+    tier: "growth",
+    title: "Why Your First Sales Won't Repeat",
+    duration: "~30 min",
+    objective:
+      "Understand why early sales feel random — and why most 'winners' at low volume are actually noise. Stop trusting the lottery; start trusting the data.",
+    concepts: [
+      {
+        title: "Survivorship bias kills beginners",
+        body: "When you scroll TikTok and see 'I made $10k in 30 days dropshipping', you're seeing the 1 winner out of 10,000 attempts. The 9,999 losers don't post videos. The first sales you make follow the same statistical reality — they're survivors of dozens of impressions you didn't track. Treating them as proof of a winning system is exactly how stores blow money scaling something that was always going to fail.",
+      },
+      {
+        title: "The noise problem at low volume",
+        body: "At fewer than ~30 conversions per variant, you cannot distinguish a real winner from random luck. A 2% conversion rate vs a 4% rate looks like the second is 'twice as good' — but with only 50 visits each, the confidence interval is so wide you'd need 10x more traffic to know. Source: any A/B testing primer; Experimentation Works covers this in depth.",
+      },
+      {
+        title: "The repeatability test",
+        body: "A real winner produces sales week 2 with similar inputs — not just week 1. If you ran a $20 ad and got 3 sales, that's the lottery. If you ran the same ad for 14 days at consistent spend and got proportional sales the whole time, that's a system. Most beginners scale based on week 1 and get crushed in week 3.",
+      },
+      {
+        title: "Lucky money vs skill money",
+        body: "Lucky money (random first sales) feels identical to skill money (repeatable system) when it lands in your account. The difference: only one is predictive. Until you can answer 'if I spend $100 tomorrow, how many sales will I make?' within ±20%, you don't have a business — you have a one-time event.",
+      },
+    ],
+    steps: [
+      "Pull your last 30 days of sales data from Shopify. Sort by date. Look at the gaps between sales.",
+      "For each sale, write down: which ad/source drove it, your ad spend that day, and your CPM/CTR/CPC. If you can't fill any column, that's your first lesson — you're not tracking.",
+      "Calculate: of your sales, how many came from the same product + creative combo? Scattered winners across 5 products = lucky portfolio, not a winner.",
+      "Run the repeatability test: pick your single best ad and run it for 7 more days at the same daily budget. Document results.",
+      "Answer one question: 'If I spend $50 on ads tomorrow, how many sales should I expect?' If the answer is 'I don't know' or 'anywhere from 0 to 10', continue to Module 14.",
+    ],
+    mistakes: [
+      "Scaling a campaign after 2–3 sales because the ROAS looks good — at that volume, ROAS is meaningless noise.",
+      "Killing a campaign after 1 day with no sales — sample is too small to conclude anything.",
+      "Looking at your best sales day and assuming it's normal — outliers fool everyone.",
+      "Switching products every week because 'this one didn't work' without giving any product enough volume to validate.",
+      "Reading TikTok success videos as data — they're lottery winners with cameras.",
+    ],
+    checklist: [
+      "I have a spreadsheet of every sale from the last 30 days with source attribution",
+      "I've identified which sales came from the same product + creative combo",
+      "I've run my best ad for at least 7 consecutive days at consistent budget",
+      "I can explain to a friend the difference between 'I had a winner' and 'I had a lucky day'",
+      "I've written down what daily spend produces what daily sales — and how confident I am in that estimate",
+    ],
+    resources: [
+      { label: "Experimentation Works (Stefan Thomke)", url: "https://www.amazon.com/Experimentation-Works-Surprising-Power-Business/dp/1633697100" },
+      { label: "A/B Test Significance Calculator", url: "https://www.surveymonkey.com/mp/ab-testing-significance-calculator/" },
+      { label: "Hacking Growth (Sean Ellis) — high-tempo testing", url: "https://www.amazon.com/Hacking-Growth-Fastest-Growing-Companies-Breakout/dp/045149721X" },
+    ],
+  },
+
+  {
+    id: 14,
+    tier: "growth",
+    title: "The Numbers That Actually Matter",
+    duration: "~40 min",
+    objective:
+      "Build a dashboard of the 8 metrics that actually drive an ecommerce business — and the thresholds that tell you whether each is healthy, marginal, or dying.",
+    concepts: [
+      {
+        title: "Two layers: platform metrics vs business metrics",
+        body: "Platform metrics live inside Meta/TikTok ads manager: CPM, CTR, CPC, hook rate, ad ROAS. Business metrics live in your Shopify dashboard or P&L: AOV, contribution margin, blended ROAS, refund rate, LTV. Beginners optimize platform metrics. Pros optimize business metrics. The two often disagree — Meta says ROAS 2.4 (great!), but blended P&L says you lost money this month.",
+      },
+      {
+        title: "The 8 metrics every operator tracks",
+        body: "CPM (cost per 1000 impressions, healthy $10–20). CTR (click-through rate, healthy 1.5%+). CPC (cost per click, healthy <$1). CR (store conversion rate, healthy 2.5%+). CPA (cost per acquisition, must be < contribution margin). AOV (average order value). Contribution margin = AOV − COGS − shipping − fees − ad cost. Blended ROAS = total revenue ÷ total ad spend across ALL channels — always more accurate than platform ROAS.",
+      },
+      {
+        title: "The North Star Metric",
+        body: "From Sean Ellis's Hacking Growth. You can't manage 8 metrics daily. Pick ONE that summarizes everything. For most ecommerce stores, the NSM is profitable orders per day — orders where contribution margin > 0 after ad spend. Track that one number daily; everything else is diagnostic.",
+      },
+      {
+        title: "Thresholds, not vanity",
+        body: "Don't ask 'is this CTR good?' — ask 'is this CTR above the threshold I need to be profitable?' Your real CTR target is whatever produces your target CPC at your current CPM. Calculate backwards from your contribution margin.",
+      },
+    ],
+    steps: [
+      "Build a Google Sheets dashboard. Columns: Date, Spend, Impressions, Clicks, Sessions, Add-to-Cart, Checkout, Purchases, Revenue, COGS, Shipping, Fees, Refunds, Contribution Margin.",
+      "Set up daily auto-population (Shopify export + Meta/TikTok export, or use Triple Whale / Polar / Lifetimely).",
+      "Calculate target metrics by working backwards: pick a target contribution margin (e.g. $15/order), work back to required CPA, then CR, then CPC, then CPM/CTR.",
+      "Add a 'verdict' column to each ad/campaign: GREEN (above threshold), YELLOW (at threshold), RED (below). Update daily.",
+      "Track NSM (profitable orders/day) on the top line. Set a 7-day rolling average.",
+      "Stop reading platform ROAS in isolation. Always pair it with blended ROAS from your P&L.",
+    ],
+    mistakes: [
+      "Watching CPM obsessively but ignoring CR — your store could be the bottleneck, not your ads.",
+      "Believing platform ROAS — Meta over-reports by 20–50% post-iOS17 due to lost attribution.",
+      "Tracking metrics without thresholds — a number is useless without knowing what's 'good' for your margin.",
+      "Optimizing for ROAS instead of contribution margin — a 3.0 ROAS on a $20 product with $15 COGS is unprofitable.",
+      "Updating dashboards weekly instead of daily — slow feedback = slow learning.",
+    ],
+    checklist: [
+      "I have a dashboard with all 8 core metrics, updated daily",
+      "I've calculated my required CPA, CTR, CPC, and CR thresholds based on my contribution margin",
+      "I have a North Star Metric posted somewhere I see every day",
+      "I track blended ROAS from my P&L, not just platform ROAS",
+      "Every ad has a GREEN/YELLOW/RED verdict updated each morning",
+      "I know my contribution margin per order to the cent",
+    ],
+    resources: [
+      { label: "Triple Whale — best ecommerce attribution dashboard", url: "https://www.triplewhale.com/" },
+      { label: "Northbeam — alternative for $50k+/mo stores", url: "https://www.northbeam.io/" },
+      { label: "Lifetimely — Shopify P&L + LTV (free tier)", url: "https://lifetimely.io/" },
+      { label: "Hacking Growth (Sean Ellis) — North Star Metric chapter", url: "https://www.amazon.com/Hacking-Growth-Fastest-Growing-Companies-Breakout/dp/045149721X" },
+    ],
+  },
+
+  {
+    id: 15,
+    tier: "growth",
+    title: "The Profit Audit: Are You Actually Making Money?",
+    duration: "~35 min",
+    objective:
+      "Run a true 30-day P&L on your store. Most 'profitable' beginner stores actually lose money once refunds, fees, and true CPA are counted. Find out which side you're on.",
+    concepts: [
+      {
+        title: "The 4 hidden costs that wreck beginner P&Ls",
+        body: "Refunds & chargebacks (5–15% of revenue depending on niche — almost no beginner deducts these). Transaction fees (Shopify Payments + currency conversion + Stripe = 3–4% on average). Returned inventory loss (for non-dropship: returned units that can't be resold). Apps & tools (Shopify subscription + app stack + email tool + ad spy tool = $200–500/mo).",
+      },
+      {
+        title: "Platform ROAS lies post-iOS17",
+        body: "Apple's privacy changes mean Meta and TikTok over-attribute conversions. A reported ROAS of 3.0 in Meta is often closer to 2.0 in reality. The only honest number is blended ROAS: total revenue from your Shopify ÷ total ad spend across all platforms.",
+      },
+      {
+        title: "The contribution margin formula",
+        body: "Per-order: Sell price − COGS − shipping cost − transaction fee − ad cost per order. If positive, you make money on that order. If you've never written this formula on paper for your hero product, do it before you spend another dollar on ads.",
+      },
+      {
+        title: "The 30-day truth window",
+        body: "Why 30 days? Refunds typically arrive 7–30 days after purchase. A 7-day P&L makes you look profitable; the same period at day 30 is the truth. Always use a closed 30-day window for real audits.",
+      },
+    ],
+    steps: [
+      "Pick a 30-day window from at least 30 days ago (so refunds have come in). Pull every line item from Shopify, all ad platforms, and bank statements.",
+      "Calculate total revenue (gross sales − refunds − discounts).",
+      "Calculate total COGS (sum of supplier cost + shipping cost for every delivered order).",
+      "Calculate total transaction fees (Stripe + Shopify Payments + currency conversion).",
+      "Calculate total ad spend (Meta + TikTok + Google + any other source).",
+      "Calculate total app/tool costs (everything paid monthly for the store).",
+      "True profit = Revenue − COGS − Fees − Ad Spend − Tools. Write this number down. Sit with it.",
+      "If profit is negative, focus on profitability before scaling — the rest of this tier is your roadmap.",
+    ],
+    mistakes: [
+      "Using gross sales (no refund deduction) and calling it 'revenue'.",
+      "Ignoring transaction fees — they're 3–4% and they compound.",
+      "Counting Meta's reported revenue figure (over-attributed by 20–50%).",
+      "Forgetting that one-time ad fatigue periods spike CPA and gut your margin.",
+      "Not running this audit because 'it'll just be depressing' — the only thing more depressing is scaling unprofitably for 6 months.",
+    ],
+    checklist: [
+      "I have a complete 30-day P&L on paper or spreadsheet",
+      "I've deducted refunds, chargebacks, and transaction fees",
+      "I've used blended ROAS, not platform ROAS",
+      "I know my true contribution margin per order",
+      "I know whether my last 30 days were profitable or not, in real numbers",
+      "If unprofitable, I've identified WHICH of the 4 hidden costs hit hardest",
+    ],
+    resources: [
+      { label: "Lifetimely — free 30-day P&L for Shopify", url: "https://lifetimely.io/" },
+      { label: "Triple Whale — closer-to-truth attribution", url: "https://www.triplewhale.com/" },
+      { label: "Ecommerce Evolved (Tanner Larsson)", url: "https://www.amazon.com/Ecommerce-Evolved-Essential-Playbook-Customers/dp/1535258543" },
+    ],
+  },
+
+  {
+    id: 16,
+    tier: "growth",
+    title: "Real Winners vs Fake Signals",
+    duration: "~35 min",
+    objective:
+      "Apply a rigorous validation method to every 'winning' product or ad before you scale it. Filter out the lottery wins from the genuine repeatable systems.",
+    concepts: [
+      {
+        title: "The 3-day vs 7-day truth",
+        body: "Day 1–3 metrics are ad-platform algorithm warm-up + lucky audience hits. Day 4–7 is when the algorithm settles. Never make scale decisions before day 7 — you're decisioning on noise.",
+      },
+      {
+        title: "The 100-click rule",
+        body: "Any new variant (creative, audience, landing page) needs at least 100 clicks before you can claim 'it doesn't convert.' With 50 clicks at 2% baseline CR, you'd expect 1 sale ± 1 — meaning 0 or 2 are both consistent with the same underlying truth. 100 clicks gives you a usable signal; 300+ gives you confidence.",
+      },
+      {
+        title: "The repeatability test",
+        body: "A real winner produces consistent sales week-over-week at the same daily budget (±25%), consistent CTR & hook rate across at least 2 audiences, and at least 30 conversions before you call it 'validated.' If your 'winner' only worked when you launched it on a Friday at 6pm, it's not a winner.",
+      },
+      {
+        title: "Hook rate as the early indicator",
+        body: "Hook rate = % of viewers who watch past 3 seconds. This metric stabilizes earlier than CTR or CPA because it requires far fewer impressions. A 30% hook rate with low CTR = creative is good but the message after the hook is wrong. A 10% hook rate = scroll-stopping isn't working, full stop.",
+      },
+    ],
+    steps: [
+      "List every 'winner' you've called out in the last 60 days. For each, write down total impressions, clicks, sales, ad spend.",
+      "Apply the 100-click rule retroactively. Any 'winner' with <100 clicks gets demoted to 'unproven.'",
+      "Check the 7-day window: did sales stay consistent across 7 days at consistent spend?",
+      "Check the 2-audience test: did the same creative work for at least 2 distinct audiences (interest-based AND broad)? If only one audience, you may have audience-specific noise.",
+      "Promote winners that pass both tests. Demote everything else to 'needs more data.'",
+      "For unproven candidates: add budget, run for 7 more days, re-test.",
+    ],
+    mistakes: [
+      "Scaling a creative after 1 viral day because 'it's working'.",
+      "Killing a creative after 24h of no sales when you have <50 clicks.",
+      "Treating 'platform ROAS 5.0 over 2 days' as proof — sample size is the issue.",
+      "Not checking hook rate separately from CTR — they fail for different reasons.",
+      "Believing that 'the algorithm needs 3 days to learn' as an excuse to keep losers running for a week.",
+    ],
+    checklist: [
+      "I've audited every claimed 'winner' against the 100-click rule",
+      "I've checked 7-day consistency, not just 2–3 day spikes",
+      "I've tested each winner across 2 different audiences",
+      "I track hook rate separately as an early signal",
+      "I have a clear 'validated' vs 'unproven' status for every active creative",
+      "I've demoted at least one 'winner' after applying these rules",
+    ],
+    resources: [
+      { label: "Foreplay — ad library + creative analytics", url: "https://www.foreplay.co/" },
+      { label: "Motion App — creative analytics with hook rate", url: "https://motionapp.com/" },
+      { label: "Experimentation Works (Stefan Thomke) — false positives", url: "https://www.amazon.com/Experimentation-Works-Surprising-Power-Business/dp/1633697100" },
+    ],
+  },
+
+  {
+    id: 17,
+    tier: "growth",
+    title: "Engineering the Offer (Beyond the Product)",
+    duration: "~40 min",
+    objective:
+      "Stop optimizing the product. Start engineering the offer. The offer (product + price + bundle + bonus + risk reversal) is what converts. Two stores selling the same product with different offers see 3–5x different conversion rates.",
+    concepts: [
+      {
+        title: "Product ≠ Offer",
+        body: "Your product is what you ship. Your offer is everything wrapped around it: price anchor, bundle composition, bonus items, urgency, scarcity, risk reversal (guarantee), shipping terms, payment terms. A $40 product with a 30-day money-back guarantee and free shipping at $50+ converts dramatically better than the same product at $40 alone.",
+      },
+      {
+        title: "Hormozi's value equation",
+        body: "Value = (Dream outcome × Perceived likelihood) ÷ (Time delay × Effort & sacrifice). Increase perceived value by: making the dream outcome more tangible, adding proof to raise perceived likelihood, reducing time-to-result, reducing required effort. Most beginners only manipulate price. Pros manipulate all four.",
+      },
+      {
+        title: "The 5 offer levers",
+        body: "Bundles (2-pack, 3-pack — increases AOV and perceived value). Bonuses (free e-book, free shipping, additional product). Risk reversal (money-back guarantee, free returns, '30-day try'). Urgency/scarcity ('ends Friday', 'only 12 left', launch pricing). Payment flexibility (Klarna, Afterpay, Shop Pay Installments — increases conversion 10–25% on $50+).",
+      },
+      {
+        title: "The ladder of offers",
+        body: "A great store has 3 offer tiers visible at checkout: Single ($40), Bundle of 2 ($72, save 10%), Bundle of 3 ($96, save 20% + bonus). Without the ladder, customers default to cheapest. With the ladder, ~40% trade up.",
+      },
+    ],
+    steps: [
+      "Write down your current offer in one paragraph. Include: product, price, shipping policy, guarantee, any bonuses.",
+      "Score it against Hormozi's 4 variables (1–10 each). Where are you weakest?",
+      "Build 3 offer variants: (A) same product + 30-day guarantee + free shipping over $50; (B) bundle of 2 at 10% off with bonus; (C) 3-pack at 20% off with urgency timer.",
+      "Run a 7-day split test: Variant A vs current offer. Track AOV and CR separately.",
+      "Add Klarna or Shop Pay Installments if your AOV is over $50.",
+      "Document which variant won and apply learnings to your next launch.",
+    ],
+    mistakes: [
+      "Treating price as the only lever — too cheap looks like junk; too expensive without a value stack just loses.",
+      "Adding a guarantee in tiny grey text at the bottom — make it loud, anchor the offer.",
+      "Bundles without genuine savings — customers can do math; a 'fake 20% off' gets spotted.",
+      "Scarcity that's obviously fake ('Only 3 left!' forever) — kills trust.",
+      "Building a complex offer with 5 bonuses no one cares about. Better: one strong bonus tied to the product's main value.",
+    ],
+    checklist: [
+      "I've written my current offer in one paragraph",
+      "I've scored it against Hormozi's value equation",
+      "I've designed 3 offer variants",
+      "I've launched at least one offer test",
+      "I have payment installments enabled if my AOV > $50",
+      "I have a clearly visible guarantee on the product page",
+    ],
+    resources: [
+      { label: "$100M Offers (Alex Hormozi)", url: "https://www.acquisition.com/100m-offers" },
+      { label: "Klarna for Shopify", url: "https://www.klarna.com/business/shopify/" },
+      { label: "Bold Bundles — Shopify bundle pricing app", url: "https://apps.shopify.com/product-bundles" },
+      { label: "The 1-Page Marketing Plan (Allan Dib)", url: "https://www.amazon.com/1-Page-Marketing-Plan-Customers-Money/dp/1989025013" },
+    ],
+  },
+
+  {
+    id: 18,
+    tier: "growth",
+    title: "Increasing AOV Without Increasing Cost",
+    duration: "~30 min",
+    objective:
+      "Engineer 3–5 mechanisms that increase AOV by 20–40% from the same traffic. Higher AOV with same traffic = higher contribution margin overnight, which means you can outbid competitors on ads and still profit.",
+    concepts: [
+      {
+        title: "The math of AOV",
+        body: "If your AOV is $40 with $25 contribution margin, you can spend up to $25 to acquire a customer. Raise AOV to $60 (with $40 margin) and you can spend up to $40 — a 60% bigger ad budget per customer, meaning you can win more auctions on Meta/TikTok and out-scale competitors at the same ROAS target. Raising AOV is the highest-leverage profit move in ecommerce.",
+      },
+      {
+        title: "The 4 AOV mechanisms (in order of ease)",
+        body: "Free shipping threshold (set 30–50% above current AOV; customers add an item to qualify; 5-min implementation). Order bumps (small add-on at checkout — insurance, gift wrap, complementary product at $7–15). Post-purchase upsells (one-click add an item AFTER they've paid — ReConvert app converts 15–25%). Bundles & quantity discounts (pre-built 2-pack 10% off, 3-pack 20% off on the product page).",
+      },
+      {
+        title: "Where each captures different psychology",
+        body: "Free shipping threshold = loss aversion. Order bumps = effort minimization (one click, already in flow). Post-purchase upsell = commitment & consistency (already proven willing to buy). Bundles = anchor pricing (3-pack makes 2-pack feel reasonable). The combo is stronger than any single one.",
+      },
+      {
+        title: "The realistic uplift",
+        body: "A store with all 4 mechanisms running well typically sees AOV climb 25–50% from baseline. A store with none is leaving 25%+ profit on the table.",
+      },
+    ],
+    steps: [
+      "Calculate current AOV. Set a free shipping threshold at 1.4x AOV (e.g., AOV $40 → free shipping at $55).",
+      "Add one order bump at checkout: pick something complementary at $9–15 (ReConvert or Bold Upsell).",
+      "Add one post-purchase upsell: same buyer, one-click add. Pick your second-best product, discount it 10%.",
+      "Build one bundle: 2-pack at 10% off, 3-pack at 20% off. Display on product page using a quantity selector or app.",
+      "Test in order: free shipping (week 1), order bump (week 2), post-purchase (week 3), bundle (week 4). Track AOV change each week.",
+      "After 4 weeks, calculate cumulative AOV uplift and how much extra ad spend you can now afford per customer.",
+    ],
+    mistakes: [
+      "Setting free shipping threshold too low (no extra revenue) or too high (customers abandon).",
+      "Order bump that's irrelevant — must complement the main product.",
+      "Post-purchase upsell that re-asks for payment — should be one-click using stored payment.",
+      "Bundles with token discounts (5% off feels like nothing — minimum 10% to register as a deal).",
+      "Adding all 4 at once — you can't tell which moved the needle.",
+    ],
+    checklist: [
+      "Free shipping threshold set at 1.4x AOV",
+      "Order bump live at checkout",
+      "Post-purchase upsell active",
+      "At least one product with 2-pack and 3-pack bundle pricing",
+      "AOV uplift measured over a 4-week test",
+      "I've recalculated my max CPA based on new AOV",
+    ],
+    resources: [
+      { label: "ReConvert Post-Purchase Upsells", url: "https://apps.shopify.com/reconvert-upsell-cross-sell?mref=bfgeliiu" },
+      { label: "Bold Bundles", url: "https://apps.shopify.com/product-bundles" },
+      { label: "Vitals — 40+ conversion apps in one", url: "https://vitals.co/" },
+      { label: "$100M Offers (Hormozi) — Value Stack chapter", url: "https://www.acquisition.com/100m-offers" },
+    ],
+  },
+
+  {
+    id: 19,
+    tier: "growth",
+    title: "Persuasion Foundations: The 6 Principles That Sell Anything",
+    duration: "~45 min",
+    objective:
+      "Master Cialdini's 6 universal persuasion principles and audit your current ads, product page, and emails against them. Most beginner copy uses 1–2 of the 6; pro copy weaves in 5–6.",
+    concepts: [
+      {
+        title: "Reciprocity",
+        body: "Humans feel obligated to return favors. Application: lead with value before asking for the sale. Free e-book, free trial, free chapter, free shipping, free strategy guide. Givers receive — but only if they give first. (Source: Cialdini, Influence.)",
+      },
+      {
+        title: "Commitment & Consistency",
+        body: "Once we publicly commit to something, we behave consistently with it. Application: quizzes ('answer 3 questions and we'll match you with the right product') build commitment before the ask. Tiny yes → bigger yes → purchase.",
+      },
+      {
+        title: "Social proof",
+        body: "When uncertain, we copy others. Application: '10,000 happy customers.' Real photo reviews. UGC videos showing real people using the product. Customer count badges. Without social proof, your ad is one stranger telling another stranger what to do.",
+      },
+      {
+        title: "Authority",
+        body: "We defer to experts. Application: doctor reviews, certifications ('ISO certified'), media features ('As seen in Forbes'), founder credentials. Even sub-symbolic authority signals (lab coats in skincare, athletic packaging in fitness) move conversion.",
+      },
+      {
+        title: "Liking",
+        body: "We buy from people we like. Application: founder story video, behind-the-scenes content, personal voice in copy ('I built this because I had the same problem'), creators who feel like the customer. UGC works because it's from someone who feels like the audience.",
+      },
+      {
+        title: "Scarcity",
+        body: "Things become more valuable when limited. Application: limited stock badges, real countdown timers, launch pricing windows, 'while supplies last', limited edition variants. Caveat: must be real or trust dies.",
+      },
+    ],
+    steps: [
+      "Print or screenshot your top-performing ad. Score it 0–2 on each of the 6 principles (0 absent, 1 weak, 2 strong). Write the score on the printout.",
+      "Repeat for: product page hero, email welcome flow, checkout page.",
+      "Identify your weakest principles. For most beginners: reciprocity, authority, commitment & consistency.",
+      "Add ONE missing principle to your ad. Test for 7 days against the original. Track CTR change.",
+      "Add ONE missing principle to your product page (commonly: better social proof — real photo reviews or video UGC). Track CR change.",
+      "Document which principle moved your numbers most. That's your highest-ROI principle for this product.",
+    ],
+    mistakes: [
+      "Confusing social proof with self-praise — 'this product is great' from yourself is not social proof.",
+      "Using fake scarcity ('Only 3 left!' that never updates) — kills trust faster than no scarcity at all.",
+      "Ignoring reciprocity entirely — most stores skip it because it requires giving something first.",
+      "Token authority signals ('Trust badge: SSL secure') that don't actually move buyers.",
+      "Using all 6 principles at maximum intensity — comes across as desperate; pick 3–4 strongest.",
+    ],
+    checklist: [
+      "I've scored my top ad against all 6 principles",
+      "I've scored my product page against all 6 principles",
+      "I've identified my weakest 2 principles",
+      "I've added one missing principle to my ad and tested for 7 days",
+      "I've added one missing principle to my product page and tracked CR change",
+      "I have a written analysis of which principle moves my conversion most",
+    ],
+    resources: [
+      { label: "Influence: The Psychology of Persuasion (Cialdini)", url: "https://www.influenceatwork.com/" },
+      { label: "Pre-Suasion (Cialdini) — sequel on framing", url: "https://www.amazon.com/Pre-Suasion-Revolutionary-Way-Influence-Persuade/dp/1501109790" },
+      { label: "Loox — photo & video reviews", url: "https://loox.app" },
+      { label: "Judge.me — review imports + photo reviews (free tier)", url: "https://judge.me" },
+    ],
+  },
+
+  {
+    id: 20,
+    tier: "growth",
+    title: "The Hook Library: How to Stop the Scroll",
+    duration: "~40 min",
+    objective:
+      "Master the 6 high-performing hook frameworks used in winning ads. Build a personal library of 20+ hooks for your product. The hook (first 3 seconds) determines 70–80% of ad performance.",
+    concepts: [
+      {
+        title: "Why hooks matter so much",
+        body: "On TikTok and Reels, viewers decide to keep watching or scroll within 1–3 seconds. Hook rate (% who watch past 3 seconds) is the single most predictive metric for ad performance. A great body with a weak hook gets 0 views. A weak body with a great hook still tests; you can iterate the body.",
+      },
+      {
+        title: "The 6 universal hook frameworks",
+        body: "1) Pattern interrupt — visual/audio that's unexpected. 2) Problem agitation — name the pain immediately. 3) Curiosity gap — pose a question that demands resolution. 4) Transformation reveal — show after, then explain. 5) Social proof opener — number, badge, or quote. 6) Contrarian / counterintuitive — challenge a common belief.",
+      },
+      {
+        title: "STEPPS — what makes content spread",
+        body: "From Jonah Berger's Contagious. Social currency (does sharing make you look smart). Triggers (does it tie to a daily occurrence). Emotion (high-arousal feelings — awe, anger, surprise — drive sharing). Public (visibility — people copy what they see). Practical value (does it teach something). Stories (humans wired for narrative; stories spread, lists don't). The best hooks embed multiple STEPPS components.",
+      },
+      {
+        title: "The 3-3 rule",
+        body: "A hook must work in 3 seconds AND from 3 feet away (mute, low-quality phone screen). If it requires audio or close attention, it fails on TikTok/Reels where most people scroll silently.",
+      },
+    ],
+    steps: [
+      "Pick your top 3 winning competitors' ads (Foreplay or Meta Ad Library). Watch the first 3 seconds of each. Categorize: which of the 6 frameworks?",
+      "For your own product, write 20 hooks — at least 3 per framework. Quantity first, don't filter yet.",
+      "Apply the 3-3 test: mute your phone, hold it at arm's length. Which hooks still work? Cut the rest.",
+      "Pick your top 5. Create video drafts (existing UGC footage or simple text-on-video).",
+      "Run a 5-variant ad test: same body, same offer, only the hook differs. 7 days at $10/day each = $350 total spend.",
+      "Document hook rate (3-second view rate) for each variant. Pick the winner. You now know what hook framework works for your product.",
+    ],
+    mistakes: [
+      "Writing one hook and assuming it's good — you need volume; pros write 30+ before picking.",
+      "Hooks that require audio — half your audience has the sound off.",
+      "Hooks that bury the lead ('Hi guys, today I want to show you...') — death sentence.",
+      "Generic hooks ('Check out this amazing product') — must be specific to product/niche.",
+      "Testing hooks for <3 days — hook rate stabilizes fast but conversions need full 7-day window.",
+    ],
+    checklist: [
+      "I've categorized 3 winning competitor ads by hook framework",
+      "I've written 20+ hooks for my product",
+      "I've applied the 3-3 test and shortlisted to 5",
+      "I've created video variants for the top 5",
+      "I've run a 7-day, 5-variant hook test",
+      "I have data on which hook framework wins for my product",
+    ],
+    resources: [
+      { label: "Contagious: Why Things Catch On (Jonah Berger)", url: "https://jonahberger.com/books/contagious/" },
+      { label: "Foreplay — competitor ad library + hook analysis", url: "https://www.foreplay.co/" },
+      { label: "Meta Ad Library", url: "https://www.facebook.com/ads/library" },
+      { label: "TikTok Creative Center", url: "https://ads.tiktok.com/business/creativecenter" },
+    ],
+  },
+
+  {
+    id: 21,
+    tier: "growth",
+    title: "UGC at Scale: Sourcing, Briefing, Iterating",
+    duration: "~45 min",
+    objective:
+      "Build a UGC creator pipeline that produces 8–15 ad variants per month at $50–150 per video. UGC outperforms branded content 2–4x on TikTok and Meta in 2026 — but only if you brief creators for performance, not aesthetics.",
+    concepts: [
+      {
+        title: "Why UGC wins",
+        body: "Algorithm + audience both prefer it. The algorithm rewards content that doesn't 'feel like an ad' with lower CPMs. The audience trusts it because it looks like organic content. In 2026, branded studio ads are usually outperformed by lo-fi UGC by 30–60% on click-through rate and 2–3x on hook rate.",
+      },
+      {
+        title: "The 3 sourcing channels",
+        body: "UGC platforms (Billo, Insense, Trend.io) — fastest, $40–100/video, lower variance. Direct outreach to micro-creators — find creators (1k–50k followers) in your niche, DM with paid offer; higher quality, more management. Customer-generated content — incentivize buyers to send video reviews via Loox or Tolstoy; cheapest, lowest volume.",
+      },
+      {
+        title: "The brief is the work",
+        body: "A great UGC creator with a bad brief = generic, unwatchable content. A mediocre creator with a great brief = winners. The brief must specify: exact hook (first 3 seconds, word-for-word), pain point to dramatize, transformation to show, the CTA, format requirements (vertical, no music, lighting, length 15–30s), and 3 reference videos. Don't ask for 'a fun video about the product.' That's how you get 50 unusable variants.",
+      },
+      {
+        title: "Variant production at scale",
+        body: "One winning UGC concept can be re-cut into 5–10 ad variants by changing: different hook (same body), different opening 3 seconds, different captions/text overlays, different CTA, different music. This is where Capcut, Munch, or Pebble become essential — multiplying winning content into dozens of ads cheaply.",
+      },
+    ],
+    steps: [
+      "Create your first brief: 1-page document with hook (word-for-word), pain, transformation, CTA, format specs, 3 reference links.",
+      "Order 3 UGC videos from Billo or Insense ($150–300 total) using the brief.",
+      "Receive deliverables, watch each, score them 1–10 on hook strength.",
+      "Take your best 1, cut into 5 variants: same body, different hooks/openers/CTAs (use Capcut, free).",
+      "Run a 5-variant test against your current best-performing branded creative for 7 days at consistent budget.",
+      "If UGC wins (it usually does), build a process: order 5 new UGC videos every 2 weeks, brief specifically for the highest-performing hook framework you identified in Module 20.",
+    ],
+    mistakes: [
+      "Vague briefs — leads to unusable content.",
+      "Picking the prettiest UGC instead of the most stopping — aesthetic ≠ performance.",
+      "Running 1 UGC variant against 1 branded variant — sample size too small.",
+      "Not iterating winners — finding a winning UGC and never re-cutting it into more variants.",
+      "Treating UGC as 'make a video' instead of 'test a hypothesis' — every UGC should test something.",
+    ],
+    checklist: [
+      "I have a 1-page UGC brief template",
+      "I've ordered at least 3 UGC videos from a platform",
+      "I've taken my best UGC and cut into 5 ad variants",
+      "I've tested UGC vs branded creative for 7 days",
+      "I have a 2-week cadence for ordering new UGC",
+      "I have at least 1 winning UGC concept multiplied into 10+ variants",
+    ],
+    resources: [
+      { label: "Billo — UGC creator platform", url: "https://billo.app/" },
+      { label: "Insense — paid creator network", url: "https://insense.pro/" },
+      { label: "Trend.io — TikTok-focused UGC", url: "https://trend.io/" },
+      { label: "Capcut — free video editor for variant cuts", url: "https://www.capcut.com/" },
+      { label: "Loox — for customer-generated UGC", url: "https://loox.app" },
+    ],
+  },
+
+  {
+    id: 22,
+    tier: "growth",
+    title: "How to Test Ads Properly (Not Randomly)",
+    duration: "~40 min",
+    objective:
+      "Replace random ad-tweaking with structured experimentation. Run isolated tests with sufficient sample size. Make decisions on data, not vibes.",
+    concepts: [
+      {
+        title: "The ICE prioritization framework",
+        body: "From Sean Ellis's Hacking Growth. You'll always have 50 testable ideas. ICE forces you to score each: Impact (1–10) — if it works, how big is the lift? Confidence (1–10) — how sure am I it'll work, based on data/precedent? Ease (1–10) — how fast and cheap to launch? ICE score = average. Run highest scores first. Without ICE, you'll always do the easy stuff (tweaking copy) instead of the high-impact stuff (offer changes, new creators, new audiences).",
+      },
+      {
+        title: "Isolation: change ONE variable",
+        body: "Most beginner 'tests' change 3 things at once: new hook, new audience, new landing page. When it wins or loses, you can't tell why. Always isolate one variable. The slower path is the faster path to learning.",
+      },
+      {
+        title: "Sample size requirements",
+        body: "From Experimentation Works (Stefan Thomke). Hook rate test: ~5,000 impressions per variant minimum. CTR test: ~3,000 impressions per variant. Conversion test: 100 clicks per variant minimum, ideally 30 conversions per variant for confidence. If you can't afford the impressions/clicks needed, the test won't yield a usable answer. Better to skip than run an underpowered test.",
+      },
+      {
+        title: "The 4 test categories, in order of impact",
+        body: "Offer tests (price, bundles, guarantee) — biggest swings, hardest to run. Audience tests (interest sets, broad, lookalikes) — second biggest, easy to run. Creative tests (hook, body, CTA) — third, easy to run, must be isolated. Landing page tests — smallest swings unless your page is bad.",
+      },
+    ],
+    steps: [
+      "List 15 testable hypotheses for your business right now. Format: 'If I change X, then Y will improve, because Z.'",
+      "ICE-score each (Impact, Confidence, Ease). Sort by score.",
+      "Pick your top 3. Pick the one with highest ICE score for this week's test.",
+      "Design the test: hypothesis (one sentence), one variable changed, sample size required, budget required, success metric (specific: 'CTR improves by 0.3 percentage points'), duration (minimum 7 days).",
+      "Launch. Don't peek before day 7. Don't make changes mid-test.",
+      "After day 7, document the result. Win, lose, or no significance — write it down. Build a 'learnings doc' you maintain across all tests.",
+    ],
+    mistakes: [
+      "Calling a test after 2 days because 'it's clearly winning' — you're seeing noise.",
+      "Changing 2–3 things at once — unlearnable result.",
+      "Running 5 variants on a $100/day budget — too thin per variant for valid data.",
+      "Stopping a 'losing' test early without checking sample size — might have been winning by day 7.",
+      "Not documenting results — same lessons get re-learned every quarter.",
+    ],
+    checklist: [
+      "I have 15 ICE-scored hypotheses written down",
+      "I've designed a test with explicit hypothesis, single variable, and success metric",
+      "I've calculated required sample size and budget",
+      "I've run my first 7-day isolated test",
+      "I have a learnings document where every test outcome is logged",
+      "I have a weekly cadence of one new test launched per Monday",
+    ],
+    resources: [
+      { label: "Hacking Growth (Sean Ellis) — ICE framework", url: "https://www.amazon.com/Hacking-Growth-Fastest-Growing-Companies-Breakout/dp/045149721X" },
+      { label: "Experimentation Works (Stefan Thomke)", url: "https://www.amazon.com/Experimentation-Works-Surprising-Power-Business/dp/1633697100" },
+      { label: "Optimizely sample size calculator", url: "https://www.optimizely.com/sample-size-calculator/" },
+    ],
+  },
+
+  {
+    id: 23,
+    tier: "growth",
+    title: "Killing, Iterating, or Scaling",
+    duration: "~35 min",
+    objective:
+      "Build a clear decision matrix for every ad: kill, iterate, or scale. Stop holding losers out of optimism and stop scaling early winners that haven't proven repeatability.",
+    concepts: [
+      {
+        title: "The kill/iterate/scale decision matrix",
+        body: "Below target + <3 days running → wait. Below target + 3–7 days → iterate (change ONE thing). Below target + 7+ days no improvement → KILL. At target + <7 days → wait. At target + 7+ days → iterate to push higher. Above target + 3–7 days → SCALE 20%. Above target + 7+ days → SCALE 50%+.",
+      },
+      {
+        title: "Ad fatigue: the silent killer",
+        body: "Every winning ad eventually fatigues — same audience, same creative = falling CTR, rising CPC. Signals: frequency over 2.5 (Meta) — same person seeing it 2.5+ times. CTR dropping for 3+ consecutive days. CPC rising for 3+ consecutive days. When you see these, it's not the ad's fault — the audience is exhausted. Solution: refresh creative, not target.",
+      },
+      {
+        title: "Iteration vs replacement",
+        body: "When iterating a struggling ad, change ONE of: hook (first 3 seconds), body messaging, CTA / endcard, music or pacing, audience or placement. Don't start from scratch unless data clearly says 'this concept is broken.' Most 'killed' ads should have been iterated.",
+      },
+      {
+        title: "The 20% scaling rule",
+        body: "When scaling, increase budget by 20% per day, max. Larger jumps reset the algorithm's learning phase, often crashing performance for 3–5 days. Slow + steady wins. The single biggest mistake among self-taught operators is doubling budget on a winner — winning ad becomes a losing ad overnight.",
+      },
+    ],
+    steps: [
+      "List every active ad. For each, fill in: days running, current performance vs target, and what the matrix says to do.",
+      "Take action on every ad based on the matrix. Kill the chronic losers. Set iteration plans for the marginals.",
+      "For each ad you're scaling: schedule a 20%/day budget increase. Set a calendar reminder daily.",
+      "Set up a fatigue alarm: daily check on frequency (>2.5) and trailing 3-day CTR (declining). When triggered, queue a refresh creative — don't wait for performance to crash.",
+      "For each iteration, isolate the single variable changed. Document hypothesis ('changing the hook from X to Y will increase hook rate by 5pts').",
+      "Run a weekly 'kill / iterate / scale' review every Monday. 30 min. Force yourself to make decisions.",
+    ],
+    mistakes: [
+      "Holding losers because 'it might come back' — opportunity cost is real.",
+      "Scaling too aggressively (>20%/day) — kills the algorithm's learning phase.",
+      "Refreshing creative on a winner before fatigue signals — kills momentum.",
+      "Iterating losers infinitely instead of admitting the concept is wrong and restarting.",
+      "Not running the Monday review — without forcing the decision, you'll drift.",
+    ],
+    checklist: [
+      "Every active ad has a kill/iterate/scale verdict",
+      "Chronic losers (7+ days under target) have been killed",
+      "Scaling ads are on a 20%/day increase schedule",
+      "Fatigue alarms set (frequency >2.5, CTR decline)",
+      "Each iteration is isolated to ONE variable",
+      "Monday weekly review is on the calendar",
+    ],
+    resources: [
+      { label: "Hacking Growth (Sean Ellis) — accelerating winners", url: "https://www.amazon.com/Hacking-Growth-Fastest-Growing-Companies-Breakout/dp/045149721X" },
+      { label: "Foreplay — track creative fatigue", url: "https://www.foreplay.co/" },
+      { label: "Motion App — automated fatigue detection", url: "https://motionapp.com/" },
+    ],
+  },
+
+  {
+    id: 24,
+    tier: "growth",
+    title: "Scaling Without Destroying ROAS",
+    duration: "~50 min",
+    objective:
+      "Design and execute a 30-day scaling plan that grows daily ad spend 3–5x without crashing ROAS. Build the operational machine that turns a small winning ad into a real business.",
+    concepts: [
+      {
+        title: "Vertical vs horizontal scaling",
+        body: "Vertical = same campaign, more budget. Easier, faster, but caps out. Horizontal = duplicate the winning campaign, target different audiences/placements/creatives. Harder, slower, but uncapped. The mistake is treating these as the same thing. You start vertical (push the winning campaign), then go horizontal (replicate the success across new vectors).",
+      },
+      {
+        title: "Why 20% is the magic number for vertical scaling",
+        body: "Meta and TikTok algorithms re-enter 'learning phase' if budget changes more than ~20% per day. Learning phase = unstable performance for 3–5 days. Repeated learning phases = perpetual instability = collapsed ROAS. The 20%/day cap is empirically derived from thousands of operators who've broken winning ads by ignoring it.",
+      },
+      {
+        title: "Horizontal scaling vectors",
+        body: "New audiences (broaden interest sets, lookalikes, broad targeting). New placements (Stories, Reels, TikTok, Pinterest, YouTube Shorts). New creatives (variant cuts of the winner from Module 21). New geos (US → CA → AU → UK). New offer angles (same product, different positioning — gift, self-care, performance). Each vector can ~match your initial winner's volume; combined, they're 3–10x the original.",
+      },
+      {
+        title: "The retention layer (LTV multiplier)",
+        body: "As you scale acquisition, every customer must go into a retention machine: welcome flow (3–5 emails), abandoned cart (3 emails), post-purchase (4–6 emails), winback flow. A store with no email/SMS post-purchase loses 40–60% of potential LTV. Adding the retention layer typically increases per-customer revenue 30–80% within 90 days — without spending more on ads.",
+      },
+      {
+        title: "Kill triggers for scale",
+        body: "Before you scale, define the conditions under which you'll un-scale: blended ROAS drops below X for 3 days → reduce budget 30%. CPA rises above Y for 5 days → pause new creatives. Refund rate spikes above Z% → pause scaling, audit fulfillment. Without kill triggers, you'll watch ROAS slide for 2 weeks before reacting.",
+      },
+    ],
+    steps: [
+      "Build your 30-day scaling plan. Days 1–7: vertical scale, 20%/day. Target: 2x current daily spend. Days 8–14: horizontal — duplicate winner with new audience. Days 15–21: horizontal — new placement (TikTok if on Meta, vice versa). Days 22–30: scale winners from days 8–21 vertically (still 20%/day cap).",
+      "Define your kill triggers in writing: blended ROAS floor, CPA ceiling, refund rate ceiling.",
+      "Build the retention layer if you don't have one: Klaviyo (or Omnisend) account; welcome flow (3 emails over 5 days); abandoned cart (3 emails: 1hr, 24hr, 72hr); post-purchase (4 emails over 21 days); winback (1 email at 30d, 1 at 60d).",
+      "Set up your scale dashboard: daily spend tracker, daily revenue, blended ROAS, kill-trigger status.",
+      "Hire or contract help if needed at >$2k/day spend: media buyer, customer support, fulfillment ops. Scaling alone past this point usually breaks the operator.",
+      "Review weekly. If kill triggers fire, reduce. If they don't, continue the 30-day plan.",
+    ],
+    mistakes: [
+      "Scaling >20%/day 'just to test' — you'll trigger the algorithm reset; weeks lost.",
+      "Skipping horizontal — vertical alone caps at 2–3x your original winner's volume.",
+      "Not defining kill triggers in advance — you'll second-guess in real time and lose money.",
+      "Scaling without retention — paying full ad cost for every dollar of LTV.",
+      "Trying to scale + manage operations + manage CS solo past $2k/day — burnout breaks the business.",
+      "Treating scaling as a one-time event — it's continuous; markets and creatives shift weekly.",
+    ],
+    checklist: [
+      "I have a written 30-day scaling plan with daily spend targets",
+      "Kill triggers defined and posted (blended ROAS, CPA, refund rate)",
+      "Email retention flows live (welcome, cart, post-purchase, winback)",
+      "Scale dashboard tracking blended ROAS daily",
+      "At least 2 horizontal scaling vectors prepared (new audience, new placement)",
+      "If scaling past $2k/day: contractor or VA arrangements in place",
+    ],
+    resources: [
+      { label: "Hacking Growth (Sean Ellis) — scaling experiments", url: "https://www.amazon.com/Hacking-Growth-Fastest-Growing-Companies-Breakout/dp/045149721X" },
+      { label: "Ecommerce Evolved (Tanner Larsson)", url: "https://www.amazon.com/Ecommerce-Evolved-Essential-Playbook-Customers/dp/1535258543" },
+      { label: "Klaviyo — email retention", url: "https://www.klaviyo.com" },
+      { label: "Triple Whale — required at scale for blended ROAS", url: "https://www.triplewhale.com" },
+      { label: "Crossing the Chasm (Geoffrey Moore) — audience expansion", url: "https://www.amazon.com/Crossing-Chasm-3rd-Disruptive-Mainstream/dp/0062292986" },
     ],
   },
 ];

@@ -32,13 +32,14 @@ export async function GET(request: Request) {
   // Pull auth users (email + created_at), profiles, and progress in parallel
   const [authRes, profilesRes, progressRes] = await Promise.all([
     admin.auth.admin.listUsers({ perPage: 1000 }),
-    admin.from("user_profiles").select("id, first_name, is_pro, streak_days, last_active, stripe_customer_id, track, goal"),
+    admin.from("user_profiles").select("id, first_name, is_pro, is_growth, streak_days, last_active, stripe_customer_id, track, goal"),
     admin.from("user_progress").select("user_id, module_id"),
   ]);
 
   const profilesById = new Map<string, {
     first_name: string | null;
     is_pro: boolean | null;
+    is_growth: boolean | null;
     streak_days: number | null;
     last_active: string | null;
     stripe_customer_id: string | null;
@@ -60,6 +61,7 @@ export async function GET(request: Request) {
       created_at: u.created_at,
       first_name: p?.first_name ?? null,
       is_pro: p?.is_pro ?? false,
+      is_growth: p?.is_growth ?? false,
       streak_days: p?.streak_days ?? 0,
       last_active: p?.last_active ?? null,
       track: p?.track ?? null,

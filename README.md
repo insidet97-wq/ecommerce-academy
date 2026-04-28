@@ -316,7 +316,8 @@ ecommerce-academy/
 | `start_module` | int | Module the quiz recommended |
 | `streak_days` | int | Current consecutive-day streak |
 | `last_active` | date | Date of last module completion |
-| `is_pro` | boolean | Set by Stripe webhook; revoked on cancellation/payment failure |
+| `is_pro` | boolean | Pro tier flag — set by Stripe webhook on checkout; revoked on cancellation/payment failure. Granting Growth also sets this to true. |
+| `is_growth` | boolean | Scale Lab (Growth) tier flag — set by Stripe webhook when `metadata.tier="growth"`. Implies `is_pro=true` (Growth includes Pro features). |
 | `stripe_customer_id` | text | Stripe customer ID (set on first checkout) |
 | `stripe_subscription_id` | text | Active Stripe subscription ID |
 | `reengagement_sent_at` | timestamptz | When the 3-day-inactive re-engagement email was sent (NULL = never). Cron uses this to send at most once per user. |
@@ -584,6 +585,8 @@ RESEND_WEBHOOK_SECRET=whsec_...   # signing secret from Resend webhooks dashboar
 STRIPE_SECRET_KEY=sk_live_...
 STRIPE_WEBHOOK_SECRET=whsec_...
 NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=pk_live_...
+STRIPE_PRICE_ID=price_...                # Pro tier $19/mo (existing)
+STRIPE_PRICE_ID_GROWTH=price_...         # Scale Lab tier $49/mo (NEW — create new Stripe Product+Price first)
 
 # Groq (AI content generation — free tier, no credit card)
 GROQ_API_KEY=gsk_...
@@ -736,6 +739,7 @@ Uses the Supabase service role key to bypass RLS. No auth check in the route —
 
 | Date | What changed |
 |------|-------------|
+| 2026-04-28 | **🚀 Scale Lab tier launched (12 new modules, 3-tier ladder).** New Growth tier at $49/mo gates modules 13-24 (covering diagnose/validate/persuade/test/scale phases — based on Cialdini, Hormozi, Sean Ellis, Hopkins, Berger). Tier ladder is now Free → Pro $19/mo → Scale Lab $49/mo. Code changes: added `Tier` type to `lib/modules.ts` and `tier` field to existing modules + 12 new module objects (1500+ lines added); new `is_growth` column on `user_profiles`; `/api/stripe/checkout` accepts `tier` param routing to `STRIPE_PRICE_ID` or `STRIPE_PRICE_ID_GROWTH` (new env var); webhook reads `metadata.tier` to set the right flag and dispatch the right welcome email; new `growthWelcomeEmailHTML` template; new `POST /api/admin/users/[userId]/growth` endpoint mirroring the Pro one; `/upgrade` page rewritten as a 3-tier comparison with `?tier=pro\|growth` deep-linking and a toggle; Module 12 completion now shows a Scale Lab pitch overlay (mirrors Module 6 → Pro pattern); Dashboard module list grouped visually by tier with section headers; Admin `/admin/users` shows Free/Pro/Scale Lab status + Grant/Revoke buttons for both tiers + filter for Scale Lab. **SQL migration:** `ALTER TABLE user_profiles ADD COLUMN IF NOT EXISTS is_growth boolean NOT NULL DEFAULT false;`. **Stripe setup:** create new Product "Scale Lab" with $49/mo recurring Price, copy the price ID into `STRIPE_PRICE_ID_GROWTH` Vercel env var |
 | 2026-04-27 | **AdSense slots configured (all 3):** Owner created 3 separate ad units in AdSense (`Content`, `Dashboard`, `Modules`) and added their slot IDs to Vercel env vars `NEXT_PUBLIC_ADSENSE_SLOT_CONTENT`, `_DASHBOARD`, `_MODULE`. Site itself is still in "Getting ready" approval status — once it flips to "Ready", ads fill automatically. Per-placement reporting now possible in AdSense dashboard. **`ads.txt`** is correctly served at `www.firstsalelab.com/ads.txt` (200 OK) but apex redirects to www so AdSense's "Ads.txt status" check may lag — monitor; re-register as `www.firstsalelab.com` if still "Not found" after 48h |
 | 2026-04-27 | **Tools / Blog / Resources promoted to landing + ads added:** `/tools` link added to marketing nav and footer (anonymous accessible — already was, just wasn't linked). New `components/UserAdBanner.tsx` wraps `AdBanner` and handles Pro detection on public pages where we don't already have it in state. AdSense banners now render on `/tools` (after the panel), `/resources` (after the list), `/blog` (after the post list), and `/blog/[slug]` (between article body and CTA card) — all controlled by new `NEXT_PUBLIC_ADSENSE_SLOT_CONTENT` env var. `sitemap.ts` and `robots.ts` updated to include `/tools` and `/resources`. Supplier Validator also got a new top-of-form Pro tease banner so the upsell appears even before users calculate |
 | 2026-04-27 | **Supplier Validator + Pro AI Analysis:** Free 5-category scoring calculator (reviews 25 / shipping 20 / communication 15 / quality 20 / price 20) → 0–100 trust score with Good/Risky/Avoid verdict. Embedded at `/tools` (5th tab, deep-linkable via `?tool=supplier`) and inline in Module 3. Logged-in users can save via `POST /api/supplier-validations`. **NEW Pro tier:** `POST /api/supplier-ai-analysis` (Pro-gated server-side) calls Groq with the supplier's inputs and returns AI-tailored red flags, verification questions, likely issues, and an 8–10 step pre-order checklist. Free users see a "🔒 Pro · Unlock AI analysis" upgrade card linking to `/upgrade`; anonymous users see one linking to `/signup`. Pro/admin users get the "🤖 Run AI analysis" button. `fetchSupplierData(url)` stub ready for future API integration |
