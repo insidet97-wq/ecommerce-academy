@@ -32,9 +32,14 @@ export const TIER_CHAINS: Record<Tier, AIChain> = {
     { provider: "groq", model: "llama-3.3-70b-versatile" },
   ],
   growth: [
-    { provider: "groq", model: "llama-3.3-70b-versatile" },
-    // When ready to upgrade Scale Lab quality:
-    // { provider: "anthropic", model: "claude-sonnet-4-5" },
+    // Scale Lab uses Gemini 2.0 Flash for a different "voice" than Pro/Free (which use Groq).
+    // If Gemini errors or hits its 1,500/day free-tier cap, we fall through to Groq below
+    // so Growth users never see an error.
+    { provider: "gemini", model: "gemini-2.0-flash" },
+    { provider: "groq",   model: "llama-3.3-70b-versatile" },
+    // When ready to upgrade Scale Lab quality (≈ $1k MRR threshold):
+    // swap the first entry to { provider: "anthropic", model: "claude-sonnet-4-5" }
+    // and add ANTHROPIC_API_KEY to Vercel.
   ],
 };
 

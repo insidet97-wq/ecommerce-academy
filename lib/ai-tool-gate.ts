@@ -5,7 +5,8 @@
  * Limits per user per tool per 24h:
  *   Free:   0  (locked — UI shows upgrade card)
  *   Pro:    5
- *   Growth: 50 (effectively unlimited; cap exists to prevent runaway abuse)
+ *   Growth: 20 (feels unlimited to legit users; cap exists to prevent runaway abuse
+ *               and to stay safely under Gemini's 1,500/day free-tier cap)
  *   Admin:  treated as Growth
  *
  * Logs every successful run to `ai_tool_log` for rate-limiting + future
@@ -86,7 +87,7 @@ export async function gateAITool(
     };
   }
 
-  const limit = tier === "growth" ? 50 : 5;
+  const limit = tier === "growth" ? 20 : 5;
 
   // Count today's uses
   const dayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();

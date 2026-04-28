@@ -11,7 +11,7 @@ const ALLOWED_FRAMEWORKS = ["Pattern Interrupt", "Problem Agitation", "Curiosity
  * POST /api/ai-tools/ugc-brief
  * Body: UGCBriefInput
  *
- * Generates a complete UGC creator brief. Pro: 5/day, Growth: 50/day.
+ * Generates a complete UGC creator brief. Pro: 5/day, Growth: 20/day.
  */
 export async function POST(request: Request) {
   const supabase = createClient(

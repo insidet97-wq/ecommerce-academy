@@ -10,7 +10,7 @@ export const dynamic = "force-dynamic";
  * Body: AdCopywriterInput
  *
  * Returns 5 ad variants (different psychological angles).
- * Pro: 5/day. Growth: 50/day. Free: 403.
+ * Pro: 5/day. Growth: 20/day. Free: 403.
  */
 export async function POST(request: Request) {
   const supabase = createClient(

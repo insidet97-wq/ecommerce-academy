@@ -10,7 +10,7 @@ export const dynamic = "force-dynamic";
  * Body: AdAuditInput
  *
  * Audits a user's ad copy against Cialdini + hook frameworks, returns
- * structured scores + concrete rewrites. Pro: 5/day, Growth: 50/day.
+ * structured scores + concrete rewrites. Pro: 5/day, Growth: 20/day.
  */
 export async function POST(request: Request) {
   const supabase = createClient(

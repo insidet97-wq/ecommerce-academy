@@ -4,7 +4,7 @@
  * AdCopywriter — paste product info, get 5 ad variants across different
  * psychological angles (Cialdini + hook frameworks).
  *
- * Pro: 5/day. Growth: 50/day. Free: locked card.
+ * Pro: 5/day. Growth: 20/day. Free: locked card.
  */
 
 import { useState } from "react";
