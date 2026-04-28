@@ -7,7 +7,7 @@ export const DEFAULT_MODELS: Record<AIProvider, string> = {
   groq:      "llama-3.3-70b-versatile",
   openai:    "gpt-4o-mini",
   anthropic: "claude-sonnet-4-5",
-  gemini:    "gemini-2.0-flash",
+  gemini:    "gemini-2.5-flash",
 };
 
 /**
@@ -32,10 +32,11 @@ export const TIER_CHAINS: Record<Tier, AIChain> = {
     { provider: "groq", model: "llama-3.3-70b-versatile" },
   ],
   growth: [
-    // Scale Lab uses Gemini 2.0 Flash for a different "voice" than Pro/Free (which use Groq).
-    // If Gemini errors or hits its 1,500/day free-tier cap, we fall through to Groq below
-    // so Growth users never see an error.
-    { provider: "gemini", model: "gemini-2.0-flash" },
+    // Scale Lab uses Gemini 2.5 Flash for a different "voice" than Pro/Free (which use Groq).
+    // (gemini-2.0-flash was deprecated for new users in late 2026.)
+    // If Gemini errors or hits its quota, we fall through to Groq below so Growth users
+    // never see an error.
+    { provider: "gemini", model: "gemini-2.5-flash" },
     { provider: "groq",   model: "llama-3.3-70b-versatile" },
     // When ready to upgrade Scale Lab quality (≈ $1k MRR threshold):
     // swap the first entry to { provider: "anthropic", model: "claude-sonnet-4-5" }
@@ -48,7 +49,7 @@ export const TIER_CHAINS: Record<Tier, AIChain> = {
  * with API keys configured will actually run; others are skipped silently.
  */
 export const FALLBACK_CHAIN: AIChain = [
-  { provider: "gemini",    model: "gemini-2.0-flash" },
+  { provider: "gemini",    model: "gemini-2.5-flash" },
   { provider: "openai",    model: "gpt-4o-mini" },
   { provider: "anthropic", model: "claude-haiku-4-5" },
 ];
