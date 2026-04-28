@@ -62,20 +62,44 @@ export default function AdminPage() {
 
   useEffect(() => {
     async function load() {
-      const { data: { user, session } } = await supabase.auth.getUser().then(async ({ data }) => {
-        const { data: sessionData } = await supabase.auth.getSession();
-        return { data: { user: data.user, session: sessionData.session } };
-      });
-      if (!user || !isAdmin(user.email)) { router.push("/dashboard"); return; }
+      try {
+        const [userRes, sessionRes] = await Promise.all([
+          supabase.auth.getUser(),
+          supabase.auth.getSession(),
+        ]);
+        const user    = userRes.data?.user;
+        const session = sessionRes.data?.session;
 
-      const [analyticsRes, metricsRes] = await Promise.all([
-        fetch("/api/analytics"),
-        fetch("/api/admin/metrics", { headers: session?.access_token ? { Authorization: `Bearer ${session.access_token}` } : {} }),
-      ]);
-      if (!analyticsRes.ok) { setError("Failed to load analytics"); setLoading(false); return; }
-      setData(await analyticsRes.json());
-      if (metricsRes.ok) setBiz(await metricsRes.json());
-      setLoading(false);
+        if (!user || !isAdmin(user.email)) { router.push("/dashboard"); return; }
+
+        // Fetch the legacy analytics endpoint AND the new metrics endpoint
+        // independently so a failure in one doesn't blank the whole page.
+        const [analyticsRes, metricsRes] = await Promise.allSettled([
+          fetch("/api/analytics"),
+          fetch("/api/admin/metrics", {
+            headers: session?.access_token ? { Authorization: `Bearer ${session.access_token}` } : {},
+          }),
+        ]);
+
+        // Analytics is required — failure of this means we can't render the page
+        if (analyticsRes.status === "rejected" || !analyticsRes.value.ok) {
+          setError(`Failed to load analytics${analyticsRes.status === "fulfilled" ? ` (${analyticsRes.value.status})` : ""}`);
+          setLoading(false);
+          return;
+        }
+        setData(await analyticsRes.value.json());
+
+        // Business metrics is optional — render the page either way
+        if (metricsRes.status === "fulfilled" && metricsRes.value.ok) {
+          try { setBiz(await metricsRes.value.json()); } catch { /* swallow JSON parse error */ }
+        }
+
+        setLoading(false);
+      } catch (err) {
+        console.error("Admin page load error:", err);
+        setError(err instanceof Error ? err.message : "Failed to load page");
+        setLoading(false);
+      }
     }
     load();
   }, [router]);
