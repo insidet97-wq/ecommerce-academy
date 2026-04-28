@@ -183,12 +183,21 @@ CRON_SECRET
 
 ## Pending / known issues
 
-### 🔄 Scale Lab tier — manual steps the owner is doing now (2026-04-28)
-1. **SQL migration in Supabase** — `ALTER TABLE user_profiles ADD COLUMN IF NOT EXISTS is_growth boolean NOT NULL DEFAULT false;` (also included in the SQL block below)
-2. **Stripe** — create a new Product called "Scale Lab" with a $49/mo recurring Price; copy the `price_xxxx...` ID
-3. **Vercel env var** — add `STRIPE_PRICE_ID_GROWTH` with the value from step 2; redeploy
+### 🔄 Scale Lab tier — only SQL needed now; Stripe deferred
+**Required now (1 step):**
+1. **SQL migration in Supabase** — `ALTER TABLE user_profiles ADD COLUMN IF NOT EXISTS is_growth boolean NOT NULL DEFAULT false;` (also in the SQL block below)
 
-Until all 3 are done, `/upgrade` Scale Lab button will return a 500 with "Missing Stripe price ID for tier growth". The rest of the tier (gating, pitch overlay, admin tools) works fine without these — owner can manually grant Growth via `/admin/users` for testing.
+After that single migration, EVERYTHING in the Scale Lab tier works **except** the live Stripe checkout button:
+- ✅ All 12 modules (13-24) are accessible to Growth users
+- ✅ Gating, pitch overlays, admin tools all work
+- ✅ Owner can manually grant/revoke Growth from `/admin/users` for testing or comping
+- ❌ The `/upgrade` "Upgrade to Scale Lab" button will return 500 "Missing Stripe price ID for tier growth" until the Stripe steps below are done
+
+**Deferred (do alongside Stripe live mode flip — see below):**
+2. Stripe → create a new Product "Scale Lab" with a $49/mo recurring Price → copy `price_xxxx...`
+3. Vercel env var → add `STRIPE_PRICE_ID_GROWTH` with that price ID → redeploy
+
+These are paired with the broader "go live with Stripe" work — no point creating a live Scale Lab product while still in test mode. When the owner is ready to flip to live keys, do Pro live + Scale Lab product + env var in one batch.
 
 ### ⏳ External waiting (no action needed)
 - **Google AdSense site approval:** "Getting ready" as of last check. All three slot IDs configured in Vercel (`NEXT_PUBLIC_ADSENSE_SLOT_DASHBOARD`, `_MODULE`, `_CONTENT`). Once Google approves, ads fill automatically. Verify in incognito (admins are ad-free).
@@ -196,7 +205,13 @@ Until all 3 are done, `/upgrade` Scale Lab button will return a 500 with "Missin
 - **Sitemap** submitted to Google Search Console — indexing takes days.
 
 ### 🛠 Owner-action operational items
-- **Stripe** is in **test mode** — switch to live keys when ready for real payments.
+- **Stripe is in test mode.** When ready for real payments, do all of the following in one batch:
+  1. Switch Pro to live keys (`STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY`)
+  2. Re-point Stripe webhook to the live mode endpoint
+  3. Create the Scale Lab live Product (Stripe → Products → "Scale Lab" → $49/mo recurring Price) → copy live `price_...`
+  4. Add `STRIPE_PRICE_ID_GROWTH` to Vercel with the live price ID
+  5. Verify `STRIPE_PRICE_ID` (Pro live price) is updated to live as well
+  6. Redeploy — both Pro $19 and Scale Lab $49 checkouts now process real money
 - **`support@firstsalelab.com`** mailbox needs to be set up in Namecheap Pro Email (already referenced in settings, terms, privacy).
 - **Resend webhook** — endpoint configured, `RESEND_WEBHOOK_SECRET` set in Vercel ✅
 
