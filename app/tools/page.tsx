@@ -4,13 +4,14 @@ import { useState, useRef, useEffect, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import SupplierValidator from "@/components/SupplierValidator";
+import StoreAutopsy from "@/components/StoreAutopsy";
 import UserAdBanner from "@/components/UserAdBanner";
 
 /* ── Design tokens ── */
 const INDIGO = "#6366f1";
 const GRAD   = "linear-gradient(135deg, #6366f1 0%, #7c3aed 100%)";
 
-type Tool = "profit" | "validation" | "roas" | "checklist" | "supplier";
+type Tool = "profit" | "validation" | "roas" | "checklist" | "supplier" | "autopsy";
 
 /* ════════════════════════════════════════════
    Shared UI primitives
@@ -591,9 +592,10 @@ const TOOLS_META: { id: Tool; emoji: string; label: string; tagline: string }[] 
   { id: "roas",       emoji: "📈", label: "Break-Even ROAS",    tagline: "Find your ad profit threshold" },
   { id: "checklist",  emoji: "✅", label: "Launch Checklist",   tagline: "24 items before going live" },
   { id: "supplier",   emoji: "🏭", label: "Supplier Validator", tagline: "Score any supplier 0–100" },
+  { id: "autopsy",    emoji: "🔍", label: "Store Autopsy",      tagline: "🚀 Scale Lab · competitor teardown" },
 ];
 
-const VALID_TOOLS: Tool[] = ["profit", "validation", "roas", "checklist", "supplier"];
+const VALID_TOOLS: Tool[] = ["profit", "validation", "roas", "checklist", "supplier", "autopsy"];
 
 // useSearchParams must be wrapped in a Suspense boundary in Next.js App Router,
 // otherwise the build fails with "useSearchParams() should be wrapped in a
@@ -704,6 +706,7 @@ function ToolsPageInner() {
           {active === "roas"       && <ROASCalculator />}
           {active === "checklist"  && <LaunchChecklist />}
           {active === "supplier"   && <SupplierValidator />}
+          {active === "autopsy"    && <StoreAutopsy />}
         </div>
 
         {/* Ad — shown to free / anonymous users only */}

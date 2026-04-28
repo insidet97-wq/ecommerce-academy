@@ -5,29 +5,41 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
 
 /**
  * POST /api/stripe/checkout
- * Body: { userId, email, tier?: "pro" | "growth" }
+ * Body: { userId, email, tier?: "pro" | "growth", billing?: "monthly" | "annual" }
  *
- * Creates a Stripe Checkout session for either tier:
- *   - tier="pro"     → STRIPE_PRICE_ID         ($19/mo)  [default; backwards-compatible]
- *   - tier="growth"  → STRIPE_PRICE_ID_GROWTH  ($49/mo)
+ * Creates a Stripe Checkout session for any tier × billing cycle combination:
+ *   tier=pro,    billing=monthly → STRIPE_PRICE_ID                  ($19/mo)
+ *   tier=pro,    billing=annual  → STRIPE_PRICE_ID_ANNUAL           ($190/yr — save 17%)
+ *   tier=growth, billing=monthly → STRIPE_PRICE_ID_GROWTH           ($49/mo)
+ *   tier=growth, billing=annual  → STRIPE_PRICE_ID_GROWTH_ANNUAL    ($490/yr — save 17%)
  *
- * Stripe metadata.tier flows through to the webhook so it can set
- * the correct flag (is_pro vs is_growth) on user_profiles.
+ * Annual env vars are optional. If unset, the request returns 500 with a
+ * clear message — flip them on once you've created the annual prices in Stripe.
+ *
+ * Stripe metadata.tier and metadata.billing flow through to the webhook.
  */
 export async function POST(req: Request) {
   try {
-    const { userId, email, tier } = await req.json();
+    const { userId, email, tier, billing } = await req.json();
     if (!userId || !email) return NextResponse.json({ error: "Missing params" }, { status: 400 });
 
-    const requestedTier: "pro" | "growth" = tier === "growth" ? "growth" : "pro";
+    const requestedTier:    "pro" | "growth"      = tier    === "growth" ? "growth" : "pro";
+    const requestedBilling: "monthly" | "annual"  = billing === "annual" ? "annual" : "monthly";
 
-    const priceId = requestedTier === "growth"
-      ? process.env.STRIPE_PRICE_ID_GROWTH
-      : process.env.STRIPE_PRICE_ID;
+    const priceId =
+      requestedTier === "growth" && requestedBilling === "annual"  ? process.env.STRIPE_PRICE_ID_GROWTH_ANNUAL :
+      requestedTier === "growth" && requestedBilling === "monthly" ? process.env.STRIPE_PRICE_ID_GROWTH        :
+      requestedTier === "pro"    && requestedBilling === "annual"  ? process.env.STRIPE_PRICE_ID_ANNUAL        :
+                                                                     process.env.STRIPE_PRICE_ID;
 
     if (!priceId) {
+      const envName =
+        requestedTier === "growth" && requestedBilling === "annual"  ? "STRIPE_PRICE_ID_GROWTH_ANNUAL" :
+        requestedTier === "growth" && requestedBilling === "monthly" ? "STRIPE_PRICE_ID_GROWTH"        :
+        requestedTier === "pro"    && requestedBilling === "annual"  ? "STRIPE_PRICE_ID_ANNUAL"        :
+                                                                       "STRIPE_PRICE_ID";
       return NextResponse.json(
-        { error: `Missing Stripe price ID for tier "${requestedTier}". Set STRIPE_PRICE_ID${requestedTier === "growth" ? "_GROWTH" : ""} in env.` },
+        { error: `Missing Stripe price ID for "${requestedTier}" / "${requestedBilling}". Set ${envName} in env.` },
         { status: 500 },
       );
     }
@@ -39,8 +51,8 @@ export async function POST(req: Request) {
       customer_email: email,
       success_url: `${process.env.NEXT_PUBLIC_SITE_URL}/dashboard?upgraded=${requestedTier}`,
       cancel_url:  `${process.env.NEXT_PUBLIC_SITE_URL}/upgrade`,
-      metadata: { userId, tier: requestedTier },
-      subscription_data: { metadata: { userId, tier: requestedTier } },
+      metadata: { userId, tier: requestedTier, billing: requestedBilling },
+      subscription_data: { metadata: { userId, tier: requestedTier, billing: requestedBilling } },
     });
 
     return NextResponse.json({ url: session.url });

@@ -51,6 +51,14 @@ export async function POST(req: Request) {
 
           await supabase.from("user_profiles").upsert(updates, { onConflict: "id" });
 
+          // Referral conversion — if this user was referred, mark the referral
+          // as converted with the tier they bought. Admin can later grant credit
+          // to the referrer via /admin/users.
+          await supabase.from("referrals")
+            .update({ converted_tier: tier })
+            .eq("referred_id", userId)
+            .is("converted_tier", null);
+
           // Fetch user email + first name for welcome email
           const [{ data: { user } }, { data: profile }] = await Promise.all([
             supabase.auth.admin.getUserById(userId),

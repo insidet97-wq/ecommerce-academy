@@ -223,6 +223,97 @@ Each item should be one short sentence — punchy, actionable, no fluff. Referen
   };
 }
 
+// ── Store Autopsy (Growth-only Pro feature) ──────────────────
+
+export type StoreAutopsy = {
+  summary:           string;     // 2–3 sentence read on the store
+  offer_analysis:    string[];   // 3–5 observations on their offer
+  hook_analysis:     string[];   // 3–5 observations on their messaging / hooks
+  social_proof:      string[];   // 2–4 observations on their proof
+  conversion_gaps:   string[];   // 3–5 specific weaknesses
+  exploitation_angles: string[]; // 3–5 specific angles you could use
+  threat_level:      "Low" | "Medium" | "High"; // how hard to compete
+};
+
+export async function analyzeStore(input: { url: string; description: string; niche?: string }): Promise<StoreAutopsy> {
+  const prompt = `You are an expert ecommerce competitive analyst. The user wants a teardown of a competitor store so they can either out-compete them or find gaps in the market.
+
+Competitor URL: ${input.url}
+${input.niche ? `Their niche: ${input.niche}\n` : ""}User's description of what they observed on the store:
+${input.description}
+
+You don't have web access — base your analysis ENTIRELY on the user's description plus what's plausible for a typical store in this niche. Don't make up specifics ("their hero image is...") that the user didn't mention. Instead, work with the patterns they describe and frame your analysis as:
+- What they're doing well (and how that signals their strategy)
+- What they're missing (and how that creates opening for the user)
+- Specific angles the user could exploit
+
+Return a JSON object:
+{
+  "summary": "2-3 sentences. What kind of competitor is this? Are they a serious operator or a thin store? Should the user worry about them or laugh at them?",
+  "offer_analysis": ["specific observation tied to their pricing / bundles / guarantee / shipping (3-5 items)"],
+  "hook_analysis": ["specific observation tied to their messaging, ad angles, value prop (3-5 items)"],
+  "social_proof": ["specific observation tied to reviews, testimonials, trust signals (2-4 items)"],
+  "conversion_gaps": ["specific gap or weakness — be concrete and exploitable (3-5 items)"],
+  "exploitation_angles": ["specific positioning the user could take to differentiate or win against this store (3-5 items)"],
+  "threat_level": "Low" | "Medium" | "High"
+}
+
+Each item: one sharp sentence. Reference specific things from the user's description where possible. Frame exploitation_angles as actions the user can take ("Position your store as ___ to differentiate from their generic positioning"). Threat level: Low = thin store, easy to beat; Medium = decent operator with gaps; High = serious player, find a niche they don't serve.`;
+
+  const raw = await callGroq(prompt);
+  const parsed = JSON.parse(raw);
+
+  return {
+    summary:             String(parsed.summary ?? "").slice(0, 800),
+    offer_analysis:      Array.isArray(parsed.offer_analysis)      ? parsed.offer_analysis.slice(0, 6).map(String)      : [],
+    hook_analysis:       Array.isArray(parsed.hook_analysis)       ? parsed.hook_analysis.slice(0, 6).map(String)       : [],
+    social_proof:        Array.isArray(parsed.social_proof)        ? parsed.social_proof.slice(0, 5).map(String)        : [],
+    conversion_gaps:     Array.isArray(parsed.conversion_gaps)     ? parsed.conversion_gaps.slice(0, 6).map(String)     : [],
+    exploitation_angles: Array.isArray(parsed.exploitation_angles) ? parsed.exploitation_angles.slice(0, 6).map(String) : [],
+    threat_level:        ["Low", "Medium", "High"].includes(parsed.threat_level) ? parsed.threat_level : "Medium",
+  };
+}
+
+// ── Module Q&A (AI assistant) ────────────────────────────────
+
+export async function answerModuleQuestion(input: {
+  question: string;
+  module_title: string;
+  module_objective: string;
+  module_concepts: { title: string; body: string }[];
+  module_steps: string[];
+  module_mistakes: string[];
+}): Promise<{ answer: string }> {
+  const conceptsBlock = input.module_concepts.map(c => `- ${c.title}: ${c.body}`).join("\n");
+  const stepsBlock    = input.module_steps.map((s, i) => `${i + 1}. ${s}`).join("\n");
+  const mistakesBlock = input.module_mistakes.map(m => `- ${m}`).join("\n");
+
+  const prompt = `You are a helpful ecommerce mentor for First Sale Lab. A student is working through a specific module and has a question. Answer their question using ONLY the module content below as your primary reference. If the answer isn't in the module, say so honestly and give your best ecommerce guidance with a note that the official course doesn't cover it.
+
+MODULE: ${input.module_title}
+OBJECTIVE: ${input.module_objective}
+
+KEY CONCEPTS:
+${conceptsBlock}
+
+ACTION STEPS:
+${stepsBlock}
+
+COMMON MISTAKES:
+${mistakesBlock}
+
+STUDENT QUESTION:
+${input.question}
+
+Answer in 2-4 short paragraphs. Be direct, specific, and reference the module content where possible. No fluff, no apologies, no "great question." If the question is unrelated to ecommerce, redirect them politely to a relevant module.
+
+Return a JSON object: { "answer": "your full answer here, with line breaks as \\n\\n between paragraphs" }`;
+
+  const raw = await callGroq(prompt);
+  const parsed = JSON.parse(raw);
+  return { answer: String(parsed.answer ?? "").slice(0, 2000) };
+}
+
 // ── Niche picker (public lead magnet at /niche-picker) ───────
 
 export type NicheSuggestion = {

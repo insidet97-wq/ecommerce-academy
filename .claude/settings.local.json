@@ -29,7 +29,8 @@
       "Bash(curl -sI https://firstsalelab.com/ads.txt)",
       "Bash(curl -s https://firstsalelab.com/ads.txt)",
       "Bash(curl -sI https://www.firstsalelab.com/ads.txt)",
-      "Bash(curl -s https://www.firstsalelab.com/ads.txt)"
+      "Bash(curl -s https://www.firstsalelab.com/ads.txt)",
+      "Bash(grep -n \"Start Module \\\\${nextId}\" C:/projects/ecommerce-academy/app/modules/\\\\[id\\\\]/page.tsx)"
     ]
   }
 }

@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { isAdmin } from "@/lib/admin";
 import AdBanner from "@/components/AdBanner";
+import ReferralCard from "@/components/ReferralCard";
 
 /* ── Design tokens ── */
 const TRACK_COLORS: Record<string, string> = {
@@ -326,6 +327,8 @@ export default function DashboardPage() {
                 { href: "/admin/content", label: "Content"   },
                 { href: "/admin/users",   label: "Users"     },
                 { href: "/admin/blog",    label: "Blog"      },
+                { href: "/admin/email",   label: "Email"     },
+                { href: "/admin/leads",   label: "Leads"     },
               ] : []),
             ].map(item => (
               <Link key={item.href} href={item.href}
@@ -553,6 +556,11 @@ export default function DashboardPage() {
 
         {/* ── Ad (free users only) ── */}
         <AdBanner isPro={isPro} slot={process.env.NEXT_PUBLIC_ADSENSE_SLOT_DASHBOARD ?? ""} />
+
+        {/* ── Refer a friend ── */}
+        <div style={{ marginTop: 12, marginBottom: 12 }}>
+          <ReferralCard />
+        </div>
 
         {/* ── Module list ── */}
         <div className="fade-up-d3">

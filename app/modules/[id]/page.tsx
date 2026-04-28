@@ -9,6 +9,7 @@ import { updateStreak } from "@/lib/streak";
 import Link from "next/link";
 import AdBanner from "@/components/AdBanner";
 import SupplierValidator from "@/components/SupplierValidator";
+import ModuleQA from "@/components/ModuleQA";
 
 const MODULE_EMOJIS: Record<number, string> = {
   1: "🎮", 2: "🎯", 3: "🏆", 4: "🧠",  5: "🛒",
@@ -185,7 +186,8 @@ export default function ModulePage() {
     if (moduleId === 6  && !isPro)    return; // Pro pitch overlay handles its own CTAs
     if (moduleId === 12 && !isGrowth) return; // Growth pitch overlay handles its own CTAs
     if (countdown <= 0) {
-      if (moduleId < 12) router.push(`/modules/${moduleId + 1}`);
+      // Last module is 24 (Scale Lab finale). Anything before that → next module.
+      if (moduleId < 24) router.push(`/modules/${moduleId + 1}`);
       else router.push("/dashboard");
       return;
     }
@@ -683,6 +685,12 @@ export default function ModulePage() {
             </Card>
           </section>
         )}
+
+        {/* ── AI Module Q&A (all modules, all logged-in users with tier-based limits) ── */}
+        <section className="fade-up-d2">
+          <SectionHeading icon="🤖" title="Ask the module" />
+          <ModuleQA moduleId={moduleId} />
+        </section>
 
         {/* ── Common Mistakes ── */}
         <section className="fade-up-d2">

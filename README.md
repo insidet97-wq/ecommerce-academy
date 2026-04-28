@@ -344,6 +344,7 @@ API endpoints:
 | `stripe_subscription_id` | text | Active Stripe subscription ID |
 | `reengagement_sent_at` | timestamptz | When the 3-day-inactive re-engagement email was sent (NULL = never). Cron uses this to send at most once per user. |
 | `streak_save_email_date` | date | Date when the most recent streak-save email was sent. Cron skips if already sent today. |
+| `referral_code` | text | Auto-generated 6-char unique code; appended to share link (`/quiz?ref=CODE`). UNIQUE indexed. |
 
 #### `user_progress`
 | Column | Type | Notes |
@@ -432,6 +433,27 @@ Briefing content shape:
 | `status` | text | `'draft'` or `'published'` |
 | `published_at` | timestamptz | When admin clicked publish |
 | `created_at` | timestamptz | Auto-set |
+
+#### `referrals`
+| Column | Type | Notes |
+|--------|------|-------|
+| `id` | uuid | Primary key |
+| `referrer_id` | uuid | The user who shared the link |
+| `referred_id` | uuid | The user who signed up via the link (UNIQUE — one referral per signup) |
+| `referral_code` | text | The code used at signup time (denormalized for audit) |
+| `converted_tier` | text | NULL until they upgrade; then `'pro'` or `'growth'` (set by Stripe webhook) |
+| `credit_granted` | boolean | Admin sets to true after manually granting the free month via `/admin/users` |
+| `created_at` | timestamptz | Auto-set |
+
+#### `module_qa_log`
+| Column | Type | Notes |
+|--------|------|-------|
+| `id` | uuid | Primary key |
+| `user_id` | uuid | The user who asked |
+| `module_id` | int | Which module (1–24) |
+| `question` | text | What they asked |
+| `answer` | text | What Groq answered |
+| `created_at` | timestamptz | Used for rate-limiting (3/10/50 per tier per module per 24h) |
 
 #### `supplier_validations`
 | Column | Type | Notes |
@@ -628,8 +650,10 @@ RESEND_WEBHOOK_SECRET=whsec_...   # signing secret from Resend webhooks dashboar
 STRIPE_SECRET_KEY=sk_live_...
 STRIPE_WEBHOOK_SECRET=whsec_...
 NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=pk_live_...
-STRIPE_PRICE_ID=price_...                # Pro tier $19/mo (existing)
-STRIPE_PRICE_ID_GROWTH=price_...         # Scale Lab tier $49/mo (NEW — create new Stripe Product+Price first)
+STRIPE_PRICE_ID=price_...                # Pro $19/mo
+STRIPE_PRICE_ID_GROWTH=price_...         # Scale Lab $49/mo
+STRIPE_PRICE_ID_ANNUAL=price_...         # Pro $190/yr (optional — annual plan)
+STRIPE_PRICE_ID_GROWTH_ANNUAL=price_...  # Scale Lab $490/yr (optional — annual plan)
 
 # Groq (AI content generation — free tier, no credit card)
 GROQ_API_KEY=gsk_...
@@ -782,6 +806,7 @@ Uses the Supabase service role key to bypass RLS. No auth check in the route —
 
 | Date | What changed |
 |------|-------------|
+| 2026-04-28 | **Big batch — admin dashboards, Store Autopsy, Module Q&A, referral program, annual prep.** (1) `/admin` expanded with MRR/tier/funnel/churn-risk/recent-signups dashboards. (2) New `/admin/email` page shows open/click/bounce rates per email type + top-clicked URLs. (3) New `/admin/leads` page browses Niche Picker leads with drip-stage filter. (4) **Store Autopsy** — Growth-only `/tools` 6th tab; user describes competitor store, Groq returns structured teardown (offer, hooks, social proof, conversion gaps, exploit angles, threat level). Server-side `is_growth` gate on `/api/store-autopsy`. (5) **AI Module Q&A** — embedded widget on every module page. Asks Groq using ONLY that module's content. Rate-limited per tier (Free 3 / Pro 10 / Growth 50 per module per 24h). Logged to `module_qa_log` table. (6) **Annual plan code prep** — `/api/stripe/checkout` accepts `billing: monthly\|annual`, routes to 4 env vars (`STRIPE_PRICE_ID`, `_ANNUAL`, `_GROWTH`, `_GROWTH_ANNUAL`). Annual Stripe products deferred with live-mode flip. (7) **Referral program** — each user gets 6-char base36 code on first dashboard load. `/quiz?ref=CODE` captures leads via localStorage → `/api/referrals/track` after signup. Stripe webhook marks `converted_tier` when they upgrade. Dashboard `<ReferralCard>` shows link + total/converted/pending counts. Admin manually grants free month via existing Grant Pro/Growth toggle. (8) **Bug fix:** module completion auto-redirect hardcoded `< 12` → fixed to `< 24` (Growth users completing M12 now advance to M13 properly). (9) Mobile pass: admin funnel grid now `auto-fit` instead of fixed 5 columns. **SQL migrations needed:** `referral_code` column + `referrals` + `module_qa_log` tables (see CLAUDE.md). New env vars `STRIPE_PRICE_ID_ANNUAL` + `STRIPE_PRICE_ID_GROWTH_ANNUAL` (deferred) |
 | 2026-04-28 | **Landing page updated for 3-tier ladder:** Hero badge now shows all 3 tiers ($19 + $49). The old 2-column "Free vs Pro" pricing section is now a 3-column comparison (Free / Pro / Scale Lab) — Scale Lab styled black/gold with "Most powerful" badge; mobile stacks to 1 column under 800px. New Scale Lab teaser card added below the 12-module curriculum grid showing the 5-phase breakdown (Diagnose/Validate/Persuade/Test/Scale). FAQ rewritten to explain all 3 tiers + course completion time per tier. JSON-LD structured data adds the $49 Scale Lab Offer and expands `teaches` with advanced topics (CPA/ROAS/AOV, persuasion copy, A/B testing, UGC creative, scaling). Stats updated to "24 modules · 3 tiers". The dashboard, upgrade page, and signup → quiz flow remain unchanged — they were already 3-tier-aware from the prior commit |
 | 2026-04-28 | **Loox affiliate link wired in:** `https://loox.io/app/FSL30`. Replaced the non-affiliate `loox.app` URL in `lib/resources.ts` (Store Building card on `/resources`) and 3 places in `lib/modules.ts` (Module 5 store building, Module 19 persuasion principles, Module 21 UGC at scale). README affiliate table updated — Loox moved from "pending" to active |
 | 2026-04-28 | **🚀 Scale Lab tier launched (12 new modules, 3-tier ladder).** New Growth tier at $49/mo gates modules 13-24 (covering diagnose/validate/persuade/test/scale phases — based on Cialdini, Hormozi, Sean Ellis, Hopkins, Berger). Tier ladder is now Free → Pro $19/mo → Scale Lab $49/mo. Code changes: added `Tier` type to `lib/modules.ts` and `tier` field to existing modules + 12 new module objects (1500+ lines added); new `is_growth` column on `user_profiles`; `/api/stripe/checkout` accepts `tier` param routing to `STRIPE_PRICE_ID` or `STRIPE_PRICE_ID_GROWTH` (new env var); webhook reads `metadata.tier` to set the right flag and dispatch the right welcome email; new `growthWelcomeEmailHTML` template; new `POST /api/admin/users/[userId]/growth` endpoint mirroring the Pro one; `/upgrade` page rewritten as a 3-tier comparison with `?tier=pro\|growth` deep-linking and a toggle; Module 12 completion now shows a Scale Lab pitch overlay (mirrors Module 6 → Pro pattern); Dashboard module list grouped visually by tier with section headers; Admin `/admin/users` shows Free/Pro/Scale Lab status + Grant/Revoke buttons for both tiers + filter for Scale Lab. **Required SQL migration (only step needed now):** `ALTER TABLE user_profiles ADD COLUMN IF NOT EXISTS is_growth boolean NOT NULL DEFAULT false;`. Stripe Scale Lab product setup is **deferred** — paired with the future flip to Stripe live mode (Pro is also still in test mode). Until Stripe is live, owner can grant Growth manually via `/admin/users` for testing |

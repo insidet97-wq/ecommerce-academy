@@ -56,10 +56,12 @@ Freemium ecommerce course with **3 tiers**, live at **firstsalelab.com**:
 | `/pro/products` | Weekly product picks (Pro-gated) | Yes (Pro) |
 | `/pro/briefings` | Monthly ecom briefings (Pro-gated) | Yes (Pro) |
 | `/certificate/[userId]` | Public shareable completion certificate | No |
-| `/admin` | Analytics dashboard (admin-only) | Yes (admin) |
+| `/admin` | Analytics dashboard — MRR, tier counts, conversion funnel, recent signups, course activity | Yes (admin) |
 | `/admin/content` | Generate/review/publish AI content drafts | Yes (admin) |
-| `/admin/users` | Browse/search users, grant or revoke Pro manually | Yes (admin) |
+| `/admin/users` | Browse/search users, grant or revoke Pro/Growth manually | Yes (admin) |
 | `/admin/blog` | Manage blog drafts (generate, preview, publish/discard) | Yes (admin) |
+| `/admin/email` | Email performance — open/click/bounce rates per email type, top-clicked URLs | Yes (admin) |
+| `/admin/leads` | Browse Niche Picker leads, filter by drip stage, view AI-generated niches per lead | Yes (admin) |
 | `/privacy` | Privacy policy | No |
 | `/terms` | Terms of service (no-refund policy) | No |
 
@@ -145,6 +147,11 @@ CRON_SECRET
 - [x] Supplier Validator: 0–100 trust score with 5-category breakdown — embedded in `/tools` (5th tab) and inside Module 3; logged-in users can save validations to `supplier_validations` table; **Pro-only AI analysis** layer adds Groq-generated red flags, questions to ask, likely issues, and a pre-order checklist tailored to the supplier's inputs
 - [x] Blog system: public `/blog` + `/blog/[slug]` with JSON-LD, weekly Groq-drafted posts, admin review/publish at `/admin/blog`
 - [x] Performance: AdSense moved from beforeInteractive → afterInteractive (no longer blocks page interactivity); decoding="async" on logo images
+- [x] Admin MRR + funnel + email + leads dashboards
+- [x] Store Autopsy (Growth-tier exclusive AI tool — competitor teardown)
+- [x] AI Q&A assistant per module (tier-rate-limited: 3 free / 10 Pro / 50 Growth per module per 24h)
+- [x] Annual plan code prep (`STRIPE_PRICE_ID_ANNUAL` + `_GROWTH_ANNUAL` env vars; Stripe products to be created with live mode)
+- [x] Referral program: code generation + capture on signup + dashboard widget + Stripe webhook flags conversion
 - [x] Affiliate links: Shopify, ReConvert, AutoDS, Privy, Loox
 
 ---
@@ -153,6 +160,12 @@ CRON_SECRET
 
 | What | Detail |
 |------|--------|
+| **Admin dashboards expanded** | `/admin` now shows MRR by tier, churn risk, signups (7d/30d), active 7d/today, full conversion funnel (signups → M1 → M6 → M12 → M24), recent 10 signups with tier badges. Module funnel covers all 24 modules. New `/admin/email` with open/click/bounce rates per email type + top-clicked URLs. New `/admin/leads` for Niche Picker leads with drip-stage filter |
+| **Store Autopsy (Growth-exclusive)** | New `🔍 Store Autopsy` tool — 6th tab on `/tools`. User pastes a competitor URL + describes what they observed, Groq returns structured teardown: 2-3 sentence summary, offer analysis, hook strategy, social proof analysis, conversion gaps, exploitation angles, threat level (Low/Medium/High). Free/Pro users see locked card → upgrade CTA. Server-side gate on `is_growth` |
+| **AI Q&A assistant per module** | Embedded `<ModuleQA>` widget on every module page. Student types a question, Groq answers using ONLY that module's content as context. Rate-limited per tier per module per 24h: Free 3, Pro 10, Growth/admin 50. Logged to new `module_qa_log` table for rate-limiting + future analysis |
+| **Annual plan code prep** | `/api/stripe/checkout` accepts `billing: "monthly" \| "annual"`. Routes to STRIPE_PRICE_ID/_ANNUAL/_GROWTH/_GROWTH_ANNUAL env vars. Annual env vars unset by default — Stripe product creation deferred with live mode. Webhook captures billing in metadata for future use |
+| **Referral program** | Each user gets a 6-char base36 code on first dashboard load. Sharing `/quiz?ref=CODE` captures the lead via localStorage → `/api/referrals/track` after signup. Stripe webhook marks the referral as converted when they upgrade. Dashboard `<ReferralCard>` shows the link + total/converted/pending counts. Admin grants the actual free month manually via existing `/admin/users` Grant Pro/Growth toggle |
+| **Module 24 redirect bug fixed** | Auto-redirect after completion was hardcoded `< 12`; now `< 24` so Growth users completing M12 advance to M13 instead of being kicked to dashboard |
 | **Landing page reflects 3-tier ladder** | Hero badge updated to "Modules 1–6 free · Pro $19/mo · Scale Lab $49/mo". Free vs Pro 2-column comparison rewritten as 3-tier grid (Free/Pro/Scale Lab) — Scale Lab styled black/gold with "Most powerful" badge. New black/gold Scale Lab teaser card added below the 12-module curriculum grid showing the 5-phase breakdown (Diagnose/Validate/Persuade/Test/Scale). FAQ "Is this actually free?" answer rewritten to explain all 3 tiers. FAQ "How long does the course take?" mentions Scale Lab takes 3-6 months due to 7-day test cycles. JSON-LD structured data adds 3rd Offer (Scale Lab $49 → `/upgrade?tier=growth`); Course `teaches` field expanded with advanced topics (CPA/ROAS/AOV, persuasion copy, A/B testing, UGC creative, profitable scaling). Stats section updated: "12 modules" → "24 modules", "Free to start" → "3 tiers". CTA banner footer text now mentions all 3 tiers |
 | **Loox affiliate link** | `https://loox.io/app/FSL30` — replaces the placeholder `loox.app` URL across `lib/modules.ts` (3 module resource arrays) and `lib/resources.ts` (Store Building category card) |
 | **🚀 Scale Lab tier launched (12 new modules + 3-tier ladder)** | New $49/mo Growth tier with 12 advanced modules (13-24) covering diagnose/validate/persuade/test/scale phases. Added `Tier` type + `tier` field to Module. New `is_growth` column on `user_profiles`. Stripe checkout accepts `tier` param (`pro`/`growth`); webhook dispatches matching welcome email and sets correct flags via `metadata.tier`. New env var `STRIPE_PRICE_ID_GROWTH`. New `/api/admin/users/[userId]/growth` endpoint. `/upgrade` rewritten as 3-tier comparison with toggle. Module 12 → Growth pitch overlay (mirrors Module 6 → Pro). Dashboard module list grouped by tier with Scale Lab styled in black/gold. New `growthWelcomeEmailHTML` template. Admin `/admin/users` shows tier (Free/Pro/Scale Lab) + Grant/Revoke buttons for both tiers, filter chips include "🚀 Scale Lab" |
@@ -185,21 +198,24 @@ CRON_SECRET
 
 ## Pending / known issues
 
-### 🔄 Scale Lab tier — only SQL needed now; Stripe deferred
-**Required now (1 step):**
-1. **SQL migration in Supabase** — `ALTER TABLE user_profiles ADD COLUMN IF NOT EXISTS is_growth boolean NOT NULL DEFAULT false;` (also in the SQL block below)
+### 🔄 SQL migrations needed now (referral + Q&A log)
 
-After that single migration, EVERYTHING in the Scale Lab tier works **except** the live Stripe checkout button:
-- ✅ All 12 modules (13-24) are accessible to Growth users
-- ✅ Gating, pitch overlays, admin tools all work
-- ✅ Owner can manually grant/revoke Growth from `/admin/users` for testing or comping
-- ❌ The `/upgrade` "Upgrade to Scale Lab" button will return 500 "Missing Stripe price ID for tier growth" until the Stripe steps below are done
+Run the new section of the SQL block below in Supabase. Without these:
+- Referral codes won't generate (dashboard widget will silently render nothing)
+- `/quiz?ref=CODE` shareable links won't capture leads
+- Module Q&A assistant will return errors (rate-limit query depends on `module_qa_log`)
 
-**Deferred (do alongside Stripe live mode flip — see below):**
-2. Stripe → create a new Product "Scale Lab" with a $49/mo recurring Price → copy `price_xxxx...`
-3. Vercel env var → add `STRIPE_PRICE_ID_GROWTH` with that price ID → redeploy
+`is_growth` column is already done from prior session ✅
 
-These are paired with the broader "go live with Stripe" work — no point creating a live Scale Lab product while still in test mode. When the owner is ready to flip to live keys, do Pro live + Scale Lab product + env var in one batch.
+Once the new SQL is run, EVERYTHING built so far works except the live Stripe checkout button — which is paired with going live (deferred, see below).
+
+### 🔄 Stripe live-mode flip (deferred)
+When ready to take real payments, do all in one batch:
+1. Switch Pro to live keys (`STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY`)
+2. Re-point Stripe webhook to live endpoint
+3. Create live Stripe Products: **Pro $19/mo**, **Scale Lab $49/mo**, optionally **Pro $190/yr** + **Scale Lab $490/yr** (annual plans)
+4. Vercel env vars: `STRIPE_PRICE_ID`, `STRIPE_PRICE_ID_GROWTH`, optionally `STRIPE_PRICE_ID_ANNUAL` + `STRIPE_PRICE_ID_GROWTH_ANNUAL`
+5. Redeploy
 
 ### ⏳ External waiting (no action needed)
 - **Google AdSense site approval:** "Getting ready" as of last check. All three slot IDs configured in Vercel (`NEXT_PUBLIC_ADSENSE_SLOT_DASHBOARD`, `_MODULE`, `_CONTENT`). Once Google approves, ads fill automatically. Verify in incognito (admins are ad-free).
@@ -219,8 +235,35 @@ These are paired with the broader "go live with Stripe" work — no point creati
 
 ### 📜 Full SQL migrations (run all once in the Supabase SQL editor — `IF NOT EXISTS` makes them safe to re-run)
   ```sql
-  -- 🔄 NEW (Scale Lab tier — owner is running this 2026-04-28)
+  -- Scale Lab tier (already done 2026-04-28)
   ALTER TABLE user_profiles ADD COLUMN IF NOT EXISTS is_growth boolean NOT NULL DEFAULT false;
+
+  -- 🔄 NEW (referral program — needed before /quiz?ref=CODE captures + dashboard widget works)
+  ALTER TABLE user_profiles ADD COLUMN IF NOT EXISTS referral_code text;
+  CREATE UNIQUE INDEX IF NOT EXISTS user_profiles_referral_code_idx ON user_profiles (referral_code);
+
+  CREATE TABLE IF NOT EXISTS referrals (
+    id              uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+    referrer_id     uuid NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+    referred_id     uuid NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+    referral_code   text NOT NULL,
+    converted_tier  text,
+    credit_granted  boolean NOT NULL DEFAULT false,
+    created_at      timestamptz NOT NULL DEFAULT now(),
+    UNIQUE (referred_id)
+  );
+  CREATE INDEX IF NOT EXISTS referrals_referrer_id_idx ON referrals (referrer_id);
+
+  -- 🔄 NEW (Module Q&A log — rate-limiting for the AI assistant)
+  CREATE TABLE IF NOT EXISTS module_qa_log (
+    id          uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id     uuid NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+    module_id   int NOT NULL,
+    question    text NOT NULL,
+    answer      text,
+    created_at  timestamptz NOT NULL DEFAULT now()
+  );
+  CREATE INDEX IF NOT EXISTS module_qa_log_user_module_idx ON module_qa_log (user_id, module_id, created_at DESC);
 
   -- Re-engagement email tracking (used by /api/cron/reengagement)
   ALTER TABLE user_profiles ADD COLUMN IF NOT EXISTS reengagement_sent_at timestamptz;

@@ -1,9 +1,9 @@
 ﻿"use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect, Suspense } from "react";
 import { supabase } from "@/lib/supabase";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 
 const HERO_BG = "linear-gradient(135deg, #1e1b4b 0%, #312e81 40%, #4c1d95 100%)";
 const INDIGO  = "#6366f1";
@@ -27,14 +27,24 @@ async function saveQuizResults(userId: string, firstName: string) {
   } catch {}
 }
 
-export default function SignupPage() {
+function SignupPageInner() {
   const router   = useRouter();
+  const params   = useSearchParams();
   const btnRef   = useRef<HTMLButtonElement>(null);
   const [firstName, setFirstName] = useState("");
   const [email,     setEmail]     = useState("");
   const [password,  setPassword]  = useState("");
   const [error,     setError]     = useState("");
   const [loading,   setLoading]   = useState(false);
+
+  // Capture ?ref=CODE on mount and stash in localStorage so it survives the
+  // signup → email confirmation → first dashboard load lifecycle.
+  useEffect(() => {
+    const ref = params.get("ref");
+    if (ref && /^[a-z0-9]{4,12}$/i.test(ref)) {
+      try { localStorage.setItem("ea_referral_code", ref.toLowerCase()); } catch {}
+    }
+  }, [params]);
 
   async function handleSignup(e: React.FormEvent) {
     e.preventDefault();
@@ -48,6 +58,20 @@ export default function SignupPage() {
       setLoading(false);
     } else {
       if (data.user) await saveQuizResults(data.user.id, firstName.trim());
+
+      // Capture referral, if any (fire and forget — never blocks signup)
+      try {
+        const referralCode = localStorage.getItem("ea_referral_code");
+        if (referralCode && data.user?.id) {
+          fetch("/api/referrals/track", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ referralCode, referredUserId: data.user.id }),
+          }).then(() => {
+            try { localStorage.removeItem("ea_referral_code"); } catch {}
+          }).catch(() => {});
+        }
+      } catch {}
 
       // Send welcome email (fire and forget)
       try {
@@ -188,5 +212,18 @@ export default function SignupPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+/* useSearchParams must be wrapped in Suspense for static generation. */
+export default function SignupPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen flex items-center justify-center px-6" style={{ background: HERO_BG }}>
+        <div className="spinner" />
+      </div>
+    }>
+      <SignupPageInner />
+    </Suspense>
   );
 }
