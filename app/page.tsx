@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useRef, useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
+import { isAdmin } from "@/lib/admin";
 
 /* ── Design tokens ── */
 const HERO_BG   = "linear-gradient(135deg, #08080f 0%, #0f0a2e 55%, #150a2e 100%)";
@@ -154,6 +155,7 @@ export default function Home() {
   const [firstName, setFirstName] = useState("");
   const [progress,  setProgress]  = useState<number[]>([]);
   const [isPro,     setIsPro]     = useState(false);
+  const [isGrowth,  setIsGrowth]  = useState(false);
 
   useEffect(() => {
     supabase.auth.getSession().then(async ({ data: { session } }) => {
@@ -161,11 +163,16 @@ export default function Home() {
       setLoggedIn(true);
       const { data: profile } = await supabase
         .from("user_profiles")
-        .select("first_name, is_pro")
+        .select("first_name, is_pro, is_growth")
         .eq("id", session.user.id)
         .single();
       setFirstName(profile?.first_name || session.user.email?.split("@")[0] || "");
-      setIsPro(profile?.is_pro ?? false);
+      // Admin email is treated as Scale Lab everywhere else — mirror that here.
+      const admin = isAdmin(session.user.email);
+      const growth = admin || (profile?.is_growth ?? false);
+      const pro    = growth || (profile?.is_pro ?? false);
+      setIsGrowth(growth);
+      setIsPro(pro);
 
       const { data: progressRows } = await supabase
         .from("user_progress")
@@ -212,7 +219,14 @@ export default function Home() {
           <div className="flex items-center gap-3">
             <img src="/logo.png" alt="First Sale Lab" decoding="async" style={{ height: 36, width: "auto" }} />
             <span className="text-base font-bold text-gray-900" style={{ letterSpacing: "-0.4px" }}>First Sale Lab</span>
-            {isPro ? (
+            {isGrowth ? (
+              <span
+                className="text-xs font-bold px-2.5 py-1 rounded-full"
+                style={{ background: "linear-gradient(135deg, #1c1917, #44403c)", color: "#facc15", border: "1px solid rgba(250,204,21,0.4)" }}
+              >
+                🚀 Scale Lab
+              </span>
+            ) : isPro ? (
               <span
                 className="text-xs font-bold px-2.5 py-1 rounded-full"
                 style={{ background: "linear-gradient(135deg, #f59e0b, #d97706)", color: "#fff" }}
