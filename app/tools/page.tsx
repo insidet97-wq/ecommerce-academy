@@ -11,6 +11,7 @@ import AdAuditor from "@/components/AdAuditor";
 import ProductDescriptionWriter from "@/components/ProductDescriptionWriter";
 import SubjectLineTester from "@/components/SubjectLineTester";
 import UserAdBanner from "@/components/UserAdBanner";
+import { Icon, type IconName } from "@/components/Icon";
 
 /* ── Design tokens ── */
 const INDIGO = "#6366f1";
@@ -421,9 +422,9 @@ function ROASCalculator() {
 /* ════════════════════════════════════════════
    Tool 4 — Launch Checklist
 ════════════════════════════════════════════ */
-const CL_SECTIONS = [
+const CL_SECTIONS: { title: string; icon: IconName; items: string[] }[] = [
   {
-    title: "Product & Sourcing", emoji: "📦",
+    title: "Product & Sourcing", icon: "package",
     items: [
       "Found at least 2–3 suppliers and compared prices",
       "Product achieves a 3X markup (selling price ÷ cost ≥ 3)",
@@ -433,7 +434,7 @@ const CL_SECTIONS = [
     ],
   },
   {
-    title: "Store Setup", emoji: "🛒",
+    title: "Store Setup", icon: "cart",
     items: [
       "Shopify store is live with a custom domain",
       "Homepage, product page and checkout look professional",
@@ -444,7 +445,7 @@ const CL_SECTIONS = [
     ],
   },
   {
-    title: "Trust & Legal", emoji: "⚖️",
+    title: "Trust & Legal", icon: "shield",
     items: [
       "Privacy policy is published (legally required in most countries)",
       "Terms of service page is live",
@@ -453,7 +454,7 @@ const CL_SECTIONS = [
     ],
   },
   {
-    title: "Marketing Ready", emoji: "📣",
+    title: "Marketing Ready", icon: "megaphone",
     items: [
       "Dedicated hero product landing page built (not just a listing)",
       "At least 3 pieces of content (video or image) ready to post",
@@ -463,7 +464,7 @@ const CL_SECTIONS = [
     ],
   },
   {
-    title: "First Ad Ready", emoji: "📈",
+    title: "First Ad Ready", icon: "trending-up",
     items: [
       "Ad creative is ready — video or image plus written copy",
       "Target audience researched and defined in ad manager",
@@ -540,11 +541,13 @@ function LaunchChecklist() {
                 display: "flex", alignItems: "center", justifyContent: "space-between",
               }}>
                 <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                  <span>{section.emoji}</span>
+                  <span style={{ display: "inline-flex", color: secFull ? "#16a34a" : "#52525b" }}>
+                    <Icon name={section.icon} size={16} strokeWidth={1.75} />
+                  </span>
                   <span style={{ fontSize: 14, fontWeight: 700, color: "#09090b" }}>{section.title}</span>
                 </div>
-                <span style={{ fontSize: 11, fontWeight: 700, color: secFull ? "#16a34a" : "#a1a1aa" }}>
-                  {secFull ? "✓ Done" : `${secDone}/${section.items.length}`}
+                <span style={{ fontSize: 11, fontWeight: 700, color: secFull ? "#16a34a" : "#a1a1aa", display: "inline-flex", alignItems: "center", gap: 4 }}>
+                  {secFull ? <><Icon name="check" size={12} strokeWidth={2.5} /> Done</> : `${secDone}/${section.items.length}`}
                 </span>
               </div>
               <div style={{ padding: "12px 20px", display: "flex", flexDirection: "column", gap: 10 }}>
@@ -591,20 +594,20 @@ function LaunchChecklist() {
 /* ════════════════════════════════════════════
    Main page
 ════════════════════════════════════════════ */
-const TOOLS_META: { id: Tool; emoji: string; label: string; tagline: string }[] = [
+const TOOLS_META: { id: Tool; icon: IconName; label: string; tagline: string }[] = [
   // Free calculators
-  { id: "profit",     emoji: "💰", label: "Profit Calculator",  tagline: "Is your margin healthy?" },
-  { id: "validation", emoji: "🎯", label: "Validation Score",   tagline: "Score your product idea /100" },
-  { id: "roas",       emoji: "📈", label: "Break-Even ROAS",    tagline: "Find your ad profit threshold" },
-  { id: "checklist",  emoji: "✅", label: "Launch Checklist",   tagline: "24 items before going live" },
-  { id: "supplier",   emoji: "🏭", label: "Supplier Validator", tagline: "Score any supplier 0–100" },
+  { id: "profit",     icon: "wallet",       label: "Profit Calculator",  tagline: "Is your margin healthy?" },
+  { id: "validation", icon: "target",       label: "Validation Score",   tagline: "Score your product idea /100" },
+  { id: "roas",       icon: "trending-up",  label: "Break-Even ROAS",    tagline: "Find your ad profit threshold" },
+  { id: "checklist",  icon: "list-checks",  label: "Launch Checklist",   tagline: "24 items before going live" },
+  { id: "supplier",   icon: "factory",      label: "Supplier Validator", tagline: "Score any supplier 0–100" },
   // AI tools (Pro / Scale Lab)
-  { id: "copywriter",    emoji: "✍️", label: "Ad Copywriter",     tagline: "✨ Pro · 5 variants per run" },
-  { id: "ugc-brief",     emoji: "🎬", label: "UGC Brief",          tagline: "✨ Pro · creator-ready brief" },
-  { id: "ad-audit",      emoji: "🧐", label: "Ad Auditor",         tagline: "✨ Pro · score + rewrites" },
-  { id: "product-desc",  emoji: "📝", label: "Product Desc",       tagline: "✨ Pro · 3 angles per run" },
-  { id: "subject-lines", emoji: "✉️", label: "Subject Lines",      tagline: "✨ Pro · 10 with predicted opens" },
-  { id: "autopsy",       emoji: "🔍", label: "Store Autopsy",      tagline: "🚀 Scale Lab · competitor teardown" },
+  { id: "copywriter",    icon: "pen",         label: "Ad Copywriter",     tagline: "Pro · 5 variants per run" },
+  { id: "ugc-brief",     icon: "film",        label: "UGC Brief",          tagline: "Pro · creator-ready brief" },
+  { id: "ad-audit",      icon: "eye",         label: "Ad Auditor",         tagline: "Pro · score + rewrites" },
+  { id: "product-desc",  icon: "file-text",   label: "Product Desc",       tagline: "Pro · 3 angles per run" },
+  { id: "subject-lines", icon: "send",        label: "Subject Lines",      tagline: "Pro · 10 with predicted opens" },
+  { id: "autopsy",       icon: "scan-search", label: "Store Autopsy",      tagline: "Scale Lab · competitor teardown" },
 ];
 
 const VALID_TOOLS: Tool[] = ["profit", "validation", "roas", "checklist", "supplier", "autopsy", "copywriter", "ugc-brief", "ad-audit", "product-desc", "subject-lines"];
@@ -681,7 +684,9 @@ function ToolsPageInner() {
                   transition: "all 0.15s",
                 }}
               >
-                <div style={{ fontSize: 22, marginBottom: 5 }}>{tool.emoji}</div>
+                <div style={{ marginBottom: 6, color: isActive ? "#3730a3" : "#52525b" }}>
+                  <Icon name={tool.icon} size={22} strokeWidth={1.75} />
+                </div>
                 <p style={{ fontSize: 12, fontWeight: 700, color: isActive ? "#3730a3" : "#09090b", marginBottom: 2 }}>
                   {tool.label}
                 </p>
@@ -706,7 +711,9 @@ function ToolsPageInner() {
         >
           {/* Panel header */}
           <div style={{ marginBottom: 24, paddingBottom: 18, borderBottom: "1px solid #f4f4f5", display: "flex", alignItems: "center", gap: 10 }}>
-            <span style={{ fontSize: 24 }}>{meta.emoji}</span>
+            <span style={{ display: "inline-flex", padding: 8, borderRadius: 10, background: "#f5f3ff", color: "#6366f1" }}>
+              <Icon name={meta.icon} size={22} strokeWidth={1.75} />
+            </span>
             <div>
               <h2 style={{ fontSize: 17, fontWeight: 800, color: "#09090b", letterSpacing: "-0.4px" }}>{meta.label}</h2>
               <p style={{ fontSize: 12, color: "#a1a1aa" }}>{meta.tagline}</p>

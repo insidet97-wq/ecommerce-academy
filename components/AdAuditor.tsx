@@ -10,6 +10,7 @@ import { supabase } from "@/lib/supabase";
 import { useAuthTier } from "@/lib/useAuthTier";
 import { useAIToolUsage } from "@/lib/useAIToolUsage";
 import AIToolLockCard from "./AIToolLockCard";
+import { Icon } from "./Icon";
 
 type Audit = {
   hook_framework: string;
@@ -52,14 +53,14 @@ export default function AdAuditor() {
     return (
       <AIToolLockCard
         authState={tier}
-        emoji="🧐"
+        icon="eye"
         label="AI Ad Auditor"
         tagline="Paste your ad. Get scored on Cialdini's 6 + concrete rewrites."
         bullets={[
-          { e: "📊", t: "Score 0-100" },
-          { e: "🪝", t: "Hook framework" },
-          { e: "🧠", t: "Cialdini's 6" },
-          { e: "✏️", t: "Rewrites" },
+          { i: "bar-chart", t: "Score 0-100" },
+          { i: "anchor",    t: "Hook framework" },
+          { i: "brain",     t: "Cialdini's 6" },
+          { i: "edit",      t: "Rewrites" },
         ]}
       />
     );
@@ -110,7 +111,8 @@ export default function AdAuditor() {
     <div>
       <div style={{ background: tier === "growth" ? "#0c0a09" : "#5b21b6", color: tier === "growth" ? "#fde68a" : "#ddd6fe", border: `1px solid ${tier === "growth" ? "rgba(250,204,21,0.3)" : "rgba(196,181,253,0.4)"}`, borderRadius: 12, padding: "10px 14px", marginBottom: 18, display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 8 }}>
         <p style={{ fontSize: 12, lineHeight: 1.5, margin: 0 }}>
-          {tier === "growth" ? "🚀 " : "✨ "}<strong>{tier === "growth" ? "Scale Lab" : "Pro"} · AI Ad Auditor.</strong> Paste your ad copy, get scored against Cialdini + hook frameworks with concrete rewrites.
+          <Icon name={tier === "growth" ? "rocket" : "sparkles"} size={12} strokeWidth={2.5} style={{ display: "inline", marginRight: 6, verticalAlign: "-1px" }} />
+          <strong>{tier === "growth" ? "Scale Lab" : "Pro"} · AI Ad Auditor.</strong> Paste your ad copy, get scored against Cialdini + hook frameworks with concrete rewrites.
         </p>
         {usage && <p style={{ fontSize: 11, opacity: 0.7, margin: 0 }}>{usage.used} / {usage.limit} runs today</p>}
       </div>

@@ -8,6 +8,7 @@ import { isAdmin } from "@/lib/admin";
 import AdBanner from "@/components/AdBanner";
 import ReferralCard from "@/components/ReferralCard";
 import GettingStartedChecklist from "@/components/GettingStartedChecklist";
+import { Icon, type IconName } from "@/components/Icon";
 
 /* ── Design tokens ── */
 const TRACK_COLORS: Record<string, string> = {
@@ -23,36 +24,36 @@ const GOAL_LABELS: Record<string, string> = {
   learn:       "Learn how ecommerce works",
 };
 type Tier = "free" | "pro" | "growth";
-type ModuleListItem = { id: number; emoji: string; title: string; duration: string; description: string; tier: Tier };
+type ModuleListItem = { id: number; icon: IconName; title: string; duration: string; description: string; tier: Tier };
 
 const MODULES: ModuleListItem[] = [
   // FREE
-  { id: 1,  emoji: "🎮", title: "The Rules of the Game",         duration: "~20 min", description: "Understand how ecommerce works before spending $1.",            tier: "free" },
-  { id: 2,  emoji: "🎯", title: "Find Your Niche",               duration: "~25 min", description: "Choose a specific, passionate, profitable niche.",              tier: "free" },
-  { id: 3,  emoji: "🏆", title: "Find Your Winning Product",     duration: "~30 min", description: "Validate one product with the 3X margin rule.",                 tier: "free" },
-  { id: 4,  emoji: "🧠", title: "Know Your Customer",            duration: "~25 min", description: "Build a detailed customer avatar.",                             tier: "free" },
-  { id: 5,  emoji: "🛒", title: "Build Your Shopify Store",      duration: "~45 min", description: "Launch a clean, professional store with trust signals.",        tier: "free" },
-  { id: 6,  emoji: "⚡", title: "Build Your First Sales Funnel", duration: "~35 min", description: "A focused landing page + upsell for your hero product.",        tier: "free" },
+  { id: 1,  icon: "compass",      title: "The Rules of the Game",         duration: "~20 min", description: "Understand how ecommerce works before spending $1.",            tier: "free" },
+  { id: 2,  icon: "target",       title: "Find Your Niche",               duration: "~25 min", description: "Choose a specific, passionate, profitable niche.",              tier: "free" },
+  { id: 3,  icon: "trophy",       title: "Find Your Winning Product",     duration: "~30 min", description: "Validate one product with the 3X margin rule.",                 tier: "free" },
+  { id: 4,  icon: "brain",        title: "Know Your Customer",            duration: "~25 min", description: "Build a detailed customer avatar.",                             tier: "free" },
+  { id: 5,  icon: "cart",         title: "Build Your Shopify Store",      duration: "~45 min", description: "Launch a clean, professional store with trust signals.",        tier: "free" },
+  { id: 6,  icon: "zap",          title: "Build Your First Sales Funnel", duration: "~35 min", description: "A focused landing page + upsell for your hero product.",        tier: "free" },
   // PRO
-  { id: 7,  emoji: "📱", title: "Drive Traffic: TikTok Organic", duration: "~30 min", description: "Get eyes on your product for free using TikTok.",               tier: "pro" },
-  { id: 8,  emoji: "📣", title: "Run Your First Paid Ad",        duration: "~40 min", description: "Launch a small Meta or TikTok ad campaign.",                    tier: "pro" },
-  { id: 9,  emoji: "📈", title: "Conversion Optimisation",       duration: "~30 min", description: "Squeeze more sales out of the traffic you have.",               tier: "pro" },
-  { id: 10, emoji: "📧", title: "Build Your Email List",         duration: "~35 min", description: "Own a direct line to your audience — forever.",                tier: "pro" },
-  { id: 11, emoji: "💰", title: "Make Your First Sale",          duration: "~20 min", description: "Get everything in place and land your first transaction.",     tier: "pro" },
-  { id: 12, emoji: "🚀", title: "Scale and Grow",                duration: "~25 min", description: "Add recurring income, a second product, a second channel.",    tier: "pro" },
+  { id: 7,  icon: "smartphone",   title: "Drive Traffic: TikTok Organic", duration: "~30 min", description: "Get eyes on your product for free using TikTok.",               tier: "pro" },
+  { id: 8,  icon: "megaphone",    title: "Run Your First Paid Ad",        duration: "~40 min", description: "Launch a small Meta or TikTok ad campaign.",                    tier: "pro" },
+  { id: 9,  icon: "trending-up",  title: "Conversion Optimisation",       duration: "~30 min", description: "Squeeze more sales out of the traffic you have.",               tier: "pro" },
+  { id: 10, icon: "mail",         title: "Build Your Email List",         duration: "~35 min", description: "Own a direct line to your audience — forever.",                tier: "pro" },
+  { id: 11, icon: "wallet",       title: "Make Your First Sale",          duration: "~20 min", description: "Get everything in place and land your first transaction.",     tier: "pro" },
+  { id: 12, icon: "rocket",       title: "Scale and Grow",                duration: "~25 min", description: "Add recurring income, a second product, a second channel.",    tier: "pro" },
   // GROWTH (Scale Lab — modules 13-24)
-  { id: 13, emoji: "🔬", title: "Why Your First Sales Won't Repeat",   duration: "~30 min", description: "Why early sales feel random — survivorship bias and the noise problem at low volume.", tier: "growth" },
-  { id: 14, emoji: "📊", title: "The Numbers That Actually Matter",    duration: "~40 min", description: "The 8 metrics every operator tracks daily — with thresholds.",                          tier: "growth" },
-  { id: 15, emoji: "💸", title: "The Profit Audit",                    duration: "~35 min", description: "Run a true 30-day P&L. Most 'profitable' stores aren't.",                               tier: "growth" },
-  { id: 16, emoji: "🎯", title: "Real Winners vs Fake Signals",        duration: "~35 min", description: "The 100-click rule and the repeatability test for any 'winner'.",                       tier: "growth" },
-  { id: 17, emoji: "🎁", title: "Engineering the Offer",               duration: "~40 min", description: "Stop optimizing the product. Engineer the offer (Hormozi value equation).",            tier: "growth" },
-  { id: 18, emoji: "💰", title: "Increasing AOV Without Cost",         duration: "~30 min", description: "4 mechanisms that lift AOV 25–50% from the same traffic.",                              tier: "growth" },
-  { id: 19, emoji: "🧠", title: "Persuasion Foundations",              duration: "~45 min", description: "Cialdini's 6 principles applied to ads, product page, and email.",                     tier: "growth" },
-  { id: 20, emoji: "🪝", title: "The Hook Library",                    duration: "~40 min", description: "6 hook frameworks. Build 20+ hooks. Find the winner for your product.",                tier: "growth" },
-  { id: 21, emoji: "🎬", title: "UGC at Scale",                        duration: "~45 min", description: "Brief, source, and iterate UGC creators. 8–15 variants/month at $50–150 each.",        tier: "growth" },
-  { id: 22, emoji: "🧪", title: "How to Test Ads Properly",            duration: "~40 min", description: "ICE prioritization, isolation, and proper sample size. Stop guessing.",                tier: "growth" },
-  { id: 23, emoji: "⚖️", title: "Killing, Iterating, or Scaling",      duration: "~35 min", description: "The decision matrix. The 20% scaling rule. Ad fatigue signals.",                       tier: "growth" },
-  { id: 24, emoji: "🚀", title: "Scaling Without Destroying ROAS",     duration: "~50 min", description: "30-day scaling plan, kill triggers, the retention layer (LTV multiplier).",            tier: "growth" },
+  { id: 13, icon: "microscope",   title: "Why Your First Sales Won't Repeat",   duration: "~30 min", description: "Why early sales feel random — survivorship bias and the noise problem at low volume.", tier: "growth" },
+  { id: 14, icon: "bar-chart",    title: "The Numbers That Actually Matter",    duration: "~40 min", description: "The 8 metrics every operator tracks daily — with thresholds.",                          tier: "growth" },
+  { id: 15, icon: "line-chart",   title: "The Profit Audit",                    duration: "~35 min", description: "Run a true 30-day P&L. Most 'profitable' stores aren't.",                               tier: "growth" },
+  { id: 16, icon: "target",       title: "Real Winners vs Fake Signals",        duration: "~35 min", description: "The 100-click rule and the repeatability test for any 'winner'.",                       tier: "growth" },
+  { id: 17, icon: "gift",         title: "Engineering the Offer",               duration: "~40 min", description: "Stop optimizing the product. Engineer the offer (Hormozi value equation).",            tier: "growth" },
+  { id: 18, icon: "coins",        title: "Increasing AOV Without Cost",         duration: "~30 min", description: "4 mechanisms that lift AOV 25–50% from the same traffic.",                              tier: "growth" },
+  { id: 19, icon: "brain",        title: "Persuasion Foundations",              duration: "~45 min", description: "Cialdini's 6 principles applied to ads, product page, and email.",                     tier: "growth" },
+  { id: 20, icon: "anchor",       title: "The Hook Library",                    duration: "~40 min", description: "6 hook frameworks. Build 20+ hooks. Find the winner for your product.",                tier: "growth" },
+  { id: 21, icon: "film",         title: "UGC at Scale",                        duration: "~45 min", description: "Brief, source, and iterate UGC creators. 8–15 variants/month at $50–150 each.",        tier: "growth" },
+  { id: 22, icon: "flask",        title: "How to Test Ads Properly",            duration: "~40 min", description: "ICE prioritization, isolation, and proper sample size. Stop guessing.",                tier: "growth" },
+  { id: 23, icon: "scale",        title: "Killing, Iterating, or Scaling",      duration: "~35 min", description: "The decision matrix. The 20% scaling rule. Ad fatigue signals.",                       tier: "growth" },
+  { id: 24, icon: "rocket",       title: "Scaling Without Destroying ROAS",     duration: "~50 min", description: "30-day scaling plan, kill triggers, the retention layer (LTV multiplier).",            tier: "growth" },
 ];
 
 function getGreeting() {
@@ -409,15 +410,15 @@ export default function DashboardPage() {
 
                 {/* 3-step path */}
                 <div style={{ display: "flex", gap: 10, marginBottom: 24, flexWrap: "wrap" }}>
-                  {[
-                    { n: "1", emoji: "⚡", label: "Do each module",       sub: "20–45 min each · one real task per step" },
-                    { n: "2", emoji: "🔓", label: "Unlock the next step", sub: "Complete the task to advance" },
-                    { n: "3", emoji: "💰", label: "Make your first sale", sub: "By Module 11 your store is live" },
-                  ].map((step) => (
+                  {([
+                    { n: "1", icon: "zap"      as IconName, label: "Do each module",       sub: "20–45 min each · one real task per step" },
+                    { n: "2", icon: "lock-open" as IconName, label: "Unlock the next step", sub: "Complete the task to advance" },
+                    { n: "3", icon: "wallet"   as IconName, label: "Make your first sale", sub: "By Module 11 your store is live" },
+                  ]).map((step) => (
                     <div key={step.n} style={{ flex: "1 1 160px", background: "rgba(255,255,255,0.07)", border: "1px solid rgba(255,255,255,0.12)", borderRadius: 16, padding: "14px 16px" }}>
                       <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8 }}>
                         <span style={{ width: 22, height: 22, borderRadius: 7, background: "rgba(99,102,241,0.55)", color: "#fff", fontSize: 10, fontWeight: 700, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>{step.n}</span>
-                        <span style={{ fontSize: 16 }}>{step.emoji}</span>
+                        <span style={{ display: "inline-flex", color: "rgba(255,255,255,0.85)" }}><Icon name={step.icon} size={16} strokeWidth={1.75} /></span>
                       </div>
                       <p style={{ fontSize: 12, fontWeight: 700, color: "#fff", marginBottom: 3 }}>{step.label}</p>
                       <p style={{ fontSize: 11, color: "rgba(255,255,255,0.45)", lineHeight: 1.4 }}>{step.sub}</p>
@@ -516,8 +517,8 @@ export default function DashboardPage() {
               </div>
 
               <div style={{ display: "flex", alignItems: "flex-start", gap: 16, marginBottom: 20 }}>
-                <div style={{ width: 52, height: 52, borderRadius: 16, background: `${trackColor}15`, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 24, flexShrink: 0 }}>
-                  {nextModule.emoji}
+                <div style={{ width: 52, height: 52, borderRadius: 16, background: `${trackColor}15`, color: trackColor, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                  <Icon name={nextModule.icon} size={26} strokeWidth={1.75} />
                 </div>
                 <div>
                   <h2 style={{ fontSize: 20, fontWeight: 800, color: "#09090b", letterSpacing: "-0.5px", marginBottom: 4 }}>
@@ -644,18 +645,18 @@ export default function DashboardPage() {
                       <div style={{
                         width: 44, height: 44, borderRadius: 14, flexShrink: 0,
                         display: "flex", alignItems: "center", justifyContent: "center",
-                        fontSize: 20,
                         background: isDone ? "#ecfdf5" : isNext ? "#eef2ff" : growthGated ? "#fef3c7" : proGated ? "#f5f3ff" : "#f4f4f5",
+                        color:      isDone ? "#16a34a" : isNext ? "#6366f1" : growthGated ? "#d97706" : proGated ? "#7c3aed" : "#71717a",
                       }}>
-                        {isDone ? "✅" : mod.emoji}
+                        <Icon name={isDone ? "check" : mod.icon} size={20} strokeWidth={isDone ? 2.5 : 1.75} />
                       </div>
                       <div style={{ flex: 1, minWidth: 0 }}>
                         <div style={{ display: "flex", alignItems: "center", gap: 6, flexWrap: "wrap", marginBottom: 2 }}>
                           <span style={{ fontSize: 13, fontWeight: 600, color: isDone ? "#a1a1aa" : tierGated ? "#71717a" : "#09090b", textDecoration: isDone ? "line-through" : "none" }}>{mod.title}</span>
                           {isNext     && <span style={{ fontSize: 10, fontWeight: 700, padding: "2px 7px", borderRadius: 99, background: trackColor, color: "#fff" }}>Up next</span>}
                           {isSkipped  && <span style={{ fontSize: 10, fontWeight: 600, padding: "2px 7px", borderRadius: 99, background: "#fffbeb", color: "#d97706", border: "1px solid #fde68a" }}>Pre-unlocked</span>}
-                          {proGated   && <span style={{ fontSize: 10, fontWeight: 700, padding: "2px 7px", borderRadius: 99, background: "linear-gradient(135deg, #6366f1, #7c3aed)", color: "#fff" }}>✨ Pro</span>}
-                          {growthGated && <span style={{ fontSize: 10, fontWeight: 700, padding: "2px 7px", borderRadius: 99, background: "#0c0a09", color: "#fde68a" }}>🚀 Scale Lab</span>}
+                          {proGated   && <span style={{ fontSize: 10, fontWeight: 700, padding: "2px 7px", borderRadius: 99, background: "linear-gradient(135deg, #6366f1, #7c3aed)", color: "#fff", display: "inline-flex", alignItems: "center", gap: 4 }}><Icon name="sparkles" size={10} strokeWidth={2.5} /> Pro</span>}
+                          {growthGated && <span style={{ fontSize: 10, fontWeight: 700, padding: "2px 7px", borderRadius: 99, background: "#0c0a09", color: "#fde68a", display: "inline-flex", alignItems: "center", gap: 4 }}><Icon name="rocket" size={10} strokeWidth={2} /> Scale Lab</span>}
                         </div>
                         <p style={{ fontSize: 12, color: "#a1a1aa" }}>{mod.duration} · {mod.description}</p>
                       </div>

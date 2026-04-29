@@ -12,6 +12,7 @@ import { supabase } from "@/lib/supabase";
 import { useAuthTier } from "@/lib/useAuthTier";
 import { useAIToolUsage } from "@/lib/useAIToolUsage";
 import AIToolLockCard from "./AIToolLockCard";
+import { Icon } from "./Icon";
 
 type Purpose = "welcome" | "promo" | "cart_abandon" | "re_engage" | "newsletter" | "re_launch";
 
@@ -55,14 +56,14 @@ export default function SubjectLineTester() {
     return (
       <AIToolLockCard
         authState={tier}
-        emoji="✉️"
+        icon="send"
         label="Email Subject Line Tester"
         tagline="Get 10 subject line variants with predicted open rates."
         bullets={[
-          { e: "🪝", t: "10 variants" },
-          { e: "🧠", t: "8 frameworks" },
-          { e: "📱", t: "Mobile preview" },
-          { e: "📊", t: "Predicted opens" },
+          { i: "anchor",     t: "10 variants" },
+          { i: "brain",      t: "8 frameworks" },
+          { i: "smartphone", t: "Mobile preview" },
+          { i: "bar-chart",  t: "Predicted opens" },
         ]}
       />
     );
@@ -110,7 +111,8 @@ export default function SubjectLineTester() {
       {/* Tier badge */}
       <div style={{ background: tier === "growth" ? "#0c0a09" : "#5b21b6", color: tier === "growth" ? "#fde68a" : "#ddd6fe", border: `1px solid ${tier === "growth" ? "rgba(250,204,21,0.3)" : "rgba(196,181,253,0.4)"}`, borderRadius: 12, padding: "10px 14px", marginBottom: 18, display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 8 }}>
         <p style={{ fontSize: 12, lineHeight: 1.5, margin: 0 }}>
-          {tier === "growth" ? "🚀 " : "✨ "}<strong>{tier === "growth" ? "Scale Lab" : "Pro"} · Subject Line Tester.</strong> 10 variants with predicted opens + preheaders.
+          <Icon name={tier === "growth" ? "rocket" : "sparkles"} size={12} strokeWidth={2.5} style={{ display: "inline", marginRight: 6, verticalAlign: "-1px" }} />
+          <strong>{tier === "growth" ? "Scale Lab" : "Pro"} · Subject Line Tester.</strong> 10 variants with predicted opens + preheaders.
         </p>
         {usage && (
           <p style={{ fontSize: 11, opacity: 0.7, margin: 0 }}>{usage.used} / {usage.limit} runs today</p>

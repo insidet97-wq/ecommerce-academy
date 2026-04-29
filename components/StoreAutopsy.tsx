@@ -21,6 +21,7 @@ import Link from "next/link";
 import { supabase } from "@/lib/supabase";
 import { isAdmin } from "@/lib/admin";
 import { useAIToolUsage } from "@/lib/useAIToolUsage";
+import { Icon } from "./Icon";
 
 type Autopsy = {
   summary: string;
@@ -113,8 +114,10 @@ export default function StoreAutopsy() {
           <div className="dot-grid" style={{ position: "absolute", inset: 0, pointerEvents: "none" }} />
           <div style={{ position: "absolute", inset: 0, pointerEvents: "none", background: "radial-gradient(ellipse 70% 50% at 50% 0%, rgba(250,204,21,0.18) 0%, transparent 70%)" }} />
           <div style={{ position: "relative", textAlign: "center" }}>
-            <p style={{ fontSize: 36, marginBottom: 12 }}>🔒</p>
-            <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.16em", textTransform: "uppercase", color: "#fde68a", marginBottom: 10 }}>🚀 Scale Lab exclusive</p>
+            <div style={{ display: "inline-flex", padding: 14, borderRadius: 14, background: "rgba(250,204,21,0.1)", color: "#fde68a", marginBottom: 14 }}>
+              <Icon name="lock" size={24} strokeWidth={1.75} />
+            </div>
+            <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.16em", textTransform: "uppercase", color: "#fde68a", marginBottom: 10, display: "inline-flex", alignItems: "center", gap: 6, justifyContent: "center" }}><Icon name="rocket" size={12} strokeWidth={2.5} /> Scale Lab exclusive</p>
             <h3 style={{ fontSize: 22, fontWeight: 900, color: "#fff", letterSpacing: "-0.5px", marginBottom: 10, lineHeight: 1.2 }}>
               Store Autopsy — see what your competitors are doing right (and wrong)
             </h3>
@@ -123,16 +126,16 @@ export default function StoreAutopsy() {
             </p>
 
             <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(140px, 1fr))", gap: 8, marginBottom: 22, maxWidth: 480, margin: "0 auto 22px" }}>
-              {[
-                { e: "🎁", t: "Offer analysis" },
-                { e: "🪝", t: "Hook strategy" },
-                { e: "⭐", t: "Social proof" },
-                { e: "🎯", t: "Conversion gaps" },
-                { e: "🥷", t: "Exploit angles" },
-                { e: "⚔️", t: "Threat level" },
-              ].map((c, i) => (
-                <div key={i} style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(253,224,71,0.15)", borderRadius: 10, padding: "10px 8px" }}>
-                  <p style={{ fontSize: 18, marginBottom: 4 }}>{c.e}</p>
+              {([
+                { i: "gift",        t: "Offer analysis" },
+                { i: "anchor",      t: "Hook strategy" },
+                { i: "star",        t: "Social proof" },
+                { i: "target",      t: "Conversion gaps" },
+                { i: "compass",     t: "Exploit angles" },
+                { i: "alert-triangle", t: "Threat level" },
+              ] as const).map((c, i) => (
+                <div key={i} style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(253,224,71,0.15)", borderRadius: 10, padding: "10px 8px", display: "flex", flexDirection: "column", alignItems: "center", gap: 6 }}>
+                  <span style={{ color: "#fde68a", display: "inline-flex" }}><Icon name={c.i} size={18} strokeWidth={1.75} /></span>
                   <p style={{ fontSize: 11, fontWeight: 600, color: "rgba(255,255,255,0.85)" }}>{c.t}</p>
                 </div>
               ))}
@@ -164,7 +167,7 @@ export default function StoreAutopsy() {
       {/* Header notice */}
       <div style={{ background: "#0c0a09", color: "#fde68a", border: "1px solid rgba(250,204,21,0.3)", borderRadius: 12, padding: "10px 14px", marginBottom: 18, display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 8 }}>
         <p style={{ fontSize: 12, lineHeight: 1.5, margin: 0, display: "flex", alignItems: "center", gap: 8 }}>
-          <span style={{ fontSize: 16 }}>🚀</span>
+          <Icon name="rocket" size={14} strokeWidth={2} />
           <span><strong>Scale Lab · Store Autopsy.</strong> Paste a URL — AI fetches the page and returns a teardown. Notes optional.</span>
         </p>
         {usage && (
@@ -231,7 +234,7 @@ export default function StoreAutopsy() {
               letterSpacing: "-0.2px",
             }}
           >
-            {analyzing ? "🤖 Fetching the page + analysing…" : "🔍 Run Store Autopsy →"}
+            {analyzing ? "Fetching the page + analysing…" : "Run Store Autopsy →"}
           </button>
 
           {error && (

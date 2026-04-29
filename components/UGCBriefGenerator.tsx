@@ -10,6 +10,7 @@ import { supabase } from "@/lib/supabase";
 import { useAuthTier } from "@/lib/useAuthTier";
 import { useAIToolUsage } from "@/lib/useAIToolUsage";
 import AIToolLockCard from "./AIToolLockCard";
+import { Icon } from "./Icon";
 
 const FRAMEWORKS = ["Pattern Interrupt", "Problem Agitation", "Curiosity Gap", "Transformation Reveal", "Social Proof", "Contrarian"] as const;
 type Framework = typeof FRAMEWORKS[number];
@@ -42,14 +43,14 @@ export default function UGCBriefGenerator() {
     return (
       <AIToolLockCard
         authState={tier}
-        emoji="🎬"
+        icon="film"
         label="UGC Brief Generator"
         tagline="Generate a complete, ready-to-send creator brief in seconds."
         bullets={[
-          { e: "🪝", t: "Hook word-for-word" },
-          { e: "🎬", t: "Shot list" },
-          { e: "📐", t: "Format specs" },
-          { e: "🚫", t: "Do-not list" },
+          { i: "anchor",     t: "Hook word-for-word" },
+          { i: "film",       t: "Shot list" },
+          { i: "list-checks", t: "Format specs" },
+          { i: "x-circle",   t: "Do-not list" },
         ]}
       />
     );
@@ -124,7 +125,8 @@ ${brief.do_not.map(s => `- ${s}`).join("\n")}`;
     <div>
       <div style={{ background: tier === "growth" ? "#0c0a09" : "#5b21b6", color: tier === "growth" ? "#fde68a" : "#ddd6fe", border: `1px solid ${tier === "growth" ? "rgba(250,204,21,0.3)" : "rgba(196,181,253,0.4)"}`, borderRadius: 12, padding: "10px 14px", marginBottom: 18, display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 8 }}>
         <p style={{ fontSize: 12, lineHeight: 1.5, margin: 0 }}>
-          {tier === "growth" ? "🚀 " : "✨ "}<strong>{tier === "growth" ? "Scale Lab" : "Pro"} · UGC Brief Generator.</strong> Paste the product, pick a hook framework, get a brief ready to send.
+          <Icon name={tier === "growth" ? "rocket" : "sparkles"} size={12} strokeWidth={2.5} style={{ display: "inline", marginRight: 6, verticalAlign: "-1px" }} />
+          <strong>{tier === "growth" ? "Scale Lab" : "Pro"} · UGC Brief Generator.</strong> Paste the product, pick a hook framework, get a brief ready to send.
         </p>
         {usage && <p style={{ fontSize: 11, opacity: 0.7, margin: 0 }}>{usage.used} / {usage.limit} runs today</p>}
       </div>
@@ -171,7 +173,7 @@ ${brief.do_not.map(s => `- ${s}`).join("\n")}`;
               letterSpacing: "-0.2px",
             }}
           >
-            {loading ? "✨ Writing brief…" : "🎬 Generate brief →"}
+            {loading ? "Writing brief…" : "Generate brief →"}
           </button>
 
           {error && <p style={{ fontSize: 12, color: "#dc2626", marginTop: 12, textAlign: "center" }}>⚠ {error}</p>}

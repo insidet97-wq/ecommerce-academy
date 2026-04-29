@@ -16,6 +16,7 @@
  */
 
 import Link from "next/link";
+import { Icon } from "./Icon";
 
 type Props = {
   hasQuiz:        boolean;
@@ -115,8 +116,8 @@ export default function GettingStartedChecklist(props: Props) {
         {/* Header */}
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 14, flexWrap: "wrap", gap: 8 }}>
           <div>
-            <p style={{ fontSize: 10, fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", color: trackColor, marginBottom: 4 }}>
-              🎯 Your first 7 days
+            <p style={{ fontSize: 10, fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", color: trackColor, marginBottom: 4, display: "inline-flex", alignItems: "center", gap: 6 }}>
+              <Icon name="target" size={11} strokeWidth={2.5} /> Your first 7 days
             </p>
             <h3 style={{ fontSize: 16, fontWeight: 800, color: "#09090b", letterSpacing: "-0.3px" }}>
               {nextItem ? `Next up: ${nextItem.label.toLowerCase()}` : "Almost there"}

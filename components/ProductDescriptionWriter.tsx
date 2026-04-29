@@ -12,6 +12,7 @@ import { supabase } from "@/lib/supabase";
 import { useAuthTier } from "@/lib/useAuthTier";
 import { useAIToolUsage } from "@/lib/useAIToolUsage";
 import AIToolLockCard from "./AIToolLockCard";
+import { Icon } from "./Icon";
 
 type Tone   = "professional" | "conversational" | "playful" | "luxury";
 type Length = "short" | "medium" | "long";
@@ -47,14 +48,14 @@ export default function ProductDescriptionWriter() {
     return (
       <AIToolLockCard
         authState={tier}
-        emoji="📝"
+        icon="file-text"
         label="Product Description Writer"
         tagline="Paste your product. Get 3 description variants for your product page."
         bullets={[
-          { e: "🎯", t: "3 angles" },
-          { e: "🎨", t: "4 tone options" },
-          { e: "📏", t: "Short / medium / long" },
-          { e: "⚡", t: "10 seconds" },
+          { i: "target",  t: "3 angles" },
+          { i: "palette", t: "4 tone options" },
+          { i: "layers",  t: "Short / medium / long" },
+          { i: "zap",     t: "10 seconds" },
         ]}
       />
     );
@@ -107,7 +108,8 @@ export default function ProductDescriptionWriter() {
       {/* Tier badge */}
       <div style={{ background: tier === "growth" ? "#0c0a09" : "#5b21b6", color: tier === "growth" ? "#fde68a" : "#ddd6fe", border: `1px solid ${tier === "growth" ? "rgba(250,204,21,0.3)" : "rgba(196,181,253,0.4)"}`, borderRadius: 12, padding: "10px 14px", marginBottom: 18, display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 8 }}>
         <p style={{ fontSize: 12, lineHeight: 1.5, margin: 0 }}>
-          {tier === "growth" ? "🚀 " : "✨ "}<strong>{tier === "growth" ? "Scale Lab" : "Pro"} · Product Description Writer.</strong> 3 variants — benefit, story, social proof.
+          <Icon name={tier === "growth" ? "rocket" : "sparkles"} size={12} strokeWidth={2.5} style={{ display: "inline", marginRight: 6, verticalAlign: "-1px" }} />
+          <strong>{tier === "growth" ? "Scale Lab" : "Pro"} · Product Description Writer.</strong> 3 variants — benefit, story, social proof.
         </p>
         {usage && (
           <p style={{ fontSize: 11, opacity: 0.7, margin: 0 }}>{usage.used} / {usage.limit} runs today</p>

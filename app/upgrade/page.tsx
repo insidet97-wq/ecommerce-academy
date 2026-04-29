@@ -4,6 +4,7 @@ import { useEffect, useState, Suspense } from "react";
 import { supabase } from "@/lib/supabase";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
+import { Icon } from "@/components/Icon";
 
 type Tier = "pro" | "growth";
 
@@ -196,7 +197,7 @@ function UpgradePageInner() {
                 ✓ Active
               </span>
             )}
-            <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", color: "#7c3aed", marginBottom: 8 }}>✨ Pro</p>
+            <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", color: "#7c3aed", marginBottom: 8, display: "inline-flex", alignItems: "center", gap: 6 }}><Icon name="sparkles" size={12} strokeWidth={2.5} /> Pro</p>
             <div style={{ display: "flex", alignItems: "baseline", gap: 4, marginBottom: 6 }}>
               <p style={{ fontSize: 38, fontWeight: 900, color: "#09090b", letterSpacing: "-1.5px", lineHeight: 1 }}>$19</p>
               <span style={{ fontSize: 13, color: "#a1a1aa", fontWeight: 600 }}>/month</span>
@@ -250,7 +251,7 @@ function UpgradePageInner() {
               <span style={{ position: "absolute", top: -2, right: -2, fontSize: 10, fontWeight: 800, padding: "3px 9px", borderRadius: 99, background: "linear-gradient(135deg, #facc15, #f59e0b)", color: "#1c1917", letterSpacing: "0.04em" }}>
                 MOST POWERFUL
               </span>
-              <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.14em", textTransform: "uppercase", color: "#fde68a", marginBottom: 8 }}>🚀 Scale Lab</p>
+              <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.14em", textTransform: "uppercase", color: "#fde68a", marginBottom: 8, display: "inline-flex", alignItems: "center", gap: 6 }}><Icon name="rocket" size={12} strokeWidth={2.5} /> Scale Lab</p>
               <div style={{ display: "flex", alignItems: "baseline", gap: 4, marginBottom: 6 }}>
                 <p style={{ fontSize: 38, fontWeight: 900, color: "#fff", letterSpacing: "-1.5px", lineHeight: 1 }}>$49</p>
                 <span style={{ fontSize: 13, color: "rgba(255,255,255,0.5)", fontWeight: 600 }}>/month</span>

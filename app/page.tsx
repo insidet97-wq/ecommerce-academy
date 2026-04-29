@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useRef, useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
 import { isAdmin } from "@/lib/admin";
+import { Icon } from "@/components/Icon";
 
 /* ── Design tokens ── */
 const HERO_BG   = "linear-gradient(135deg, #08080f 0%, #0f0a2e 55%, #150a2e 100%)";
@@ -221,17 +222,17 @@ export default function Home() {
             <span className="text-base font-bold text-gray-900" style={{ letterSpacing: "-0.4px" }}>First Sale Lab</span>
             {isGrowth ? (
               <span
-                className="text-xs font-bold px-2.5 py-1 rounded-full"
+                className="text-xs font-bold px-2.5 py-1 rounded-full inline-flex items-center gap-1.5"
                 style={{ background: "linear-gradient(135deg, #1c1917, #44403c)", color: "#facc15", border: "1px solid rgba(250,204,21,0.4)" }}
               >
-                🚀 Scale Lab
+                <Icon name="rocket" size={12} strokeWidth={2} /> Scale Lab
               </span>
             ) : isPro ? (
               <span
-                className="text-xs font-bold px-2.5 py-1 rounded-full"
+                className="text-xs font-bold px-2.5 py-1 rounded-full inline-flex items-center gap-1.5"
                 style={{ background: "linear-gradient(135deg, #f59e0b, #d97706)", color: "#fff" }}
               >
-                ✨ Pro
+                <Icon name="sparkles" size={12} strokeWidth={2} /> Pro
               </span>
             ) : (
               <Link
@@ -771,14 +772,14 @@ export default function Home() {
       {/* ── SOCIAL PROOF BAR ── */}
       <section className="bg-white border-b border-gray-100 px-4 sm:px-8 py-5">
         <div className="max-w-4xl mx-auto flex flex-wrap items-center justify-center gap-x-10 gap-y-3">
-          {[
-            { icon: "⭐", text: "Rated 4.9 by early users" },
-            { icon: "🌍", text: "Used in 30+ countries" },
-            { icon: "🆓", text: "Modules 1–6 completely free" },
-            { icon: "⚡", text: "First module takes 20 minutes" },
-          ].map(item => (
+          {([
+            { icon: "star",      text: "Rated 4.9 by early users" },
+            { icon: "globe",     text: "Used in 30+ countries" },
+            { icon: "lock-open", text: "Modules 1–6 completely free" },
+            { icon: "zap",       text: "First module takes 20 minutes" },
+          ] as const).map(item => (
             <div key={item.text} className="flex items-center gap-2">
-              <span className="text-base">{item.icon}</span>
+              <span className="inline-flex text-gray-400"><Icon name={item.icon} size={15} strokeWidth={1.75} /></span>
               <span className="text-xs font-medium text-gray-500">{item.text}</span>
             </div>
           ))}
@@ -885,7 +886,7 @@ export default function Home() {
               <div style={{ position: "absolute", top: -200, right: -100, width: 400, height: 400, background: "radial-gradient(circle, rgba(250,204,21,0.12) 0%, transparent 70%)", pointerEvents: "none" }} />
               <div style={{ position: "relative" }}>
                 <div className="flex items-center gap-2 mb-3 flex-wrap">
-                  <span className="text-xs font-bold uppercase tracking-[0.14em]" style={{ color: "#fde68a" }}>🚀 Scale Lab</span>
+                  <span className="text-xs font-bold uppercase tracking-[0.14em] inline-flex items-center gap-1.5" style={{ color: "#fde68a" }}><Icon name="rocket" size={12} strokeWidth={2.5} /> Scale Lab</span>
                   <span className="text-xs font-medium" style={{ color: "rgba(255,255,255,0.45)" }}>· $49/mo · for after your first sale</span>
                 </div>
                 <h3 className="text-xl sm:text-2xl font-extrabold mb-3" style={{ color: "#fff", letterSpacing: "-0.4px", lineHeight: 1.2 }}>
@@ -1112,7 +1113,7 @@ export default function Home() {
               <div className="absolute pointer-events-none" style={{ top: "-40%", left: "50%", transform: "translateX(-50%)", width: "400px", height: "300px", background: "radial-gradient(ellipse, rgba(139,92,246,0.35) 0%, transparent 70%)" }} />
               <div className="relative z-10 flex flex-col flex-1">
                 <div className="flex items-center gap-2 mb-1 flex-wrap">
-                  <p className="text-xs font-bold tracking-[0.1em] uppercase" style={{ color: "rgba(196,181,253,0.85)" }}>✨ Pro</p>
+                  <p className="text-xs font-bold tracking-[0.1em] uppercase inline-flex items-center gap-1.5" style={{ color: "rgba(196,181,253,0.85)" }}><Icon name="sparkles" size={11} strokeWidth={2.5} /> Pro</p>
                   <span className="text-xs font-bold px-2 py-0.5 rounded-full" style={{ background: "rgba(250,204,21,0.15)", color: "#fde68a", border: "1px solid rgba(250,204,21,0.25)" }}>Most popular</span>
                 </div>
                 <p className="text-3xl font-extrabold text-white mb-1" style={{ letterSpacing: "-0.04em" }}>$19<span className="text-base font-medium" style={{ color: "rgba(255,255,255,0.4)" }}>/mo</span></p>
@@ -1158,7 +1159,7 @@ export default function Home() {
               <div className="absolute pointer-events-none" style={{ top: "-40%", left: "50%", transform: "translateX(-50%)", width: "400px", height: "300px", background: "radial-gradient(ellipse, rgba(250,204,21,0.18) 0%, transparent 70%)" }} />
               <div className="relative z-10 flex flex-col flex-1">
                 <div className="flex items-center gap-2 mb-1 flex-wrap">
-                  <p className="text-xs font-bold tracking-[0.1em] uppercase" style={{ color: "#fde68a" }}>🚀 Scale Lab</p>
+                  <p className="text-xs font-bold tracking-[0.1em] uppercase inline-flex items-center gap-1.5" style={{ color: "#fde68a" }}><Icon name="rocket" size={11} strokeWidth={2.5} /> Scale Lab</p>
                   <span className="text-xs font-bold px-2 py-0.5 rounded-full" style={{ background: "rgba(250,204,21,0.15)", color: "#fde68a", border: "1px solid rgba(250,204,21,0.4)" }}>Most powerful</span>
                 </div>
                 <p className="text-3xl font-extrabold text-white mb-1" style={{ letterSpacing: "-0.04em" }}>$49<span className="text-base font-medium" style={{ color: "rgba(255,255,255,0.4)" }}>/mo</span></p>

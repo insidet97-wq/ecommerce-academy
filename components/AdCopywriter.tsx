@@ -12,6 +12,7 @@ import { supabase } from "@/lib/supabase";
 import { useAuthTier } from "@/lib/useAuthTier";
 import { useAIToolUsage } from "@/lib/useAIToolUsage";
 import AIToolLockCard from "./AIToolLockCard";
+import { Icon } from "./Icon";
 
 type Variant = {
   angle:        string;
@@ -41,14 +42,14 @@ export default function AdCopywriter() {
     return (
       <AIToolLockCard
         authState={tier}
-        emoji="✍️"
+        icon="pen"
         label="AI Ad Copywriter"
         tagline="Paste your product. Get 5 ad variants across different psychological angles."
         bullets={[
-          { e: "🪝", t: "5 hook variants" },
-          { e: "🧠", t: "Cialdini-backed" },
-          { e: "📝", t: "Hook + body + CTA" },
-          { e: "⚡", t: "10 seconds" },
+          { i: "anchor", t: "5 hook variants" },
+          { i: "brain",  t: "Cialdini-backed" },
+          { i: "edit",   t: "Hook + body + CTA" },
+          { i: "zap",    t: "10 seconds" },
         ]}
       />
     );
@@ -104,7 +105,8 @@ export default function AdCopywriter() {
       {/* Tier badge */}
       <div style={{ background: tier === "growth" ? "#0c0a09" : "#5b21b6", color: tier === "growth" ? "#fde68a" : "#ddd6fe", border: `1px solid ${tier === "growth" ? "rgba(250,204,21,0.3)" : "rgba(196,181,253,0.4)"}`, borderRadius: 12, padding: "10px 14px", marginBottom: 18, display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 8 }}>
         <p style={{ fontSize: 12, lineHeight: 1.5, margin: 0 }}>
-          {tier === "growth" ? "🚀 " : "✨ "}<strong>{tier === "growth" ? "Scale Lab" : "Pro"} · AI Ad Copywriter.</strong> Paste product info, get 5 variants across different psychological angles.
+          <Icon name={tier === "growth" ? "rocket" : "sparkles"} size={12} strokeWidth={2.5} style={{ display: "inline", marginRight: 6, verticalAlign: "-1px" }} />
+          <strong>{tier === "growth" ? "Scale Lab" : "Pro"} · AI Ad Copywriter.</strong> Paste product info, get 5 variants across different psychological angles.
         </p>
         {usage && (
           <p style={{ fontSize: 11, opacity: 0.7, margin: 0 }}>{usage.used} / {usage.limit} runs today</p>
@@ -145,7 +147,7 @@ export default function AdCopywriter() {
               letterSpacing: "-0.2px",
             }}
           >
-            {loading ? "✨ Writing 5 variants…" : "✍️ Generate 5 ad variants →"}
+            {loading ? "Writing 5 variants…" : "Generate 5 ad variants →"}
           </button>
 
           {error && (

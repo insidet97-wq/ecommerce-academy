@@ -10,6 +10,7 @@ import Link from "next/link";
 import AdBanner from "@/components/AdBanner";
 import SupplierValidator from "@/components/SupplierValidator";
 import ModuleQA from "@/components/ModuleQA";
+import { Icon, type IconName } from "@/components/Icon";
 
 const MODULE_EMOJIS: Record<number, string> = {
   1: "🎮", 2: "🎯", 3: "🏆", 4: "🧠",  5: "🛒",
@@ -315,31 +316,31 @@ export default function ModulePage() {
   const isLast       = moduleId === 24 || (moduleId === 12 && !isGrowth);
   const nextId       = moduleId + 1;
 
-  const NEXT_TITLES: Record<number, { emoji: string; title: string; duration: string }> = {
-    1:  { emoji: "🎯", title: "Find Your Niche",                  duration: "~25 min" },
-    2:  { emoji: "🏆", title: "Find Your Winning Product",        duration: "~30 min" },
-    3:  { emoji: "🧠", title: "Know Your Customer",               duration: "~25 min" },
-    4:  { emoji: "🛒", title: "Build Your Shopify Store",         duration: "~45 min" },
-    5:  { emoji: "⚡", title: "Build Your First Sales Funnel",    duration: "~35 min" },
-    6:  { emoji: "📱", title: "Drive Traffic: TikTok Organic",    duration: "~30 min" },
-    7:  { emoji: "📣", title: "Run Your First Paid Ad",           duration: "~40 min" },
-    8:  { emoji: "📈", title: "Conversion Optimisation",          duration: "~30 min" },
-    9:  { emoji: "📧", title: "Build Your Email List",            duration: "~35 min" },
-    10: { emoji: "💰", title: "Make Your First Sale",             duration: "~20 min" },
-    11: { emoji: "🚀", title: "Scale and Grow",                   duration: "~25 min" },
+  const NEXT_TITLES: Record<number, { icon: IconName; title: string; duration: string }> = {
+    1:  { icon: "target",       title: "Find Your Niche",                  duration: "~25 min" },
+    2:  { icon: "trophy",       title: "Find Your Winning Product",        duration: "~30 min" },
+    3:  { icon: "brain",        title: "Know Your Customer",               duration: "~25 min" },
+    4:  { icon: "cart",         title: "Build Your Shopify Store",         duration: "~45 min" },
+    5:  { icon: "zap",          title: "Build Your First Sales Funnel",    duration: "~35 min" },
+    6:  { icon: "smartphone",   title: "Drive Traffic: TikTok Organic",    duration: "~30 min" },
+    7:  { icon: "megaphone",    title: "Run Your First Paid Ad",           duration: "~40 min" },
+    8:  { icon: "trending-up",  title: "Conversion Optimisation",          duration: "~30 min" },
+    9:  { icon: "mail",         title: "Build Your Email List",            duration: "~35 min" },
+    10: { icon: "wallet",       title: "Make Your First Sale",             duration: "~20 min" },
+    11: { icon: "rocket",       title: "Scale and Grow",                   duration: "~25 min" },
     // Scale Lab continuation — only Growth users see these prompts after completing M12+
-    12: { emoji: "🔬", title: "Why Your First Sales Won't Repeat", duration: "~30 min" },
-    13: { emoji: "📊", title: "The Numbers That Actually Matter",  duration: "~40 min" },
-    14: { emoji: "💸", title: "The Profit Audit",                  duration: "~35 min" },
-    15: { emoji: "🎯", title: "Real Winners vs Fake Signals",      duration: "~35 min" },
-    16: { emoji: "🎁", title: "Engineering the Offer",             duration: "~40 min" },
-    17: { emoji: "💰", title: "Increasing AOV Without Cost",       duration: "~30 min" },
-    18: { emoji: "🧠", title: "Persuasion Foundations",            duration: "~45 min" },
-    19: { emoji: "🪝", title: "The Hook Library",                  duration: "~40 min" },
-    20: { emoji: "🎬", title: "UGC at Scale",                      duration: "~45 min" },
-    21: { emoji: "🧪", title: "How to Test Ads Properly",          duration: "~40 min" },
-    22: { emoji: "⚖️", title: "Killing, Iterating, or Scaling",    duration: "~35 min" },
-    23: { emoji: "🚀", title: "Scaling Without Destroying ROAS",   duration: "~50 min" },
+    12: { icon: "microscope",   title: "Why Your First Sales Won't Repeat", duration: "~30 min" },
+    13: { icon: "bar-chart",    title: "The Numbers That Actually Matter",  duration: "~40 min" },
+    14: { icon: "line-chart",   title: "The Profit Audit",                  duration: "~35 min" },
+    15: { icon: "target",       title: "Real Winners vs Fake Signals",      duration: "~35 min" },
+    16: { icon: "gift",         title: "Engineering the Offer",             duration: "~40 min" },
+    17: { icon: "coins",        title: "Increasing AOV Without Cost",       duration: "~30 min" },
+    18: { icon: "brain",        title: "Persuasion Foundations",            duration: "~45 min" },
+    19: { icon: "anchor",       title: "The Hook Library",                  duration: "~40 min" },
+    20: { icon: "film",         title: "UGC at Scale",                      duration: "~45 min" },
+    21: { icon: "flask",        title: "How to Test Ads Properly",          duration: "~40 min" },
+    22: { icon: "scale",        title: "Killing, Iterating, or Scaling",    duration: "~35 min" },
+    23: { icon: "rocket",       title: "Scaling Without Destroying ROAS",   duration: "~50 min" },
   };
   const nextInfo = NEXT_TITLES[moduleId];
 
@@ -523,7 +524,7 @@ export default function ModulePage() {
                   <>
                     {/* Next module preview */}
                     <div style={{ background: "#f8f8fb", borderRadius: 16, padding: "14px 16px", marginBottom: 16, display: "flex", alignItems: "center", gap: 12 }}>
-                      <span style={{ fontSize: 22 }}>{nextInfo.emoji}</span>
+                      <span style={{ display: "inline-flex", color: "#6366f1" }}><Icon name={nextInfo.icon} size={22} strokeWidth={1.75} /></span>
                       <div style={{ flex: 1 }}>
                         <p style={{ fontSize: 11, color: "#a1a1aa", marginBottom: 2 }}>Up next · Module {nextId} · {nextInfo.duration}</p>
                         <p style={{ fontSize: 14, fontWeight: 700, color: "#09090b" }}>{nextInfo.title}</p>
