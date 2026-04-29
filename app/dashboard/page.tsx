@@ -7,6 +7,7 @@ import Link from "next/link";
 import { isAdmin } from "@/lib/admin";
 import AdBanner from "@/components/AdBanner";
 import ReferralCard from "@/components/ReferralCard";
+import GettingStartedChecklist from "@/components/GettingStartedChecklist";
 
 /* ── Design tokens ── */
 const TRACK_COLORS: Record<string, string> = {
@@ -143,6 +144,7 @@ export default function DashboardPage() {
   const [showCert,       setShowCert]       = useState(false);
   const [upgradedBanner, setUpgradedBanner] = useState(false);
   const [portalLoading,  setPortalLoading]  = useState(false);
+  const [hasUsedTool,    setHasUsedTool]    = useState(false);
 
   const openCert  = useCallback(() => setShowCert(true),  []);
   const closeCert = useCallback(() => setShowCert(false), []);
@@ -181,11 +183,17 @@ export default function DashboardPage() {
         window.history.replaceState({}, "", "/dashboard");
       }
 
-      const [progressRes, profileRes] = await Promise.all([
+      const [progressRes, profileRes, aiToolRes, supplierValRes] = await Promise.all([
         supabase.from("user_progress").select("module_id").eq("user_id", user.id),
         supabase.from("user_profiles").select("track, start_module, goal, first_name, streak_days, last_active, is_pro, is_growth, stripe_customer_id").eq("id", user.id).single(),
+        // For the getting-started checklist: has the user touched any tool?
+        // Two HEAD-only count queries (no rows returned). Either one being non-zero
+        // is enough to check off the "Try a tool" milestone.
+        supabase.from("ai_tool_log")          .select("id", { count: "exact", head: true }).eq("user_id", user.id),
+        supabase.from("supplier_validations") .select("id", { count: "exact", head: true }).eq("user_id", user.id),
       ]);
       setCompleted((progressRes.data ?? []).map((r: { module_id: number }) => r.module_id));
+      setHasUsedTool((aiToolRes.count ?? 0) > 0 || (supplierValRes.count ?? 0) > 0);
       // Always call setProfile — even if no row exists, use safe defaults
       setProfile({
         track:               profileRes.data?.track               ?? null,
@@ -473,6 +481,16 @@ export default function DashboardPage() {
                 </div>
               </div>
             </div>
+
+            {/* ── Getting Started checklist — auto-hides at 5/6 done ── */}
+            <GettingStartedChecklist
+              hasQuiz     ={profile.track !== null}
+              hasModule1  ={completed.includes(1)}
+              hasStreak3  ={(profile.streak_days ?? 0) >= 3}
+              hasUsedTool ={hasUsedTool}
+              hasModule6  ={completed.includes(6)}
+              trackColor  ={trackColor}
+            />
           </>
         )}
 
