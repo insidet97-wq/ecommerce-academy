@@ -1,8 +1,9 @@
 ﻿import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { Analytics } from "@vercel/analytics/react";
-import Script from "next/script";
 import "./globals.css";
+import AnalyticsScripts from "@/components/AnalyticsScripts";
+import CookieBanner from "@/components/CookieBanner";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -59,29 +60,13 @@ export default function RootLayout({
     >
       <body className="min-h-full flex flex-col">
         {children}
+        {/* Vercel Analytics — cookieless / GDPR-compliant, no consent needed */}
         <Analytics />
-        {/* Google Analytics */}
-        <Script
-          src="https://www.googletagmanager.com/gtag/js?id=G-VT4RZ3JB6L"
-          strategy="afterInteractive"
-        />
-        <Script id="google-analytics" strategy="afterInteractive">
-          {`
-            window.dataLayer = window.dataLayer || [];
-            function gtag(){dataLayer.push(arguments);}
-            gtag('js', new Date());
-            gtag('config', 'G-VT4RZ3JB6L');
-          `}
-        </Script>
-        {/* Google AdSense — afterInteractive keeps it from blocking page interactivity.
-            AdSense verification is handled via the `google-adsense-account` meta tag in
-            metadata.other (line 26), so this script's load timing doesn't affect verification. */}
-        <Script
-          async
-          src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1382028135058819"
-          crossOrigin="anonymous"
-          strategy="afterInteractive"
-        />
+        {/* GA4 + AdSense — gated behind cookie consent (renders nothing until "Accept all").
+            AdSense site verification still works via the meta tag in metadata.other above —
+            that meta tag is just text, no cookies, no script. */}
+        <AnalyticsScripts />
+        <CookieBanner />
       </body>
     </html>
   );

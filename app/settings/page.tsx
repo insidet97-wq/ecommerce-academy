@@ -25,6 +25,12 @@ export default function SettingsPage() {
   const [nameMsg,      setNameMsg]      = useState<{ type: "success" | "error"; text: string } | null>(null);
   const [pwMsg,        setPwMsg]        = useState<{ type: "success" | "error"; text: string } | null>(null);
 
+  // Delete-account modal state
+  const [deleteOpen,    setDeleteOpen]    = useState(false);
+  const [deleteConfirm, setDeleteConfirm] = useState("");
+  const [deleteLoading, setDeleteLoading] = useState(false);
+  const [deleteError,   setDeleteError]   = useState("");
+
   useEffect(() => {
     async function load() {
       const { data: { user } } = await supabase.auth.getUser();
@@ -92,6 +98,36 @@ export default function SettingsPage() {
       setNewPassword("");
       setConfirmPw("");
       setPwMsg({ type: "success", text: "Password changed successfully." });
+    }
+  }
+
+  /* ── Delete account ── */
+  async function handleDeleteAccount() {
+    if (deleteConfirm !== "DELETE") return;
+    setDeleteLoading(true);
+    setDeleteError("");
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session?.access_token) { setDeleteError("Session expired — please log in again."); return; }
+
+      const res = await fetch("/api/account/delete", {
+        method: "POST",
+        headers: { Authorization: `Bearer ${session.access_token}` },
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        setDeleteError(data.error ?? "Couldn't delete account. Try again or email support@firstsalelab.com.");
+        return;
+      }
+
+      // Sign the local session out and bounce to home with a flag so the
+      // landing page can show a "your account has been deleted" toast.
+      await supabase.auth.signOut();
+      window.location.href = "/?deleted=1";
+    } catch (err) {
+      setDeleteError(err instanceof Error ? err.message : "Couldn't delete account.");
+    } finally {
+      setDeleteLoading(false);
     }
   }
 
@@ -232,17 +268,108 @@ export default function SettingsPage() {
           {/* ── Danger zone ── */}
           <div style={{ background: "#fff", borderRadius: 20, border: "1.5px solid #fecaca", padding: "28px 28px" }}>
             <h2 style={{ fontSize: 15, fontWeight: 800, color: "#09090b", letterSpacing: "-0.3px", marginBottom: 4 }}>Danger zone</h2>
-            <p style={{ fontSize: 13, color: "#a1a1aa", marginBottom: 20 }}>
-              To delete your account or cancel your subscription, email us at{" "}
+            <p style={{ fontSize: 13, color: "#a1a1aa", marginBottom: 6 }}>
+              Permanently delete your account and all your data. This cannot be undone.
+            </p>
+            <p style={{ fontSize: 12, color: "#a1a1aa", marginBottom: 18 }}>
+              We&apos;ll cancel any active subscription, then remove your profile, progress, AI tool history, and all
+              other personal data. Stripe retains billing records as required by tax law. Questions? Email{" "}
               <a href="mailto:support@firstsalelab.com" style={{ color: "#6366f1", textDecoration: "none" }}>support@firstsalelab.com</a>.
             </p>
-            <p style={{ fontSize: 12, color: "#fca5a5" }}>
-              Deleting your account is permanent and cannot be undone.
-            </p>
+            <button
+              onClick={() => { setDeleteOpen(true); setDeleteConfirm(""); setDeleteError(""); }}
+              style={{
+                background: "#fff",
+                border: "1.5px solid #ef4444",
+                color: "#dc2626",
+                fontWeight: 700,
+                fontSize: 13,
+                padding: "10px 20px",
+                borderRadius: 10,
+                cursor: "pointer",
+              }}
+            >
+              Delete my account
+            </button>
           </div>
 
         </div>
       </main>
+
+      {/* ── Delete confirmation modal ── */}
+      {deleteOpen && (
+        <div
+          role="dialog"
+          aria-modal="true"
+          style={{
+            position: "fixed", inset: 0, background: "rgba(0,0,0,0.55)",
+            display: "flex", alignItems: "center", justifyContent: "center",
+            padding: 20, zIndex: 9998,
+          }}
+          onClick={() => !deleteLoading && setDeleteOpen(false)}
+        >
+          <div
+            onClick={e => e.stopPropagation()}
+            style={{ background: "#fff", borderRadius: 18, padding: "28px 28px", maxWidth: 460, width: "100%", boxShadow: "0 24px 60px rgba(0,0,0,0.25)" }}
+          >
+            <h2 style={{ fontSize: 18, fontWeight: 900, color: "#09090b", letterSpacing: "-0.4px", marginBottom: 8 }}>Delete your account?</h2>
+            <p style={{ fontSize: 13, color: "#52525b", lineHeight: 1.65, marginBottom: 14 }}>
+              This will permanently remove your profile, module progress, streak, AI tool history, supplier validations,
+              referral code, and any saved data. If you have an active Pro or Scale Lab subscription, it&apos;ll be cancelled.
+            </p>
+            <p style={{ fontSize: 13, color: "#52525b", marginBottom: 8 }}>
+              Type <strong style={{ color: "#dc2626" }}>DELETE</strong> to confirm:
+            </p>
+            <input
+              type="text"
+              value={deleteConfirm}
+              onChange={e => setDeleteConfirm(e.target.value)}
+              placeholder="DELETE"
+              autoFocus
+              disabled={deleteLoading}
+              style={{
+                width: "100%",
+                padding: "10px 14px",
+                borderRadius: 10,
+                border: "1.5px solid #e4e4e7",
+                fontSize: 14,
+                color: "#09090b",
+                outline: "none",
+                marginBottom: 14,
+                boxSizing: "border-box",
+              }}
+            />
+            {deleteError && (
+              <p style={{ fontSize: 12, color: "#dc2626", marginBottom: 12 }}>⚠ {deleteError}</p>
+            )}
+            <div style={{ display: "flex", gap: 8, justifyContent: "flex-end" }}>
+              <button
+                onClick={() => setDeleteOpen(false)}
+                disabled={deleteLoading}
+                style={{ padding: "10px 18px", borderRadius: 10, border: "1.5px solid #e4e4e7", background: "#fff", color: "#52525b", fontSize: 13, fontWeight: 700, cursor: deleteLoading ? "not-allowed" : "pointer" }}
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleDeleteAccount}
+                disabled={deleteLoading || deleteConfirm !== "DELETE"}
+                style={{
+                  padding: "10px 18px",
+                  borderRadius: 10,
+                  border: "none",
+                  background: deleteLoading || deleteConfirm !== "DELETE" ? "#fca5a5" : "#dc2626",
+                  color: "#fff",
+                  fontSize: 13,
+                  fontWeight: 800,
+                  cursor: deleteLoading || deleteConfirm !== "DELETE" ? "not-allowed" : "pointer",
+                }}
+              >
+                {deleteLoading ? "Deleting…" : "Delete forever"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

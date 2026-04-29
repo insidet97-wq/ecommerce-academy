@@ -25,7 +25,7 @@ export default function PrivacyPage() {
         <div style={{ marginBottom: 40 }}>
           <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: "#6366f1", marginBottom: 10 }}>Legal</p>
           <h1 style={{ fontSize: 32, fontWeight: 900, color: "#09090b", letterSpacing: "-0.8px", marginBottom: 10 }}>Privacy Policy</h1>
-          <p style={{ fontSize: 13, color: "#a1a1aa" }}>Last updated: April 2026</p>
+          <p style={{ fontSize: 13, color: "#a1a1aa" }}>Last updated: 29 April 2026</p>
         </div>
 
         <div style={{ display: "flex", flexDirection: "column", gap: 36 }}>
@@ -41,7 +41,8 @@ export default function PrivacyPage() {
               <li><strong>Account data:</strong> your email address, first name, and password (hashed — we never see it) when you sign up.</li>
               <li><strong>Progress data:</strong> which modules you have completed and when, your learning streak, and your quiz answers.</li>
               <li><strong>Payment data:</strong> handled entirely by Stripe. We store only your Stripe customer ID and subscription ID — never your card details.</li>
-              <li><strong>Usage data:</strong> page views and basic analytics collected by Vercel Analytics (anonymous, no cross-site tracking).</li>
+              <li><strong>Usage data:</strong> anonymous page-view counts via Vercel Analytics (cookieless, no cross-site tracking). With your consent, we also load Google Analytics 4 for more detailed behavioural data.</li>
+              <li><strong>AI tool inputs and outputs:</strong> when you use an AI tool (Ad Copywriter, UGC Brief, Ad Auditor, Product Description Writer, Subject Line Tester, Store Autopsy), the inputs you submit and the response we return are stored against your account. This is used for daily rate-limiting and so you can later revisit your past results in your account.</li>
               <li><strong>Email engagement:</strong> whether you open or click emails we send via Resend.</li>
             </ul>
           </Section>
@@ -70,11 +71,13 @@ export default function PrivacyPage() {
               <tbody>
                 {[
                   ["Supabase", "Database and authentication (EU/US servers)"],
-                  ["Stripe", "Payment processing and subscription management"],
-                  ["Resend", "Transactional and newsletter emails"],
-                  ["Groq", "AI generation of weekly product picks and briefings (no personal data sent)"],
-                  ["Google AdSense", "Display advertising for free users"],
-                  ["Vercel", "Hosting and anonymous page analytics"],
+                  ["Stripe", "Payment processing, subscriptions, and billing portal"],
+                  ["Resend", "Transactional emails (welcome, module completion, weekly digest, etc.)"],
+                  ["Groq", "AI generation for free / Pro-tier features (Niche Picker, blog, weekly product picks, ad copy). Inputs you provide are sent to Groq for processing."],
+                  ["Google AI (Gemini)", "AI generation for Scale Lab (Growth-tier) features (Store Autopsy, advanced ad tools). Used only when you trigger one of these tools. Inputs you provide are sent to Google for processing."],
+                  ["Google AdSense", "Display advertising for free users (only loaded after you accept cookies)"],
+                  ["Google Analytics 4", "Site analytics (only loaded after you accept cookies)"],
+                  ["Vercel", "Hosting and cookieless page-view analytics"],
                 ].map(([service, purpose]) => (
                   <tr key={service} style={{ borderBottom: "1px solid #f4f4f5" }}>
                     <td style={{ padding: "10px 0", color: "#09090b", fontWeight: 600, whiteSpace: "nowrap" }}>{service}</td>
@@ -85,29 +88,35 @@ export default function PrivacyPage() {
             </table>
           </Section>
 
-          <Section title="5. Cookies">
-            <p>We use cookies for:</p>
+          <Section title="5. Cookies and tracking">
+            <p>The first time you visit, we ask whether to load optional tracking. You have two choices:</p>
             <ul>
-              <li><strong>Authentication:</strong> Supabase stores a session token in a secure cookie to keep you logged in.</li>
-              <li><strong>Advertising:</strong> Google AdSense sets cookies on free users&apos; browsers to serve relevant ads. Pro members are ad-free.</li>
+              <li><strong>&ldquo;Essential only&rdquo;</strong> — only the cookies needed for the site to work load: a Supabase session cookie (to keep you logged in) and Stripe checkout cookies (only on the upgrade flow, used to prevent payment fraud).</li>
+              <li><strong>&ldquo;Accept all&rdquo;</strong> — the above plus Google Analytics 4 (site analytics) and Google AdSense (ads for free users). These set additional cookies in your browser.</li>
             </ul>
-            <p>We do not use tracking or marketing cookies beyond the above.</p>
+            <p>Vercel page-view analytics is always loaded, since it is cookieless and does not track you across sites.</p>
+            <p>You can change your choice at any time by clearing your browser&apos;s site data for firstsalelab.com — the consent banner will reappear on your next visit.</p>
+            <p>Pro and Scale Lab members never see ads, regardless of cookie choice.</p>
           </Section>
 
           <Section title="6. Data retention">
-            <p>We keep your account data for as long as your account is active. If you delete your account, your personal data is removed within 30 days. Aggregated, anonymised analytics data may be retained indefinitely.</p>
+            <p>We keep your account data for as long as your account is active. When you delete your account (from <Link href="/settings" style={{ color: "#6366f1" }}>Settings → Danger zone</Link>), your profile, module progress, AI tool history, supplier validations, referral code, and other personal data are removed immediately and any active subscription is cancelled.</p>
+            <p>Two narrow exceptions:</p>
+            <ul>
+              <li><strong>Stripe billing records</strong> are retained by Stripe (not us) for as long as required by tax law in their jurisdiction. We hold no copy after deletion.</li>
+              <li><strong>Aggregated analytics data</strong> (e.g. &ldquo;X% of users completed Module 3&rdquo;) may be retained indefinitely — this data does not identify you.</li>
+            </ul>
           </Section>
 
           <Section title="7. Your rights">
             <p>You have the right to:</p>
             <ul>
-              <li>Access the personal data we hold about you</li>
-              <li>Correct inaccurate data</li>
-              <li>Request deletion of your account and data</li>
-              <li>Export your data</li>
-              <li>Unsubscribe from marketing emails at any time (transactional emails related to your account cannot be opted out of while your account is active)</li>
+              <li><strong>Delete your account and all personal data</strong> — instantly, from <Link href="/settings" style={{ color: "#6366f1" }}>Settings → Danger zone</Link>.</li>
+              <li><strong>Access or export the personal data we hold about you</strong> — email <a href="mailto:support@firstsalelab.com" style={{ color: "#6366f1" }}>support@firstsalelab.com</a> and we&apos;ll send a JSON export within 30 days.</li>
+              <li>Correct inaccurate data — change your name from <Link href="/settings" style={{ color: "#6366f1" }}>Settings</Link>, or email us for anything else.</li>
+              <li>Unsubscribe from marketing emails at any time (transactional emails related to your account cannot be opted out of while your account is active).</li>
+              <li>Lodge a complaint with your local data protection authority if you believe we&apos;ve mishandled your data.</li>
             </ul>
-            <p>To exercise any of these rights, email <a href="mailto:support@firstsalelab.com" style={{ color: "#6366f1" }}>support@firstsalelab.com</a>.</p>
           </Section>
 
           <Section title="8. Children">
