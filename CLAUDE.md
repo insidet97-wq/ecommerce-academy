@@ -262,7 +262,18 @@ Without this the webhook will throw on every event (table doesn't exist) — dup
 
 Other older migrations (referral codes, Q&A log, ai_tool_log, etc.) — already run in prior sessions ✅. Full schema reference is below.
 
-### 🔄 Next session: Stripe live-mode flip (queued)
+### 🔄 Next session: 4 new Growth-tier AI tools (queued)
+Before flipping Stripe to live, the owner wants 4 more Gemini-powered AI tools exclusive to Scale Lab so the $49 tier has more standalone value. Candidates discussed (pick 4 — see end-of-day brief in chat for full reasoning):
+1. **Grand Slam Offer Builder** (Hormozi) — text input → irresistible offer construction. Module 17 fit.
+2. **Cialdini Page Audit** — URL → fetches via Gemini url_context → scores 6 principles. Module 19 fit.
+3. **AOV Optimization Audit** — URL → finds missing upsells / bundles / order bumps. Module 18 fit.
+4. **Scale/Kill/Iterate Decision Helper** — paste ad performance numbers → action recommendation. Module 23 fit.
+5. (alt) Customer Review Miner — URL → extracts pain points + exact phrases for ad copy
+6. (alt) Profit P&L Analyzer — paste revenue/spend/COGS → true contribution margin + bleeding points
+
+All 4 follow the existing pattern: `gateAITool` (20/day for Growth) + `lib/perplexity.ts` generator + new `/api/ai-tools/[name]/route.ts` + new component → `/tools` tab. No SQL needed (`AI_TOOLS` array auto-picks them up).
+
+### 🔄 After that: Stripe live-mode flip (still queued)
 Owner stepping away briefly; will resume to flip Stripe to live mode. Steps in one batch:
 1. Switch Pro to live keys (`STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY`)
 2. Re-point Stripe webhook to live endpoint (`https://www.firstsalelab.com/api/stripe/webhook`)
