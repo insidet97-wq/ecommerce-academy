@@ -508,7 +508,7 @@ export function nichePickerDay0HTML(firstName: string, niches: NicheLead["niches
           <table width="100%" cellpadding="0" cellspacing="0">${nicheRows}</table>
           <div style="margin-top:14px;background:#f5f3ff;border-radius:14px;padding:18px 20px;border:1px solid #ede9fe;">
             <p style="margin:0 0 6px;font-size:13px;font-weight:800;color:#4c1d95;">Picked one? Now build the store.</p>
-            <p style="margin:0 0 14px;font-size:12px;color:#6b21a8;line-height:1.6;">Our free 12-module course takes you from a niche idea to your first Shopify sale. Modules 1–6 are free, no credit card.</p>
+            <p style="margin:0 0 14px;font-size:12px;color:#6b21a8;line-height:1.6;">Our 24-module course takes you from a niche idea to scalable revenue. Modules 1–6 are free, no credit card.</p>
             <a href="${SITE_URL}/quiz" style="display:inline-block;background:#7c3aed;color:#fff;font-weight:800;font-size:13px;padding:11px 22px;border-radius:10px;text-decoration:none;">Build my free roadmap →</a>
           </div>
         </td></tr>

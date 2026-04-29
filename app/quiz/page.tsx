@@ -304,7 +304,7 @@ export default function QuizPage() {
                   Already have an account? Log in
                 </Link>
               </div>
-              <p className="text-center text-xs text-gray-400">Free forever · No credit card needed</p>
+              <p className="text-center text-xs text-gray-400">Free to start · No credit card needed</p>
             </div>
           </div>
 

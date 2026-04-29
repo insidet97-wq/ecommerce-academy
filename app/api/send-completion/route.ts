@@ -154,7 +154,7 @@ export async function POST(req: Request) {
         <!-- Footer -->
         <tr><td style="background:#f8f8fb;border-radius:0 0 20px 20px;padding:24px 40px;text-align:center;border-top:1px solid #e4e4e7;">
           <p style="margin:0 0 6px;font-size:13px;font-weight:700;color:#09090b;">First Sale Lab</p>
-          <p style="margin:0;font-size:12px;color:#a1a1aa;">Free forever · Built for complete beginners</p>
+          <p style="margin:0;font-size:12px;color:#a1a1aa;">Built for complete beginners · Modules 1–6 free</p>
         </td></tr>
 
       </table>

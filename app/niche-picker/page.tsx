@@ -333,7 +333,7 @@ export default function NichePickerPage() {
                 Picked a niche? Now build the store.
               </h2>
               <p style={{ fontSize: 13, color: "rgba(255,255,255,0.65)", lineHeight: 1.6, marginBottom: 20, maxWidth: 420, margin: "0 auto 20px" }}>
-                First Sale Lab&apos;s 12-module course takes complete beginners from a niche idea to their first Shopify sale. Modules 1–6 are free.
+                First Sale Lab&apos;s 24-module course takes complete beginners from a niche idea to scalable revenue. Modules 1–6 are free.
               </p>
               <Link href="/quiz" style={{ display: "inline-block", background: "linear-gradient(135deg, #facc15, #f59e0b)", color: "#1c1917", fontWeight: 800, fontSize: 14, padding: "13px 28px", borderRadius: 13, textDecoration: "none", letterSpacing: "-0.2px" }}>
                 Build my free roadmap →

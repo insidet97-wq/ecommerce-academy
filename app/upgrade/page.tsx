@@ -138,7 +138,7 @@ function UpgradePageInner() {
           <p style={{ fontSize: 15, color: "rgba(255,255,255,0.65)", lineHeight: 1.65 }}>
             {isPro
               ? "You finished the foundation. Now turn random sales into predictable revenue."
-              : "Modules 1–6 are free forever. Pro unlocks your first sale. Scale Lab makes those sales repeat."}
+              : "Modules 1–6 are free. Pro unlocks your first sale. Scale Lab makes those sales repeat."}
           </p>
         </div>
       </div>
