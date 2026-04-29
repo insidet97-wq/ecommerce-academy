@@ -487,14 +487,17 @@ export default function DashboardPage() {
               </div>
             </div>
 
-            {/* ── Getting Started checklist — auto-hides at 5/6 done ── */}
+            {/* ── Getting Started checklist — auto-hides at 5/6 done,
+                 and hidden entirely for admins or users with 3+ modules done ── */}
             <GettingStartedChecklist
-              hasQuiz     ={profile.track !== null}
-              hasModule1  ={completed.includes(1)}
-              hasStreak3  ={(profile.streak_days ?? 0) >= 3}
-              hasUsedTool ={hasUsedTool}
-              hasModule6  ={completed.includes(6)}
-              trackColor  ={trackColor}
+              hasQuiz        ={profile.track !== null}
+              hasModule1     ={completed.includes(1)}
+              hasStreak3     ={(profile.streak_days ?? 0) >= 3}
+              hasUsedTool    ={hasUsedTool}
+              hasModule6     ={completed.includes(6)}
+              completedCount ={completedCount}
+              isAdmin        ={admin}
+              trackColor     ={trackColor}
             />
           </>
         )}

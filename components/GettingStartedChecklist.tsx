@@ -18,12 +18,16 @@
 import Link from "next/link";
 
 type Props = {
-  hasQuiz:     boolean;
-  hasModule1:  boolean;
-  hasStreak3:  boolean;
-  hasUsedTool: boolean;
-  hasModule6:  boolean;
-  trackColor?: string;
+  hasQuiz:        boolean;
+  hasModule1:     boolean;
+  hasStreak3:     boolean;
+  hasUsedTool:    boolean;
+  hasModule6:     boolean;
+  /** Total modules completed — used to auto-hide for users past early-momentum. */
+  completedCount: number;
+  /** Admin flag — admins never see the onboarding checklist. */
+  isAdmin?:       boolean;
+  trackColor?:    string;
 };
 
 type Item = {
@@ -37,6 +41,13 @@ type Item = {
 export default function GettingStartedChecklist(props: Props) {
   const trackColor = props.trackColor ?? "#7c3aed";
 
+  // Hide for admins (internal users, not learners) and for anyone who's
+  // already past the early-momentum phase (3+ modules done means they
+  // don't need an onboarding nudge anymore — the dashboard's normal
+  // "Up next" card is doing that job).
+  if (props.isAdmin)              return null;
+  if (props.completedCount >= 3)  return null;
+
   const items: Item[] = [
     {
       id: "account",
@@ -46,10 +57,13 @@ export default function GettingStartedChecklist(props: Props) {
     },
     {
       id: "quiz",
-      done: props.hasQuiz,
+      // If they've already completed Module 1, the quiz CTA is moot — they're
+      // clearly using the system. Only nudge them about the quiz if they
+      // haven't started any module yet.
+      done: props.hasQuiz || props.hasModule1,
       label: "Take the quiz",
       description: "Personalises your roadmap and unlocks a starting module.",
-      cta: props.hasQuiz ? undefined : { text: "Start →", href: "/quiz" },
+      cta: (props.hasQuiz || props.hasModule1) ? undefined : { text: "Start →", href: "/quiz" },
     },
     {
       id: "mod1",
