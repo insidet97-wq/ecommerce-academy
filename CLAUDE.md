@@ -236,40 +236,50 @@ CRON_SECRET
 
 ## Pending / known issues
 
-### 🔄 SQL migrations needed now (referral + Q&A log)
+### ✅ Pre-launch hardening complete (2026-04-29)
+All security + data-protection work for live-mode launch is shipped:
+- 2 security audit passes complete (8 real issues fixed total — see Recent changes)
+- Cookie consent banner + self-serve account deletion + privacy policy refresh
+- AdSense ads.txt fix via middleware
+- Getting Started checklist (with admin/power-user fixes)
+- 2 new AI tools (Product Description Writer + Subject Line Tester)
 
-Run the new section of the SQL block below in Supabase. Without these:
-- Referral codes won't generate (dashboard widget will silently render nothing)
-- `/quiz?ref=CODE` shareable links won't capture leads
-- Module Q&A assistant will return errors (rate-limit query depends on `module_qa_log`)
+### 🔄 SQL migration needed before next deploy fully takes effect
+**ONE new table required** (Stripe webhook idempotency):
+```sql
+CREATE TABLE IF NOT EXISTS stripe_webhook_events (
+  id              uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  stripe_event_id text NOT NULL UNIQUE,
+  event_type      text NOT NULL,
+  processed_at    timestamptz NOT NULL DEFAULT now()
+);
+CREATE INDEX IF NOT EXISTS stripe_webhook_events_event_id_idx
+  ON stripe_webhook_events (stripe_event_id);
+```
+Without this the webhook will throw on every event (table doesn't exist) — duplicate-detection won't work, no events will be deduped or marked processed.
 
-`is_growth` column is already done from prior session ✅
+Other older migrations (referral codes, Q&A log, ai_tool_log, etc.) — already run in prior sessions ✅. Full schema reference is below.
 
-Once the new SQL is run, EVERYTHING built so far works except the live Stripe checkout button — which is paired with going live (deferred, see below).
-
-### 🔄 Stripe live-mode flip (deferred)
-When ready to take real payments, do all in one batch:
+### 🔄 Next session: Stripe live-mode flip (queued)
+Owner stepping away briefly; will resume to flip Stripe to live mode. Steps in one batch:
 1. Switch Pro to live keys (`STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY`)
-2. Re-point Stripe webhook to live endpoint
+2. Re-point Stripe webhook to live endpoint (`https://www.firstsalelab.com/api/stripe/webhook`)
 3. Create live Stripe Products: **Pro $19/mo**, **Scale Lab $49/mo**, optionally **Pro $190/yr** + **Scale Lab $490/yr** (annual plans)
 4. Vercel env vars: `STRIPE_PRICE_ID`, `STRIPE_PRICE_ID_GROWTH`, optionally `STRIPE_PRICE_ID_ANNUAL` + `STRIPE_PRICE_ID_GROWTH_ANNUAL`
 5. Redeploy
+6. **Test the full flow with a real card on a non-admin account** before sharing the upgrade page widely (admin accounts bypass Stripe entirely so they can't be used for end-to-end testing)
 
 ### ⏳ External waiting (no action needed)
 - **Google AdSense site approval:** "Getting ready" as of last check. All three slot IDs configured in Vercel (`NEXT_PUBLIC_ADSENSE_SLOT_DASHBOARD`, `_MODULE`, `_CONTENT`). Once Google approves, ads fill automatically. Verify in incognito (admins are ad-free).
 - **AdSense `ads.txt`:** showed "Not found" despite file being correct at `https://www.firstsalelab.com/ads.txt`. The apex returns 307 → www; AdSense crawlers usually follow but status can lag 24–72h. Register `www.firstsalelab.com` as a separate site only if still "Not found" after 48h.
 - **Sitemap** submitted to Google Search Console — indexing takes days.
 
-### 🛠 Owner-action operational items
-- **Stripe is in test mode.** When ready for real payments, do all of the following in one batch:
-  1. Switch Pro to live keys (`STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY`)
-  2. Re-point Stripe webhook to the live mode endpoint
-  3. Create the Scale Lab live Product (Stripe → Products → "Scale Lab" → $49/mo recurring Price) → copy live `price_...`
-  4. Add `STRIPE_PRICE_ID_GROWTH` to Vercel with the live price ID
-  5. Verify `STRIPE_PRICE_ID` (Pro live price) is updated to live as well
-  6. Redeploy — both Pro $19 and Scale Lab $49 checkouts now process real money
-- **`support@firstsalelab.com`** mailbox is set up ✅ (referenced in settings, terms, privacy — owner is monitoring this inbox).
+### 🛠 Owner-action operational state
+- **Stripe** is still in test mode — flip queued for next session (see above).
+- **`support@firstsalelab.com`** mailbox is set up ✅
 - **Resend webhook** — endpoint configured, `RESEND_WEBHOOK_SECRET` set in Vercel ✅
+- **Gemini** paid tier 1 enabled with $5/mo budget alert + 30 req/min cap ✅
+- **AdSense ads.txt** now serves directly from apex via middleware carve-out ✅ (waiting on Google's crawler to re-check)
 
 ### 📜 Full SQL migrations (run all once in the Supabase SQL editor — `IF NOT EXISTS` makes them safe to re-run)
   ```sql
