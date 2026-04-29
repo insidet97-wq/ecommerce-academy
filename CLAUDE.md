@@ -259,7 +259,7 @@ When ready to take real payments, do all in one batch:
   4. Add `STRIPE_PRICE_ID_GROWTH` to Vercel with the live price ID
   5. Verify `STRIPE_PRICE_ID` (Pro live price) is updated to live as well
   6. Redeploy — both Pro $19 and Scale Lab $49 checkouts now process real money
-- **`support@firstsalelab.com`** mailbox needs to be set up in Namecheap Pro Email (already referenced in settings, terms, privacy).
+- **`support@firstsalelab.com`** mailbox is set up ✅ (referenced in settings, terms, privacy — owner is monitoring this inbox).
 - **Resend webhook** — endpoint configured, `RESEND_WEBHOOK_SECRET` set in Vercel ✅
 
 ### 📜 Full SQL migrations (run all once in the Supabase SQL editor — `IF NOT EXISTS` makes them safe to re-run)
