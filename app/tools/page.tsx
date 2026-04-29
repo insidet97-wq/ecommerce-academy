@@ -594,21 +594,75 @@ function LaunchChecklist() {
 /* ════════════════════════════════════════════
    Main page
 ════════════════════════════════════════════ */
-const TOOLS_META: { id: Tool; icon: IconName; label: string; tagline: string }[] = [
+type ToolTier = "free" | "pro" | "growth";
+const TOOLS_META: { id: Tool; icon: IconName; label: string; tagline: string; tier: ToolTier }[] = [
   // Free calculators
-  { id: "profit",     icon: "wallet",       label: "Profit Calculator",  tagline: "Is your margin healthy?" },
-  { id: "validation", icon: "target",       label: "Validation Score",   tagline: "Score your product idea /100" },
-  { id: "roas",       icon: "trending-up",  label: "Break-Even ROAS",    tagline: "Find your ad profit threshold" },
-  { id: "checklist",  icon: "list-checks",  label: "Launch Checklist",   tagline: "24 items before going live" },
-  { id: "supplier",   icon: "factory",      label: "Supplier Validator", tagline: "Score any supplier 0–100" },
-  // AI tools (Pro / Scale Lab)
-  { id: "copywriter",    icon: "pen",         label: "Ad Copywriter",     tagline: "Pro · 5 variants per run" },
-  { id: "ugc-brief",     icon: "film",        label: "UGC Brief",          tagline: "Pro · creator-ready brief" },
-  { id: "ad-audit",      icon: "eye",         label: "Ad Auditor",         tagline: "Pro · score + rewrites" },
-  { id: "product-desc",  icon: "file-text",   label: "Product Desc",       tagline: "Pro · 3 angles per run" },
-  { id: "subject-lines", icon: "send",        label: "Subject Lines",      tagline: "Pro · 10 with predicted opens" },
-  { id: "autopsy",       icon: "scan-search", label: "Store Autopsy",      tagline: "Scale Lab · competitor teardown" },
+  { id: "profit",     icon: "wallet",       label: "Profit Calculator",  tagline: "Is your margin healthy?",       tier: "free" },
+  { id: "validation", icon: "target",       label: "Validation Score",   tagline: "Score your product idea /100",  tier: "free" },
+  { id: "roas",       icon: "trending-up",  label: "Break-Even ROAS",    tagline: "Find your ad profit threshold", tier: "free" },
+  { id: "checklist",  icon: "list-checks",  label: "Launch Checklist",   tagline: "24 items before going live",    tier: "free" },
+  { id: "supplier",   icon: "factory",      label: "Supplier Validator", tagline: "Score any supplier 0–100",      tier: "free" },
+  // Pro AI tools
+  { id: "copywriter",    icon: "pen",         label: "Ad Copywriter",  tagline: "Pro · 5 variants per run",          tier: "pro" },
+  { id: "ugc-brief",     icon: "film",        label: "UGC Brief",      tagline: "Pro · creator-ready brief",         tier: "pro" },
+  { id: "ad-audit",      icon: "eye",         label: "Ad Auditor",     tagline: "Pro · score + rewrites",            tier: "pro" },
+  { id: "product-desc",  icon: "file-text",   label: "Product Desc",   tagline: "Pro · 3 angles per run",            tier: "pro" },
+  { id: "subject-lines", icon: "send",        label: "Subject Lines",  tagline: "Pro · 10 with predicted opens",     tier: "pro" },
+  // Scale Lab exclusive
+  { id: "autopsy",       icon: "scan-search", label: "Store Autopsy",  tagline: "Scale Lab · competitor teardown",   tier: "growth" },
 ];
+
+/**
+ * Tier-based theming for tool tabs. Soft tints so the visual signal is clear
+ * but the page doesn't shout. Active state amplifies the same hue.
+ */
+const TIER_THEME: Record<ToolTier, {
+  // Inactive
+  bg:         string;
+  border:     string;
+  iconColor:  string;
+  // Active (selected tool)
+  activeBg:        string;
+  activeBorder:    string;
+  activeIcon:      string;
+  activeLabel:     string;
+  activeTag:       string;
+  activeShadow:    string;
+}> = {
+  free: {
+    bg:         "#fff",
+    border:     "rgba(0,0,0,0.08)",
+    iconColor:  "#52525b",
+    activeBg:        "#fff",
+    activeBorder:    "#6366f1",
+    activeIcon:      "#6366f1",
+    activeLabel:     "#3730a3",
+    activeTag:       "#6366f1",
+    activeShadow:    "0 0 0 3px rgba(99,102,241,0.12)",
+  },
+  pro: {
+    bg:         "#faf5ff",
+    border:     "rgba(124,58,237,0.18)",
+    iconColor:  "#7c3aed",
+    activeBg:        "#f5f3ff",
+    activeBorder:    "#7c3aed",
+    activeIcon:      "#6d28d9",
+    activeLabel:     "#5b21b6",
+    activeTag:       "#7c3aed",
+    activeShadow:    "0 0 0 3px rgba(124,58,237,0.18)",
+  },
+  growth: {
+    bg:         "#1c1917",
+    border:     "rgba(250,204,21,0.25)",
+    iconColor:  "#fde68a",
+    activeBg:        "#0c0a09",
+    activeBorder:    "#facc15",
+    activeIcon:      "#facc15",
+    activeLabel:     "#fde68a",
+    activeTag:       "#fcd34d",
+    activeShadow:    "0 0 0 3px rgba(250,204,21,0.25)",
+  },
+};
 
 const VALID_TOOLS: Tool[] = ["profit", "validation", "roas", "checklist", "supplier", "autopsy", "copywriter", "ugc-brief", "ad-audit", "product-desc", "subject-lines"];
 
@@ -671,26 +725,44 @@ function ToolsPageInner() {
         {/* Tool selector */}
         <div className="fade-up tool-selector" style={{ display: "grid", gap: 10, marginBottom: 24 }}>
           {TOOLS_META.map(tool => {
-            const isActive = active === tool.id;
+            const isActive   = active === tool.id;
+            const theme      = TIER_THEME[tool.tier];
+            const isDark     = tool.tier === "growth";
+            // Pre-compute the per-state colors so the JSX stays readable
+            const bg            = isActive ? theme.activeBg     : theme.bg;
+            const borderColor   = isActive ? theme.activeBorder : theme.border;
+            const iconColor     = isActive ? theme.activeIcon   : theme.iconColor;
+            const labelColor    = isActive ? theme.activeLabel  : (isDark ? "#fff" : "#09090b");
+            const tagColor      = isActive ? theme.activeTag    : (isDark ? "rgba(253,224,71,0.65)" : "#a1a1aa");
+            const shadow        = isActive ? theme.activeShadow : "0 1px 3px rgba(0,0,0,0.04)";
             return (
               <button
                 key={tool.id}
                 onClick={() => setActive(tool.id)}
                 style={{
-                  padding: "13px 8px", borderRadius: 16, cursor: "pointer", textAlign: "center",
-                  border: `1.5px solid ${isActive ? INDIGO : "rgba(0,0,0,0.06)"}`,
-                  background: isActive ? "#eef2ff" : "#fff",
-                  boxShadow: isActive ? "0 0 0 3px rgba(99,102,241,0.12)" : "0 1px 3px rgba(0,0,0,0.04)",
+                  padding: "16px 10px",
+                  borderRadius: 16,
+                  cursor: "pointer",
+                  textAlign: "center",
+                  border: `1.5px solid ${borderColor}`,
+                  background: bg,
+                  boxShadow: shadow,
                   transition: "all 0.15s",
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  gap: 8,
+                  minHeight: 110,
                 }}
               >
-                <div style={{ marginBottom: 6, color: isActive ? "#3730a3" : "#52525b" }}>
+                <span style={{ display: "inline-flex", color: iconColor }}>
                   <Icon name={tool.icon} size={22} strokeWidth={1.75} />
-                </div>
-                <p style={{ fontSize: 12, fontWeight: 700, color: isActive ? "#3730a3" : "#09090b", marginBottom: 2 }}>
+                </span>
+                <p style={{ fontSize: 12, fontWeight: 700, color: labelColor, lineHeight: 1.25 }}>
                   {tool.label}
                 </p>
-                <p style={{ fontSize: 10, color: isActive ? "#6366f1" : "#a1a1aa", lineHeight: 1.4 }}>
+                <p style={{ fontSize: 10, color: tagColor, lineHeight: 1.4 }}>
                   {tool.tagline}
                 </p>
               </button>

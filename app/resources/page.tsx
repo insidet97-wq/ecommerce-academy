@@ -4,6 +4,7 @@ import { useState, useRef } from "react";
 import Link from "next/link";
 import { resources, CATEGORIES, type Category } from "@/lib/resources";
 import UserAdBanner from "@/components/UserAdBanner";
+import { Icon, type IconName } from "@/components/Icon";
 
 const INDIGO = "#6366f1";
 
@@ -14,9 +15,9 @@ for (const r of resources) {
 }
 
 /* ── Resource card ── */
-function ResourceCard({ name, description, url, emoji, free, freeTier }: {
+function ResourceCard({ name, description, url, icon, free, freeTier }: {
   name: string; description: string; url: string;
-  emoji: string; free: boolean; freeTier?: string;
+  icon: IconName; free: boolean; freeTier?: string;
 }) {
   const ref = useRef<HTMLDivElement>(null);
   function enter() {
@@ -50,11 +51,11 @@ function ResourceCard({ name, description, url, emoji, free, freeTier }: {
       <div style={{ display: "flex", alignItems: "flex-start", gap: 12, marginBottom: 10 }}>
         <div style={{
           width: 42, height: 42, borderRadius: 12, flexShrink: 0,
-          background: "#f4f4f5",
+          background: "#f5f3ff",
+          color: "#6366f1",
           display: "flex", alignItems: "center", justifyContent: "center",
-          fontSize: 20,
         }}>
-          {emoji}
+          <Icon name={icon} size={20} strokeWidth={1.75} />
         </div>
         <div style={{ flex: 1, minWidth: 0 }}>
           <div style={{ display: "flex", alignItems: "center", gap: 6, flexWrap: "wrap", marginBottom: 2 }}>

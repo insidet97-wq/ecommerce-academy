@@ -1,10 +1,12 @@
-﻿export type Resource = {
+import type { IconName } from "@/components/Icon";
+
+export type Resource = {
   id: string;
   category: string;
   name: string;
   description: string;
   url: string;
-  emoji: string;
+  icon: IconName;
   free: boolean;
   freeTier?: string; // e.g. "Free up to 250 contacts"
 };
@@ -31,7 +33,7 @@ export const resources: Resource[] = [
     name: "Google Trends",
     description: "Check if demand for a product is growing, shrinking or seasonal. Free, no signup required.",
     url: "https://trends.google.com",
-    emoji: "📈",
+    icon: "trending-up",
     free: true,
   },
   {
@@ -40,7 +42,7 @@ export const resources: Resource[] = [
     name: "TikTok Creative Center",
     description: "See trending ads, products and sounds directly from TikTok. Best free tool for spotting winners early.",
     url: "https://ads.tiktok.com/business/creativecenter",
-    emoji: "🎵",
+    icon: "music",
     free: true,
   },
   {
@@ -49,7 +51,7 @@ export const resources: Resource[] = [
     name: "Meta Ad Library",
     description: "Search every ad running on Facebook and Instagram right now. See what competitors are running and for how long.",
     url: "https://www.facebook.com/ads/library",
-    emoji: "🔍",
+    icon: "search",
     free: true,
   },
   {
@@ -58,7 +60,7 @@ export const resources: Resource[] = [
     name: "AliExpress DS Center",
     description: "AliExpress's own tool to find trending products, analyse demand and estimate shipping times. Free with an account.",
     url: "https://home.aliexpress.com/dropshippercenter/product_analysis.htm",
-    emoji: "🛍️",
+    icon: "shopping-bag",
     free: true,
   },
   {
@@ -67,7 +69,7 @@ export const resources: Resource[] = [
     name: "Exploding Topics",
     description: "Discover niches and products that are growing fast before they hit mainstream. Free tier available.",
     url: "https://explodingtopics.com",
-    emoji: "🚀",
+    icon: "rocket",
     free: false,
     freeTier: "Limited free searches",
   },
@@ -77,7 +79,7 @@ export const resources: Resource[] = [
     name: "Minea",
     description: "Spy on winning products from Facebook, TikTok and Pinterest ads. One of the most comprehensive paid spy tools.",
     url: "https://minea.com",
-    emoji: "🕵️",
+    icon: "scan-search",
     free: false,
   },
 
@@ -88,7 +90,7 @@ export const resources: Resource[] = [
     name: "Shopify",
     description: "The industry standard platform for ecommerce stores. Handles everything from products to checkout to shipping.",
     url: "https://shopify.com",
-    emoji: "🛒",
+    icon: "cart",
     free: false,
     freeTier: "3-day free trial",
   },
@@ -98,7 +100,7 @@ export const resources: Resource[] = [
     name: "PageFly",
     description: "Drag-and-drop landing page builder for Shopify. Build high-converting product pages without touching code.",
     url: "https://pagefly.io",
-    emoji: "🎨",
+    icon: "palette",
     free: false,
     freeTier: "1 free page",
   },
@@ -108,7 +110,7 @@ export const resources: Resource[] = [
     name: "Vitals",
     description: "40+ conversion-boosting apps in one: reviews, upsells, trust badges, urgency timers and more.",
     url: "https://vitals.co",
-    emoji: "⚡",
+    icon: "zap",
     free: false,
     freeTier: "30-day free trial",
   },
@@ -118,7 +120,7 @@ export const resources: Resource[] = [
     name: "Loox",
     description: "Photo and video review app for Shopify. Import reviews, display them beautifully and boost trust instantly.",
     url: "https://loox.io/app/FSL30",
-    emoji: "⭐",
+    icon: "star",
     free: false,
     freeTier: "14-day free trial",
   },
@@ -130,7 +132,7 @@ export const resources: Resource[] = [
     name: "AliExpress",
     description: "The most beginner-friendly way to find and order products. Thousands of suppliers, low minimum orders, worldwide shipping.",
     url: "https://aliexpress.com",
-    emoji: "📦",
+    icon: "package",
     free: true,
   },
   {
@@ -139,7 +141,7 @@ export const resources: Resource[] = [
     name: "CJ Dropshipping",
     description: "Free dropshipping agent with warehouses in China and the US. Faster shipping and better margins than AliExpress.",
     url: "https://cjdropshipping.com",
-    emoji: "🏭",
+    icon: "factory",
     free: true,
   },
   {
@@ -148,7 +150,7 @@ export const resources: Resource[] = [
     name: "Zendrop",
     description: "US-based dropshipping fulfillment with fast shipping times. Popular for scaling once you find a winner.",
     url: "https://zendrop.com",
-    emoji: "⚡",
+    icon: "truck",
     free: false,
     freeTier: "Free plan (50 orders/month)",
   },
@@ -158,7 +160,7 @@ export const resources: Resource[] = [
     name: "Spocket",
     description: "Source products from EU and US suppliers for faster 2–7 day delivery. Great for European sellers.",
     url: "https://spocket.co",
-    emoji: "🌍",
+    icon: "globe",
     free: false,
     freeTier: "Free browsing",
   },
@@ -170,7 +172,7 @@ export const resources: Resource[] = [
     name: "Meta Ads Manager",
     description: "Run ads on Facebook and Instagram. The most powerful targeting platform for ecommerce. Start with $5–10/day.",
     url: "https://adsmanager.facebook.com",
-    emoji: "📣",
+    icon: "megaphone",
     free: true,
   },
   {
@@ -179,7 +181,7 @@ export const resources: Resource[] = [
     name: "TikTok Ads Manager",
     description: "Run paid ads on TikTok. Lower CPMs than Meta right now and excellent for impulse-buy products.",
     url: "https://ads.tiktok.com",
-    emoji: "📱",
+    icon: "smartphone",
     free: true,
   },
   {
@@ -188,7 +190,7 @@ export const resources: Resource[] = [
     name: "AdSpy",
     description: "The largest database of Facebook and Instagram ads. Find your competitors, see what's working and model it.",
     url: "https://adspy.com",
-    emoji: "👁️",
+    icon: "eye",
     free: false,
   },
 
@@ -199,7 +201,7 @@ export const resources: Resource[] = [
     name: "Klaviyo",
     description: "The go-to email platform for ecommerce. Deep Shopify integration, powerful flows (abandoned cart, welcome, etc.).",
     url: "https://klaviyo.com",
-    emoji: "📧",
+    icon: "mail",
     free: false,
     freeTier: "Free up to 250 contacts",
   },
@@ -209,7 +211,7 @@ export const resources: Resource[] = [
     name: "Omnisend",
     description: "Email + SMS marketing built for ecommerce. Slightly more generous free tier than Klaviyo.",
     url: "https://omnisend.com",
-    emoji: "📬",
+    icon: "send",
     free: false,
     freeTier: "Free up to 250 contacts / 500 emails/month",
   },
@@ -219,7 +221,7 @@ export const resources: Resource[] = [
     name: "Privy",
     description: "The simplest popup and email capture builder for Shopify. Exit-intent, spin-to-win, embedded forms — turn store visitors into subscribers without writing code.",
     url: "https://go.privy.com/NYUtfS6",
-    emoji: "🎯",
+    icon: "target",
     free: false,
     freeTier: "Free up to 100 contacts",
   },
@@ -231,7 +233,7 @@ export const resources: Resource[] = [
     name: "Google Analytics 4",
     description: "Free traffic analytics. See where visitors come from, what pages they visit and where they drop off.",
     url: "https://analytics.google.com",
-    emoji: "📊",
+    icon: "bar-chart",
     free: true,
   },
   {
@@ -240,7 +242,7 @@ export const resources: Resource[] = [
     name: "Hotjar",
     description: "Heatmaps, session recordings and surveys. See exactly where visitors click, scroll and leave your store.",
     url: "https://hotjar.com",
-    emoji: "🔥",
+    icon: "flame",
     free: false,
     freeTier: "Free up to 35 sessions/day",
   },
@@ -250,7 +252,7 @@ export const resources: Resource[] = [
     name: "Triple Whale",
     description: "Advanced ecommerce analytics dashboard. Tracks your real ROAS across all channels in one place. For scaling stores.",
     url: "https://triplewhale.com",
-    emoji: "🐳",
+    icon: "line-chart",
     free: false,
   },
 
@@ -261,7 +263,7 @@ export const resources: Resource[] = [
     name: "Canva",
     description: "Design ad creatives, product images and store graphics without any design experience. Free tier is very powerful.",
     url: "https://canva.com",
-    emoji: "🎨",
+    icon: "palette",
     free: false,
     freeTier: "Generous free plan",
   },
@@ -271,7 +273,7 @@ export const resources: Resource[] = [
     name: "CapCut",
     description: "Free video editor used by most TikTok sellers. Fast cuts, captions, trending effects — perfect for product videos.",
     url: "https://capcut.com",
-    emoji: "🎬",
+    icon: "film",
     free: true,
   },
   {
@@ -280,7 +282,7 @@ export const resources: Resource[] = [
     name: "Remove.bg",
     description: "Remove image backgrounds in one click. Useful for clean product photos and ad creatives.",
     url: "https://remove.bg",
-    emoji: "✂️",
+    icon: "edit",
     free: false,
     freeTier: "5 free previews",
   },
@@ -292,7 +294,7 @@ export const resources: Resource[] = [
     name: "Shopify Learn",
     description: "Free official Shopify courses covering everything from launching a store to running ads. Great supplementary material.",
     url: "https://learn.shopify.com",
-    emoji: "📚",
+    icon: "book-open",
     free: true,
   },
   {
@@ -301,7 +303,7 @@ export const resources: Resource[] = [
     name: "Davie Fogarty — YouTube",
     description: "Built a $300M/year brand from his bedroom. His YouTube channel is the most honest, no-fluff ecommerce education available.",
     url: "https://www.youtube.com/@DavieFogarty",
-    emoji: "▶️",
+    icon: "film",
     free: true,
   },
   {
@@ -310,7 +312,7 @@ export const resources: Resource[] = [
     name: "Jordan Welch — YouTube",
     description: "Practical, honest breakdowns of what's working in ecommerce right now. Great for beginners learning the ad side.",
     url: "https://www.youtube.com/@JordanWelch",
-    emoji: "▶️",
+    icon: "film",
     free: true,
   },
   {
@@ -319,7 +321,7 @@ export const resources: Resource[] = [
     name: "r/dropship",
     description: "The largest ecommerce community on Reddit. Real people sharing wins, losses, and honest advice. No gurus.",
     url: "https://reddit.com/r/dropship",
-    emoji: "💬",
+    icon: "message",
     free: true,
   },
 ];

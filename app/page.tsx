@@ -78,12 +78,12 @@ function FAQItem({ q, a }: { q: string; a: string }) {
 
 /* ── Floating product mockup ── */
 function ProductMockup() {
-  const items = [
-    { emoji: "🎮", label: "The Rules of the Game",     done: true  },
-    { emoji: "🎯", label: "Find Your Niche",            done: true  },
-    { emoji: "🏆", label: "Find Your Winning Product",  done: false, active: true },
-    { emoji: "🧠", label: "Know Your Customer",         done: false },
-    { emoji: "🛒", label: "Build Your Shopify Store",   done: false },
+  const items: { icon: _ModIconName; label: string; done: boolean; active?: boolean }[] = [
+    { icon: "compass", label: "The Rules of the Game",     done: true  },
+    { icon: "target",  label: "Find Your Niche",            done: true  },
+    { icon: "trophy",  label: "Find Your Winning Product",  done: false, active: true },
+    { icon: "brain",   label: "Know Your Customer",         done: false },
+    { icon: "cart",    label: "Build Your Shopify Store",   done: false },
   ];
   return (
     <div
@@ -112,7 +112,9 @@ function ProductMockup() {
               border: item.active ? "1px solid rgba(99,102,241,0.3)" : "1px solid rgba(255,255,255,0.05)",
             }}
           >
-            <span className="text-sm">{item.done ? "✅" : item.emoji}</span>
+            <span className="inline-flex" style={{ color: item.done ? "rgba(167,243,208,0.85)" : item.active ? "#c4b5fd" : "rgba(255,255,255,0.55)" }}>
+              <Icon name={item.done ? "check-circle" : item.icon} size={15} strokeWidth={item.done ? 2 : 1.75} />
+            </span>
             <span
               className="text-xs font-medium flex-1 truncate"
               style={{ color: item.done ? "rgba(255,255,255,0.4)" : item.active ? "#c4b5fd" : "rgba(255,255,255,0.7)" }}
@@ -135,19 +137,20 @@ function ProductMockup() {
 }
 
 /* ── Module data ── */
-const MODULES = [
-  { id: 1,  emoji: "🎮", title: "The Rules of the Game",         duration: "~20 min" },
-  { id: 2,  emoji: "🎯", title: "Find Your Niche",               duration: "~25 min" },
-  { id: 3,  emoji: "🏆", title: "Find Your Winning Product",     duration: "~30 min" },
-  { id: 4,  emoji: "🧠", title: "Know Your Customer",            duration: "~25 min" },
-  { id: 5,  emoji: "🛒", title: "Build Your Shopify Store",      duration: "~45 min" },
-  { id: 6,  emoji: "⚡", title: "Build Your First Sales Funnel", duration: "~35 min" },
-  { id: 7,  emoji: "📱", title: "Drive Traffic: TikTok Organic", duration: "~30 min" },
-  { id: 8,  emoji: "📣", title: "Run Your First Paid Ad",        duration: "~40 min" },
-  { id: 9,  emoji: "📈", title: "Conversion Optimisation",       duration: "~30 min" },
-  { id: 10, emoji: "📧", title: "Build Your Email List",         duration: "~35 min" },
-  { id: 11, emoji: "💰", title: "Make Your First Sale",          duration: "~20 min" },
-  { id: 12, emoji: "🚀", title: "Scale and Grow",                duration: "~25 min" },
+import type { IconName as _ModIconName } from "@/components/Icon";
+const MODULES: { id: number; icon: _ModIconName; title: string; duration: string }[] = [
+  { id: 1,  icon: "compass",     title: "The Rules of the Game",         duration: "~20 min" },
+  { id: 2,  icon: "target",      title: "Find Your Niche",               duration: "~25 min" },
+  { id: 3,  icon: "trophy",      title: "Find Your Winning Product",     duration: "~30 min" },
+  { id: 4,  icon: "brain",       title: "Know Your Customer",            duration: "~25 min" },
+  { id: 5,  icon: "cart",        title: "Build Your Shopify Store",      duration: "~45 min" },
+  { id: 6,  icon: "zap",         title: "Build Your First Sales Funnel", duration: "~35 min" },
+  { id: 7,  icon: "smartphone",  title: "Drive Traffic: TikTok Organic", duration: "~30 min" },
+  { id: 8,  icon: "megaphone",   title: "Run Your First Paid Ad",        duration: "~40 min" },
+  { id: 9,  icon: "trending-up", title: "Conversion Optimisation",       duration: "~30 min" },
+  { id: 10, icon: "mail",        title: "Build Your Email List",         duration: "~35 min" },
+  { id: 11, icon: "wallet",      title: "Make Your First Sale",          duration: "~20 min" },
+  { id: 12, icon: "rocket",      title: "Scale and Grow",                duration: "~25 min" },
 ];
 
 /* ── Main page ── */
@@ -857,10 +860,10 @@ export default function Home() {
                 className="bg-white rounded-2xl border border-gray-100 px-5 py-4 flex items-center gap-4"
               >
                 <div
-                  className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 text-lg"
-                  style={{ background: "linear-gradient(135deg, rgba(99,102,241,0.1), rgba(139,92,246,0.1))" }}
+                  className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0"
+                  style={{ background: "linear-gradient(135deg, rgba(99,102,241,0.1), rgba(139,92,246,0.1))", color: "#6366f1" }}
                 >
-                  {mod.emoji}
+                  <Icon name={mod.icon} size={18} strokeWidth={1.75} />
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="text-xs font-bold text-gray-400 mb-0.5">Module {mod.id}</p>
@@ -896,15 +899,15 @@ export default function Home() {
                   12 advanced modules (13–24) for users who got past the first sale and want consistent revenue. Real winners vs fake signals, persuasion psychology (Cialdini), proper ad testing (ICE framework), UGC at scale, and a 30-day scaling plan with kill triggers.
                 </p>
                 <div className="grid grid-cols-2 md:grid-cols-5 gap-2 mb-5">
-                  {[
-                    { e: "🔬", t: "Diagnose" },
-                    { e: "🎯", t: "Validate" },
-                    { e: "🧠", t: "Persuade" },
-                    { e: "🧪", t: "Test" },
-                    { e: "🚀", t: "Scale" },
-                  ].map(p => (
+                  {([
+                    { i: "microscope" as _ModIconName, t: "Diagnose" },
+                    { i: "target"     as _ModIconName, t: "Validate" },
+                    { i: "brain"      as _ModIconName, t: "Persuade" },
+                    { i: "flask"      as _ModIconName, t: "Test" },
+                    { i: "rocket"     as _ModIconName, t: "Scale" },
+                  ]).map(p => (
                     <div key={p.t} className="rounded-xl px-3 py-2 flex items-center gap-2" style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(253,224,71,0.15)" }}>
-                      <span className="text-base">{p.e}</span>
+                      <span className="inline-flex" style={{ color: "#fde68a" }}><Icon name={p.i} size={15} strokeWidth={1.75} /></span>
                       <span className="text-xs font-semibold" style={{ color: "rgba(255,255,255,0.85)" }}>{p.t}</span>
                     </div>
                   ))}
@@ -939,17 +942,17 @@ export default function Home() {
               style={{ background: "linear-gradient(to bottom, rgba(99,102,241,0.4), rgba(139,92,246,0.2))" }}
             />
             <div className="space-y-10">
-              {[
-                { n: "01", emoji: "🧭", title: "You get a plan built around you", body: "Answer 5 quick questions. In 2 minutes you have a personalised roadmap — not a generic syllabus. Your experience, goal, and budget all shape it." },
-                { n: "02", emoji: "⚡", title: "You take real action — not just notes", body: "Each module ends with a concrete task and a checklist. You don't move forward until you've done something. No passive watching." },
-                { n: "03", emoji: "💰", title: "You make your first sale — for real", body: "By Module 11, your store is live, your ad is running, and your first sale is within reach. The next step is always obvious." },
-              ].map((step) => (
+              {([
+                { n: "01", icon: "compass" as _ModIconName, title: "You get a plan built around you", body: "Answer 5 quick questions. In 2 minutes you have a personalised roadmap — not a generic syllabus. Your experience, goal, and budget all shape it." },
+                { n: "02", icon: "zap"     as _ModIconName, title: "You take real action — not just notes", body: "Each module ends with a concrete task and a checklist. You don't move forward until you've done something. No passive watching." },
+                { n: "03", icon: "wallet"  as _ModIconName, title: "You make your first sale — for real", body: "By Module 11, your store is live, your ad is running, and your first sale is within reach. The next step is always obvious." },
+              ]).map((step) => (
                 <div key={step.n} className="flex gap-8 relative">
                   <div
-                    className="w-12 h-12 rounded-2xl flex items-center justify-center flex-shrink-0 text-xl z-10"
-                    style={{ background: "white", border: "2px solid rgba(99,102,241,0.2)", boxShadow: "0 2px 12px rgba(99,102,241,0.1)" }}
+                    className="w-12 h-12 rounded-2xl flex items-center justify-center flex-shrink-0 z-10"
+                    style={{ background: "white", border: "2px solid rgba(99,102,241,0.2)", boxShadow: "0 2px 12px rgba(99,102,241,0.1)", color: "#6366f1" }}
                   >
-                    {step.emoji}
+                    <Icon name={step.icon} size={20} strokeWidth={1.75} />
                   </div>
                   <div className="pb-2">
                     <span className="text-xs font-bold tracking-[0.1em] uppercase mb-2 block" style={{ color: "#6366f1" }}>Step {step.n}</span>
@@ -973,23 +976,23 @@ export default function Home() {
             </h2>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {[
-              { icon: "🛍️", title: "A live Shopify store", body: "Set up correctly from day one — with trust signals, a hero product, and a clean checkout." },
-              { icon: "🎯", title: "A validated winning product", body: "Using the 3× margin rule to pick something that can actually make you money." },
-              { icon: "📣", title: "Your first ad campaign", body: "A real Meta or TikTok campaign with a budget you control and metrics you understand." },
-              { icon: "📧", title: "An email list you own", body: "A direct line to your audience that no algorithm can take away from you." },
-              { icon: "💡", title: "A sales funnel", body: "A focused landing page + upsell flow designed to convert cold traffic into buyers." },
-              { icon: "🚀", title: "A scalable business model", body: "Not just a first sale — a repeatable system you can grow month over month." },
-            ].map(item => (
+            {([
+              { icon: "shopping-bag" as _ModIconName, title: "A live Shopify store", body: "Set up correctly from day one — with trust signals, a hero product, and a clean checkout." },
+              { icon: "target"       as _ModIconName, title: "A validated winning product", body: "Using the 3× margin rule to pick something that can actually make you money." },
+              { icon: "megaphone"    as _ModIconName, title: "Your first ad campaign", body: "A real Meta or TikTok campaign with a budget you control and metrics you understand." },
+              { icon: "mail"         as _ModIconName, title: "An email list you own", body: "A direct line to your audience that no algorithm can take away from you." },
+              { icon: "lightbulb"    as _ModIconName, title: "A sales funnel", body: "A focused landing page + upsell flow designed to convert cold traffic into buyers." },
+              { icon: "rocket"       as _ModIconName, title: "A scalable business model", body: "Not just a first sale — a repeatable system you can grow month over month." },
+            ]).map(item => (
               <HoverCard
                 key={item.title}
                 className="bg-white rounded-2xl border border-gray-100 p-6"
               >
                 <div
-                  className="w-11 h-11 rounded-xl flex items-center justify-center text-xl mb-4"
-                  style={{ background: "linear-gradient(135deg, rgba(99,102,241,0.1), rgba(139,92,246,0.1))" }}
+                  className="w-11 h-11 rounded-xl flex items-center justify-center mb-4"
+                  style={{ background: "linear-gradient(135deg, rgba(99,102,241,0.1), rgba(139,92,246,0.1))", color: "#6366f1" }}
                 >
-                  {item.icon}
+                  <Icon name={item.icon} size={20} strokeWidth={1.75} />
                 </div>
                 <h3 className="text-sm font-bold text-gray-900 mb-2" style={{ letterSpacing: "-0.01em" }}>{item.title}</h3>
                 <p className="text-sm text-gray-500 leading-relaxed">{item.body}</p>
@@ -1170,11 +1173,11 @@ export default function Home() {
                   {[
                     "Everything in Pro",
                     "Modules 13–24 — 12 advanced modules",
-                    "🔬 Diagnose: why first sales don't repeat",
-                    "🎯 Validate: real winners vs fake signals",
-                    "🧠 Persuade: Cialdini's 6 + UGC at scale",
-                    "🧪 Test: ICE framework + sample size discipline",
-                    "🚀 Scale: 30-day plan with kill triggers",
+                    "Diagnose: why first sales don't repeat",
+                    "Validate: real winners vs fake signals",
+                    "Persuade: Cialdini's 6 + UGC at scale",
+                    "Test: ICE framework + sample size discipline",
+                    "Scale: 30-day plan with kill triggers",
                     "Built on Cialdini, Hormozi, Sean Ellis, Hopkins",
                   ].map(item => (
                     <li key={item} className="flex items-start gap-2 text-xs leading-relaxed" style={{ color: "rgba(255,255,255,0.78)" }}>
