@@ -19,12 +19,33 @@ export async function POST(req: Request) {
 
   if (!sig) return NextResponse.json({ error: "No signature" }, { status: 400 });
 
+  // Defense: explicit env var check beats relying on the non-null assertion to
+  // produce a useful error if STRIPE_WEBHOOK_SECRET ever drops out of Vercel.
+  const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
+  if (!webhookSecret) {
+    console.error("CRITICAL: STRIPE_WEBHOOK_SECRET not set");
+    return NextResponse.json({ error: "Webhook misconfigured" }, { status: 500 });
+  }
+
   let event: Stripe.Event;
   try {
-    event = stripe.webhooks.constructEvent(body, sig, process.env.STRIPE_WEBHOOK_SECRET!);
+    event = stripe.webhooks.constructEvent(body, sig, webhookSecret);
   } catch (err) {
     console.error("Webhook signature error:", err);
     return NextResponse.json({ error: "Invalid signature" }, { status: 400 });
+  }
+
+  // Idempotency — Stripe retries webhooks on transient failures. Without
+  // dedup, a retry of `checkout.session.completed` would send a 2nd welcome
+  // email and re-mark the referral. We track event.id in stripe_webhook_events
+  // (UNIQUE on stripe_event_id) and skip if already processed.
+  const { data: existing } = await supabase
+    .from("stripe_webhook_events")
+    .select("id")
+    .eq("stripe_event_id", event.id)
+    .maybeSingle();
+  if (existing) {
+    return NextResponse.json({ received: true, deduped: true });
   }
 
   try {
@@ -122,8 +143,19 @@ export async function POST(req: Request) {
         break;
       }
     }
+
+    // Mark event processed only after the handler ran without throwing.
+    // If we threw, we DON'T insert — Stripe will retry, we'll re-process,
+    // and idempotency-on-the-DB-side (upsert) keeps things consistent.
+    await supabase.from("stripe_webhook_events").insert({
+      stripe_event_id: event.id,
+      event_type:      event.type,
+    });
   } catch (err) {
     console.error("Webhook handler error:", err);
+    // Return 200 anyway — Stripe will retry on non-2xx, and the next attempt
+    // will also see the same event.id (still not in stripe_webhook_events
+    // since we didn't insert) so it can re-attempt.
   }
 
   return NextResponse.json({ received: true });

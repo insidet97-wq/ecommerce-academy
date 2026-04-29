@@ -59,14 +59,20 @@ function SignupPageInner() {
     } else {
       if (data.user) await saveQuizResults(data.user.id, firstName.trim());
 
-      // Capture referral, if any (fire and forget — never blocks signup)
+      // Capture referral, if any (fire and forget — never blocks signup).
+      // Pass the bearer token so the route can verify the referredUserId
+      // matches the just-signed-up user.
       try {
         const referralCode = localStorage.getItem("ea_referral_code");
-        if (referralCode && data.user?.id) {
+        const accessToken  = data.session?.access_token;
+        if (referralCode && accessToken) {
           fetch("/api/referrals/track", {
             method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ referralCode, referredUserId: data.user.id }),
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${accessToken}`,
+            },
+            body: JSON.stringify({ referralCode }),
           }).then(() => {
             try { localStorage.removeItem("ea_referral_code"); } catch {}
           }).catch(() => {});

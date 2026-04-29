@@ -45,12 +45,39 @@ export async function POST(request: Request) {
   }
 
   const rawUrl = String(body.url).trim();
-  // Light URL sanity check — Gemini's url_context tool needs a real URL
+  // URL validation. Defense-in-depth: even though the actual fetch is done
+  // by Gemini's url_context tool (Google's servers, not ours), we still
+  // refuse to even ASK Gemini to fetch private / loopback / metadata
+  // addresses. Two reasons: (1) signals intent — anyone passing localhost
+  // here is probing, not analysing a competitor; (2) future-proofs us if we
+  // ever switch from Gemini to a server-side fetcher.
   try {
     const u = new URL(rawUrl);
     if (!["http:", "https:"].includes(u.protocol)) throw new Error("bad protocol");
+
+    const host = u.hostname.toLowerCase();
+    const blocked = [
+      "localhost",
+      "127.0.0.1", "0.0.0.0", "::1",
+      "169.254.169.254",  // AWS / Azure / OpenStack metadata
+      "metadata.google.internal",
+    ];
+    if (blocked.includes(host)) throw new Error("private host");
+
+    // Block private IPv4 ranges (10/8, 172.16/12, 192.168/16)
+    const ipv4 = host.match(/^(\d+)\.(\d+)\.(\d+)\.(\d+)$/);
+    if (ipv4) {
+      const [, a, b] = ipv4.map(Number);
+      const isPrivate =
+        a === 10 ||
+        (a === 172 && b >= 16 && b <= 31) ||
+        (a === 192 && b === 168) ||
+        a === 127 || a === 0 ||
+        a >= 224;  // multicast + reserved
+      if (isPrivate) throw new Error("private IPv4 range");
+    }
   } catch {
-    return NextResponse.json({ error: "That doesn't look like a valid URL (must start with https://)" }, { status: 400 });
+    return NextResponse.json({ error: "That doesn't look like a valid public URL (must start with https:// and point to a public domain)" }, { status: 400 });
   }
 
   // Truncate inputs. description + niche are optional now — Gemini fetches the URL.
