@@ -90,7 +90,9 @@ export default function AdminPage() {
         // Fetch the legacy analytics endpoint AND the new metrics endpoint
         // independently so a failure in one doesn't blank the whole page.
         const [analyticsRes, metricsRes] = await Promise.allSettled([
-          fetch("/api/analytics"),
+          fetch("/api/analytics", {
+            headers: session?.access_token ? { Authorization: `Bearer ${session.access_token}` } : {},
+          }),
           fetch("/api/admin/metrics", {
             headers: session?.access_token ? { Authorization: `Bearer ${session.access_token}` } : {},
           }),

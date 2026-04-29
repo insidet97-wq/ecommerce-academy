@@ -1,7 +1,16 @@
 ﻿import { Resend } from "resend";
 import { NextResponse } from "next/server";
+import { createClient } from "@supabase/supabase-js";
+
+export const dynamic = "force-dynamic";
 
 const resend = new Resend(process.env.RESEND_API_KEY);
+
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.SUPABASE_SERVICE_ROLE_KEY!,
+  { auth: { autoRefreshToken: false, persistSession: false } },
+);
 
 const MODULE_TITLES: Record<number, string> = {
   1: "The Rules of the Game",
@@ -26,7 +35,18 @@ const MODULE_EMOJIS: Record<number, string> = {
 
 export async function POST(req: Request) {
   try {
+    // Auth gate: must be the actual user. Without this, anyone could spam any
+    // email with a fake welcome email.
+    const token = req.headers.get("authorization")?.replace("Bearer ", "");
+    if (!token) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    const { data: { user } } = await supabase.auth.getUser(token);
+    if (!user?.email) return NextResponse.json({ error: "Invalid session" }, { status: 401 });
+
     const { firstName, email, startModule, userId } = await req.json();
+
+    // The to-address and userId must belong to the authenticated user.
+    if (email !== user.email)         return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    if (userId && userId !== user.id) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     const moduleNum = startModule ?? 1;
     const moduleTitle = MODULE_TITLES[moduleNum] ?? "The Rules of the Game";
     const moduleEmoji = MODULE_EMOJIS[moduleNum] ?? "🎮";

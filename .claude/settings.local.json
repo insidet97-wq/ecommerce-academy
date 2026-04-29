@@ -33,7 +33,8 @@
       "Bash(grep -n \"Start Module \\\\${nextId}\" C:/projects/ecommerce-academy/app/modules/\\\\[id\\\\]/page.tsx)",
       "Bash(git -C C:/projects/ecommerce-academy log --oneline -5)",
       "Bash(git -C C:/projects/ecommerce-academy show --stat 409f57a)",
-      "Bash(curl -sI https://firstsalelab.com/dashboard)"
+      "Bash(curl -sI https://firstsalelab.com/dashboard)",
+      "Bash(xargs grep *)"
     ]
   }
 }

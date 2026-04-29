@@ -73,15 +73,22 @@ function SignupPageInner() {
         }
       } catch {}
 
-      // Send welcome email (fire and forget)
+      // Send welcome email (fire and forget). Pass the bearer token so the
+      // route can verify the email belongs to the just-signed-up user.
       try {
         const quizRaw = localStorage.getItem("quiz_results");
         const startModule = quizRaw ? (JSON.parse(quizRaw).startModule ?? 1) : 1;
-        fetch("/api/send-welcome", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ firstName: firstName.trim(), email, startModule, userId: data.user?.id }),
-        });
+        const accessToken = data.session?.access_token;
+        if (accessToken) {
+          fetch("/api/send-welcome", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${accessToken}`,
+            },
+            body: JSON.stringify({ firstName: firstName.trim(), email, startModule, userId: data.user?.id }),
+          });
+        }
       } catch {}
 
       const next = localStorage.getItem("ea_next");

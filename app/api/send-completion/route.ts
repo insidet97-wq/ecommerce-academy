@@ -1,7 +1,16 @@
 ﻿import { Resend } from "resend";
 import { NextResponse } from "next/server";
+import { createClient } from "@supabase/supabase-js";
+
+export const dynamic = "force-dynamic";
 
 const resend = new Resend(process.env.RESEND_API_KEY);
+
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.SUPABASE_SERVICE_ROLE_KEY!,
+  { auth: { autoRefreshToken: false, persistSession: false } },
+);
 
 const MODULES: Record<number, { emoji: string; title: string; duration: string; description: string }> = {
   1:  { emoji: "🎮", title: "The Rules of the Game",         duration: "~20 min", description: "Understand how ecommerce works before spending $1." },
@@ -34,7 +43,19 @@ const MILESTONE_COPY: Record<number, string> = {
 
 export async function POST(req: Request) {
   try {
+    // Auth gate: must be the actual user. Without this, anyone could spam any
+    // email with fake completion emails (and pollute their inbox + skew our
+    // email-events analytics).
+    const token = req.headers.get("authorization")?.replace("Bearer ", "");
+    if (!token) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    const { data: { user } } = await supabase.auth.getUser(token);
+    if (!user?.email) return NextResponse.json({ error: "Invalid session" }, { status: 401 });
+
     const { firstName, email, completedModuleId, userId } = await req.json();
+
+    // The to-address and userId must belong to the authenticated user.
+    if (email !== user.email)              return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    if (userId && userId !== user.id)      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://firstsalelab.com";
     const done = MODULES[completedModuleId];
     const isLast = completedModuleId === 12;

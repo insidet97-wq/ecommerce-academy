@@ -1,7 +1,19 @@
 import { createClient } from "@supabase/supabase-js";
 import { NextResponse } from "next/server";
+import { isAdmin } from "@/lib/admin";
 
-export async function GET() {
+export const dynamic = "force-dynamic";
+
+/**
+ * GET /api/analytics
+ *
+ * Returns business metrics (user count, completions per module, signups, streaks).
+ * Admin-only — verified via bearer token + isAdmin() email check.
+ *
+ * Without this gate, anyone with the URL could enumerate user counts and
+ * engagement metrics, which is a competitive-intel leak.
+ */
+export async function GET(request: Request) {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const serviceKey  = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
@@ -12,6 +24,14 @@ export async function GET() {
   const admin = createClient(supabaseUrl, serviceKey, {
     auth: { autoRefreshToken: false, persistSession: false },
   });
+
+  // Auth gate: must be a logged-in admin
+  const token = request.headers.get("authorization")?.replace("Bearer ", "");
+  if (!token) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const { data: { user } } = await admin.auth.getUser(token);
+  if (!user || !isAdmin(user.email)) {
+    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  }
 
   const [
     { count: totalUsers },

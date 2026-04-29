@@ -167,13 +167,20 @@ export default function ModulePage() {
     await updateStreak(userId);
     setMarking(false);
 
-    // Send completion email (fire and forget)
+    // Send completion email (fire and forget). Pass the bearer token so the
+    // route can verify the email belongs to the authenticated user.
     if (userEmail) {
-      fetch("/api/send-completion", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ firstName, email: userEmail, completedModuleId: moduleId, userId }),
-      });
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session?.access_token) {
+        fetch("/api/send-completion", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${session.access_token}`,
+          },
+          body: JSON.stringify({ firstName, email: userEmail, completedModuleId: moduleId, userId }),
+        });
+      }
     }
 
     setCountdown(5);
