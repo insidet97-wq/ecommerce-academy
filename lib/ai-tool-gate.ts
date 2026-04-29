@@ -37,9 +37,22 @@ export type ToolTier = "free" | "pro" | "growth";
  *   - get logged to ai_tool_log
  *   - get a usage row on /api/ai-tools/usage for the UI counter
  */
-export type AITool = "ad_copywriter" | "ugc_brief" | "ad_audit" | "store_autopsy";
+export type AITool =
+  | "ad_copywriter"
+  | "ugc_brief"
+  | "ad_audit"
+  | "store_autopsy"
+  | "product_description"
+  | "subject_lines";
 
-export const AI_TOOLS: AITool[] = ["ad_copywriter", "ugc_brief", "ad_audit", "store_autopsy"];
+export const AI_TOOLS: AITool[] = [
+  "ad_copywriter",
+  "ugc_brief",
+  "ad_audit",
+  "store_autopsy",
+  "product_description",
+  "subject_lines",
+];
 
 export type GateResult = {
   ok: true;

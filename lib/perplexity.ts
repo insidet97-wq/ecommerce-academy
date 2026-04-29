@@ -403,6 +403,157 @@ Score conservatively. 'OK' should mean genuinely OK, not a politeness rating. Mo
   };
 }
 
+// ── Product Description Writer ────────────────────────────────
+
+export type ProductDescVariant = {
+  angle:    "benefit" | "story" | "social_proof";
+  headline: string;     // punchy product page H1
+  body:     string;     // the main description copy
+  bullets:  string[];   // 3-5 highlight bullets
+};
+
+export type ProductDescInput = {
+  product_name:    string;
+  benefits:        string;                                          // textarea — features + benefits + materials, etc.
+  target_customer: string;
+  tone:            "professional" | "conversational" | "playful" | "luxury";
+  length:          "short" | "medium" | "long";                     // ~50, ~120, ~250 words
+};
+
+const LENGTH_TARGETS: Record<ProductDescInput["length"], string> = {
+  short:  "~50 words — punchy, single paragraph",
+  medium: "~120 words — 2 short paragraphs",
+  long:   "~250 words — 3 paragraphs with a sensory hook",
+};
+
+const TONE_GUIDES: Record<ProductDescInput["tone"], string> = {
+  professional:  "clear, confident, no slang. Allow yourself one striking adjective per paragraph.",
+  conversational:"like a friend recommending the product. Contractions OK, light humour, no exclamation marks.",
+  playful:       "energetic, witty, surprising word choices. Up to one exclamation mark in the whole description. Never cringe.",
+  luxury:        "restrained, evocative, sensory. Short sentences. Premium adjectives only when earned by a concrete detail.",
+};
+
+export async function generateProductDescription(input: ProductDescInput, tier: Tier = "pro"): Promise<{ variants: ProductDescVariant[] }> {
+  const prompt = `You are an ecommerce copywriter who writes product page descriptions that convert browsers into buyers. Write 3 description variants for the same product, each using a DIFFERENT psychological angle.
+
+Product: ${input.product_name}
+Benefits / features / materials:
+${input.benefits}
+Target customer: ${input.target_customer}
+Tone: ${input.tone} — ${TONE_GUIDES[input.tone]}
+Length: ${LENGTH_TARGETS[input.length]}
+
+Write 3 variants, one for each angle (assign in this order):
+1. "benefit" — lead with the transformation. What changes for the customer the moment they own this? Make the outcome vivid and specific.
+2. "story" — sensory and narrative. What does it FEEL like to use? Drop the reader into a moment with the product.
+3. "social_proof" — lead with traction, scarcity, or what other buyers say. Numbers, ratings, or implied FOMO without being sleazy.
+
+Each variant needs:
+- "angle": exactly one of "benefit" | "story" | "social_proof"
+- "headline": a punchy product page H1, max 10 words. Specific, not generic ("Sleep Cool All Night" not "The Best Pillow").
+- "body": the description copy at the requested length and tone. No corporate-speak, no "introducing", no "elevate your".
+- "bullets": 3-5 highlight bullets. Each starts with a benefit verb, ends with a concrete detail. Max 12 words each.
+
+Return JSON:
+{ "variants": [ { angle, headline, body, bullets[] }, {...}, {...} ] }
+
+Quality bar:
+- Every sentence earns its place. Cut filler.
+- Concrete > abstract. Numbers > adjectives. Sensory > generic.
+- The reader should be able to picture using the product after reading.`;
+
+  const raw = await generate(prompt, tier);
+  const parsed = JSON.parse(raw);
+  const variants = Array.isArray(parsed.variants) ? parsed.variants : [];
+  const allowedAngles = new Set(["benefit", "story", "social_proof"]);
+  return {
+    variants: variants.slice(0, 3).map((v: Record<string, unknown>) => ({
+      angle:    (allowedAngles.has(String(v.angle)) ? String(v.angle) : "benefit") as ProductDescVariant["angle"],
+      headline: String(v.headline ?? "").slice(0, 120),
+      body:     String(v.body     ?? "").slice(0, 1500),
+      bullets:  Array.isArray(v.bullets) ? (v.bullets as unknown[]).slice(0, 5).map(b => String(b).slice(0, 120)) : [],
+    })),
+  };
+}
+
+// ── Email Subject Line Tester ─────────────────────────────────
+
+export type SubjectLineVariant = {
+  subject:        string;
+  framework:      string;       // "Curiosity" | "Urgency" | "Numbers" | "Personalized" | "Question" | "Pattern Interrupt" | "Benefit" | "Social Proof"
+  preheader:      string;       // optional preheader / preview text
+  mobile_truncated: boolean;    // true if subject > 40 chars (gets cut on iPhone Mail)
+  predicted_open: "Low" | "Medium" | "High";
+  why:            string;       // 1-sentence reasoning
+};
+
+export type SubjectLineInput = {
+  email_purpose: "welcome" | "promo" | "cart_abandon" | "re_engage" | "newsletter" | "re_launch";
+  topic:         string;        // product or topic the email is about
+  audience:      string;
+};
+
+const PURPOSE_GUIDES: Record<SubjectLineInput["email_purpose"], string> = {
+  welcome:      "first email after signup. Aim for warmth + curiosity. They just gave you their email — earn it.",
+  promo:        "promotion or offer. Avoid spammy tropes (FREE, $$$, !!!). Lead with the actual win.",
+  cart_abandon: "they almost bought, then didn't. Re-engage without nagging. Soft FOMO or curiosity beats discounts.",
+  re_engage:    "a dormant subscriber. Acknowledge the gap or pattern-interrupt. They'll skim — make it stop them.",
+  newsletter:   "regular content email. Compete against personal mail in the inbox. Personality + curiosity > corporate.",
+  re_launch:    "announcing a comeback or restock. Lead with the timing or the scarcity, not the product name.",
+};
+
+export async function generateSubjectLines(input: SubjectLineInput, tier: Tier = "pro"): Promise<{ variants: SubjectLineVariant[] }> {
+  const prompt = `You are an email marketer who has run thousands of subject line A/B tests for Shopify and DTC brands. Generate 10 subject line variants for the following email. Each must use a DIFFERENT framework — diversity matters more than one "perfect" one.
+
+Email purpose: ${input.email_purpose} — ${PURPOSE_GUIDES[input.email_purpose]}
+Topic / product: ${input.topic}
+Audience: ${input.audience}
+
+Use these 8 frameworks. Pick the most relevant ones for this email purpose. Repeat a framework only if you've used all 8 once:
+- "Curiosity" — incomplete information that demands resolution
+- "Urgency" — time-bound, real reason behind it
+- "Numbers" — specific number that earns the open ("3 things", "47% off", "in 8 minutes")
+- "Personalized" — second-person specific ("you", a behaviour, a state)
+- "Question" — a question the audience would actually ask themselves
+- "Pattern Interrupt" — unexpected phrasing, lowercase, or odd punctuation
+- "Benefit" — the win, stated plainly, no fluff
+- "Social Proof" — others are doing it, by quantity or quality
+
+For EACH variant return:
+- "subject": the subject line itself. ${`Aim for under 40 chars when possible (iPhone Mail truncates) but don't sacrifice quality.`}
+- "framework": one of the 8 above
+- "preheader": 1-2 sentence preview text that complements (not echoes) the subject. ~70 chars max.
+- "mobile_truncated": true if the subject is over 40 characters
+- "predicted_open": "Low" | "Medium" | "High" — your honest read of how this would perform vs. an industry-average baseline
+- "why": one short sentence explaining the mechanic (e.g. "Numbers bypass skepticism because they imply specificity.")
+
+Return JSON:
+{ "variants": [ { subject, framework, preheader, mobile_truncated, predicted_open, why }, ... 10 total ] }
+
+Quality rules:
+- No spam triggers (FREE, !!!, $$$, ALL CAPS subjects).
+- No corporate clichés ("Don't miss out", "Limited time only").
+- "High" predictions must be earned — most variants should be Medium. If you assign more than 4 Highs, you're being lazy.`;
+
+  const raw = await generate(prompt, tier);
+  const parsed = JSON.parse(raw);
+  const variants = Array.isArray(parsed.variants) ? parsed.variants : [];
+  const allowedOpen = new Set(["Low", "Medium", "High"]);
+  return {
+    variants: variants.slice(0, 10).map((v: Record<string, unknown>) => {
+      const subject = String(v.subject ?? "").slice(0, 200);
+      return {
+        subject,
+        framework:        String(v.framework ?? "").slice(0, 40),
+        preheader:        String(v.preheader ?? "").slice(0, 200),
+        mobile_truncated: subject.length > 40,
+        predicted_open:   (allowedOpen.has(String(v.predicted_open)) ? String(v.predicted_open) : "Medium") as SubjectLineVariant["predicted_open"],
+        why:              String(v.why ?? "").slice(0, 240),
+      };
+    }),
+  };
+}
+
 // ── Store Autopsy (Growth-only Pro feature) ──────────────────
 
 export type StoreAutopsy = {

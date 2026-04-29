@@ -46,13 +46,15 @@ export async function GET(request: Request) {
   const limit = tier === "growth" ? 20 : tier === "pro" ? 5 : 0;
   const dayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
 
-  // One COUNT query per tool (4 total). Could fold into a single grouped query
-  // but Supabase JS doesn't expose group-by neatly; 4 small counts is fine.
+  // One COUNT query per tool. Could fold into a single grouped query but
+  // Supabase JS doesn't expose group-by neatly; small counts in parallel is fine.
   const usage: Record<AITool, { used: number; limit: number }> = {
-    ad_copywriter: { used: 0, limit },
-    ugc_brief:     { used: 0, limit },
-    ad_audit:      { used: 0, limit },
-    store_autopsy: { used: 0, limit: tier === "growth" ? limit : 0 },
+    ad_copywriter:       { used: 0, limit },
+    ugc_brief:           { used: 0, limit },
+    ad_audit:            { used: 0, limit },
+    store_autopsy:       { used: 0, limit: tier === "growth" ? limit : 0 },
+    product_description: { used: 0, limit },
+    subject_lines:       { used: 0, limit },
   };
 
   await Promise.all(
