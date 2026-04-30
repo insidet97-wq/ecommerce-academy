@@ -815,6 +815,131 @@ Quality rules:
   };
 }
 
+// ── AOV Optimization Audit (Growth-only — Module 18 fit) ──────────
+//
+// Uses Gemini's url_context tool to FETCH the user's store / product page
+// and identify which AOV mechanisms are missing. For each mechanism:
+// is it present? if missing, the expected lift, the exact app/feature to
+// install, and a copy-template the user can paste in.
+
+export type AOVMechanism = {
+  mechanism:        "Order bump" | "Quantity break" | "Bundle" | "Post-purchase upsell" | "Free shipping threshold" | "Cross-sell" | "Subscription discount";
+  present:          boolean;
+  expected_lift:    string;        // e.g. "+15-25% AOV"
+  what_we_saw:      string;        // 1-sentence: what's actually on the page (or what's missing)
+  how_to_add:       string;        // exact app / Shopify feature / setting
+  copy_template:    string;        // a ready-to-paste copy block the user can use
+};
+
+export type AOVAudit = {
+  summary:           string;                // 2-3 sentences. Current AOV maturity + biggest opportunity.
+  estimated_aov_lift: string;               // e.g. "+30-45%" — combined potential if all missing items added
+  current_strengths: string[];              // 0-3 things they're already doing right
+  mechanisms:        AOVMechanism[];        // ranked: most missing-and-impactful first
+  recommended_priority: { rank: 1 | 2 | 3; mechanism: string; reason: string }[]; // top-3 to install in order
+};
+
+const AOV_MECHANISM_NAMES = [
+  "Order bump",
+  "Quantity break",
+  "Bundle",
+  "Post-purchase upsell",
+  "Free shipping threshold",
+  "Cross-sell",
+  "Subscription discount",
+] as const;
+
+export async function auditAOV(input: { url: string }): Promise<AOVAudit> {
+  const prompt = `You are a Shopify CRO consultant focused on AOV (Average Order Value). A Scale Lab user wants their store / product page audited for missing AOV mechanisms. The URL is below — fetch it and identify what's there vs what's missing.
+
+URL: ${input.url}
+
+Audit these 7 standard AOV mechanisms — for each, mark present:true ONLY if you can verify it on the page:
+1. **Order bump** — a small add-on offer on the checkout/cart page
+2. **Quantity break** — "Buy 2, save X%" or tiered pricing
+3. **Bundle** — curated multi-product offer at a discount
+4. **Post-purchase upsell** — a one-click offer after checkout (e.g. ReConvert)
+5. **Free shipping threshold** — "$X free shipping" anchor (ideally at AOV × 1.3)
+6. **Cross-sell** — "Customers also bought" / related-products module
+7. **Subscription discount** — recurring "subscribe & save 10%" option
+
+Return JSON:
+{
+  "summary": "2-3 sentences. What's their AOV maturity? What's the biggest single opportunity?",
+  "estimated_aov_lift": "Combined potential if all currently-missing mechanisms were added. Honest range. Example: '+30-45%'.",
+  "current_strengths": ["0-3 specific things they're already doing well — only include real ones"],
+  "mechanisms": [
+    {
+      "mechanism": "Order bump",
+      "present": true|false,
+      "expected_lift": "Realistic range like '+8-15% AOV' if missing, or 'Already capturing this' if present",
+      "what_we_saw": "Specific observation. 'Saw a "Add Gift Wrap +$5" checkbox on cart page' OR 'No order bump on cart or checkout pages.'",
+      "how_to_add": "If missing: exact Shopify app or feature. Example: 'CartHook (cart bump app, $9/mo) — set up a "Add the matching X for $Y" offer below the buy button.' If present: leave empty string.",
+      "copy_template": "If missing: a ready-to-paste copy block, written in the user's voice. If present: leave empty string."
+    },
+    ... ALL 7 mechanisms in the order listed above ...
+  ],
+  "recommended_priority": [
+    { "rank": 1, "mechanism": "Mechanism name", "reason": "Why this one first — biggest impact / easiest to install / fits their existing setup" },
+    { "rank": 2, "mechanism": "...", "reason": "..." },
+    { "rank": 3, "mechanism": "...", "reason": "..." }
+  ]
+}
+
+Quality bar:
+- "what_we_saw" must reference SPECIFIC observable elements. If you can't see the page (fetch failed), say so transparently in the summary and base "present" judgements on what's plausible for the URL.
+- "how_to_add" should name a real Shopify app or built-in feature. Common picks: ReConvert (post-purchase), Vitals (bundles+quantity), Bold Upsell, ZipCheckout, Honeycomb. Don't invent app names.
+- "copy_template" should be 1-3 short sentences max — actual copy, not a description of copy.
+- "expected_lift" ranges should be honest. Order bumps typically +8-15%. Bundles +10-25%. Post-purchase upsells +5-15%. Free-shipping-threshold +10-20%. Don't claim 50%+ for any single mechanism.
+- "recommended_priority" must only include MISSING mechanisms. Order them by impact × ease.`;
+
+  const raw = await callAI(
+    {
+      systemPrompt: SYSTEM_PROMPT,
+      userPrompt:   prompt,
+      json:         true,
+      temperature:  0.4,
+      urls:         [input.url],
+    },
+    "growth",
+  );
+  const parsed = JSON.parse(raw);
+
+  // Defensive: ensure we return all 7 mechanisms in canonical order
+  const mechanismsMap = new Map<string, Record<string, unknown>>();
+  if (Array.isArray(parsed.mechanisms)) {
+    for (const m of parsed.mechanisms) {
+      const name = String(m?.mechanism ?? "").trim();
+      if (name) mechanismsMap.set(name, m);
+    }
+  }
+  const mechanisms: AOVMechanism[] = AOV_MECHANISM_NAMES.map(name => {
+    const m = mechanismsMap.get(name) ?? {};
+    return {
+      mechanism:     name,
+      present:       Boolean(m.present),
+      expected_lift: String(m.expected_lift ?? "").slice(0, 80),
+      what_we_saw:   String(m.what_we_saw ?? "").slice(0, 400),
+      how_to_add:    String(m.how_to_add ?? "").slice(0, 400),
+      copy_template: String(m.copy_template ?? "").slice(0, 400),
+    };
+  });
+
+  return {
+    summary:            String(parsed.summary ?? "").slice(0, 800),
+    estimated_aov_lift: String(parsed.estimated_aov_lift ?? "").slice(0, 30),
+    current_strengths:  Array.isArray(parsed.current_strengths) ? parsed.current_strengths.slice(0, 4).map(String) : [],
+    mechanisms,
+    recommended_priority: Array.isArray(parsed.recommended_priority)
+      ? parsed.recommended_priority.slice(0, 3).map((r: Record<string, unknown>, i: number) => ({
+          rank:      ((Number(r.rank) || (i + 1)) as 1 | 2 | 3),
+          mechanism: String(r.mechanism ?? "").slice(0, 80),
+          reason:    String(r.reason    ?? "").slice(0, 300),
+        }))
+      : [],
+  };
+}
+
 // ── Module Q&A (AI assistant) ────────────────────────────────
 
 export async function answerModuleQuestion(input: {
