@@ -193,6 +193,23 @@ export default function DashboardPage() {
         supabase.from("ai_tool_log")          .select("id", { count: "exact", head: true }).eq("user_id", user.id),
         supabase.from("supplier_validations") .select("id", { count: "exact", head: true }).eq("user_id", user.id),
       ]);
+
+      // Diagnostic: if the profile fetch returns null/error or claims the user
+      // has no Pro flag, log the full response so we can see what's wrong.
+      // Open DevTools console after a hard refresh to inspect.
+      if (!profileRes.data || profileRes.data.is_pro !== true) {
+        console.warn("[dashboard] profile fetch suspect:", {
+          dataIsNull:   profileRes.data === null,
+          error:        profileRes.error,
+          status:       profileRes.status,
+          statusText:   profileRes.statusText,
+          fullData:     profileRes.data,
+          userId:       user.id,
+          authUserId:   user.id,
+          hasSession:   Boolean(user),
+        });
+      }
+
       setCompleted((progressRes.data ?? []).map((r: { module_id: number }) => r.module_id));
       setHasUsedTool((aiToolRes.count ?? 0) > 0 || (supplierValRes.count ?? 0) > 0);
       // Always call setProfile — even if no row exists, use safe defaults
