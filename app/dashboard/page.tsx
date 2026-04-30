@@ -249,7 +249,11 @@ export default function DashboardPage() {
   const completedCount  = completed.length;
   const progressPercent = Math.round((completedCount / MODULES.length) * 100);
   const startModule     = profile.start_module ?? 1;
-  const firstName       = profile.first_name || email.split("@")[0];
+  // Only treat first_name as a real name if it looks like one — otherwise we
+  // fall back to empty string and the templates omit the name entirely.
+  // Avoids ever rendering the email prefix (e.g. "growthtest123") as a "name".
+  const realFirstName   = (profile.first_name ?? "").trim();
+  const firstName       = realFirstName.length > 0 && realFirstName.length < 30 ? realFirstName : "";
   const trackColor      = profile.track ? (TRACK_COLORS[profile.track] ?? "#4f46e5") : "#4f46e5";
   const isProGated      = (id: number) => id > 6  && id <= 12 && !isPro;
   const isGrowthGated   = (id: number) => id > 12 && !isGrowth;
@@ -307,57 +311,70 @@ export default function DashboardPage() {
         </div>
       )}
 
-      {/* ── Nav ── */}
+      {/* ── Nav: 3-column layout (logo left · links centre · account-actions right) ── */}
       <nav style={{ background: "rgba(255,255,255,0.85)", backdropFilter: "blur(12px)", borderBottom: "1px solid rgba(0,0,0,0.06)", position: "sticky", top: 0, zIndex: 40 }}>
-        <div style={{ maxWidth: 680, margin: "0 auto", padding: "0 24px", height: 60, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-          {/* Left — logo + admin/pro badge */}
-          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+        <div style={{ maxWidth: 1140, margin: "0 auto", padding: "0 24px", height: 60, display: "flex", alignItems: "center", gap: 16 }}>
+
+          {/* LEFT — logo + tier badge */}
+          <div style={{ display: "flex", alignItems: "center", gap: 8, flexShrink: 0 }}>
             <Link href="/" style={{ display: "flex", alignItems: "center", gap: 9, textDecoration: "none" }}>
-              <img src="/logo.png" alt="First Sale Lab" decoding="async" style={{ height: 40, width: "auto" }} />
-              <span style={{ fontWeight: 800, fontSize: 15, color: "#09090b", letterSpacing: "-0.4px" }}>First Sale Lab</span>
+              <img src="/logo.png" alt="First Sale Lab" decoding="async" style={{ height: 36, width: "auto" }} />
+              <span className="hidden sm:block" style={{ fontWeight: 800, fontSize: 15, color: "#09090b", letterSpacing: "-0.4px" }}>First Sale Lab</span>
             </Link>
             {admin ? (
-              <span style={{ fontSize: 10, fontWeight: 700, padding: "2px 7px", borderRadius: 99, background: "linear-gradient(135deg, #6366f1, #7c3aed)", color: "#fff", letterSpacing: "0.1em", textTransform: "uppercase" }}>
+              <span style={{ fontSize: 10, fontWeight: 700, padding: "2px 8px", borderRadius: 99, background: "linear-gradient(135deg, #6366f1, #7c3aed)", color: "#fff", letterSpacing: "0.1em", textTransform: "uppercase" }}>
                 Admin
               </span>
+            ) : isGrowth ? (
+              <span style={{ fontSize: 10, fontWeight: 700, padding: "3px 8px", borderRadius: 99, background: "linear-gradient(135deg, #1c1917, #44403c)", color: "#facc15", border: "1px solid rgba(250,204,21,0.4)", letterSpacing: "0.04em", display: "inline-flex", alignItems: "center", gap: 4 }}>
+                <Icon name="rocket" size={11} strokeWidth={2.25} /> Scale Lab
+              </span>
             ) : isPro ? (
-              <span style={{ fontSize: 10, fontWeight: 700, padding: "2px 8px", borderRadius: 99, background: "linear-gradient(135deg, #facc15, #f59e0b)", color: "#1c1917", letterSpacing: "0.06em" }}>
-                ✨ Pro
+              <span style={{ fontSize: 10, fontWeight: 700, padding: "3px 8px", borderRadius: 99, background: "linear-gradient(135deg, #f59e0b, #d97706)", color: "#fff", letterSpacing: "0.04em", display: "inline-flex", alignItems: "center", gap: 4 }}>
+                <Icon name="sparkles" size={11} strokeWidth={2.25} /> Pro
               </span>
             ) : null}
           </div>
 
-          {/* Right — nav links + logout */}
-          <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
-            {[
-              { href: "/tools",     label: "Tools"     },
-              { href: "/resources", label: "Resources" },
+          {/* CENTRE — primary nav links (hidden on mobile) */}
+          <div className="hidden sm:flex" style={{ flex: 1, justifyContent: "center", alignItems: "center", gap: 2 }}>
+            {([
+              { href: "/tools",     label: "Tools",     icon: null              as IconName | null },
+              { href: "/resources", label: "Resources", icon: null              as IconName | null },
               ...(isPro && !admin ? [
-                { href: "/pro/products",  label: "📦 Picks"     },
-                { href: "/pro/briefings", label: "📋 Briefings" },
+                { href: "/pro/products",  label: "Picks",     icon: "package"   as IconName | null },
+                { href: "/pro/briefings", label: "Briefings", icon: "file-text" as IconName | null },
               ] : []),
               ...(admin ? [
-                { href: "/admin",         label: "Analytics" },
-                { href: "/admin/content", label: "Content"   },
-                { href: "/admin/users",   label: "Users"     },
-                { href: "/admin/blog",    label: "Blog"      },
-                { href: "/admin/email",   label: "Email"     },
-                { href: "/admin/leads",   label: "Leads"     },
+                { href: "/admin",         label: "Analytics", icon: null as IconName | null },
+                { href: "/admin/content", label: "Content",   icon: null as IconName | null },
+                { href: "/admin/users",   label: "Users",     icon: null as IconName | null },
+                { href: "/admin/blog",    label: "Blog",      icon: null as IconName | null },
+                { href: "/admin/email",   label: "Email",     icon: null as IconName | null },
+                { href: "/admin/leads",   label: "Leads",     icon: null as IconName | null },
               ] : []),
-            ].map(item => (
+            ]).map(item => (
               <Link key={item.href} href={item.href}
-                className="hidden sm:block"
-                style={{ fontSize: 13, fontWeight: 500, color: "#52525b", textDecoration: "none", padding: "6px 12px", borderRadius: 8 }}
+                style={{ fontSize: 13, fontWeight: 500, color: "#52525b", textDecoration: "none", padding: "6px 12px", borderRadius: 8, display: "inline-flex", alignItems: "center", gap: 5 }}
                 onMouseEnter={e => { e.currentTarget.style.background = "#f4f4f5"; e.currentTarget.style.color = "#09090b"; }}
                 onMouseLeave={e => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = "#52525b"; }}
-              >{item.label}</Link>
+              >
+                {item.icon && <Icon name={item.icon} size={14} strokeWidth={1.75} />}
+                {item.label}
+              </Link>
             ))}
+          </div>
+
+          {/* RIGHT — upgrade / billing / settings / log out */}
+          <div style={{ display: "flex", alignItems: "center", gap: 4, flexShrink: 0, marginLeft: "auto" }}>
             {!isPro && (
               <Link href="/upgrade"
-                style={{ fontSize: 12, fontWeight: 700, color: "#7c3aed", textDecoration: "none", padding: "5px 12px", borderRadius: 8, border: "1.5px solid #c4b5fd", background: "#f5f3ff" }}
+                style={{ fontSize: 12, fontWeight: 700, color: "#7c3aed", textDecoration: "none", padding: "6px 12px", borderRadius: 8, border: "1.5px solid #c4b5fd", background: "#f5f3ff", display: "inline-flex", alignItems: "center", gap: 5 }}
                 onMouseEnter={e => { e.currentTarget.style.background = "#ede9fe"; }}
                 onMouseLeave={e => { e.currentTarget.style.background = "#f5f3ff"; }}
-              >✨ Upgrade</Link>
+              >
+                <Icon name="sparkles" size={12} strokeWidth={2} /> Upgrade
+              </Link>
             )}
             {isPro && profile.stripe_customer_id && !admin && (
               <button onClick={handleManageBilling} disabled={portalLoading}
@@ -368,24 +385,33 @@ export default function DashboardPage() {
               >{portalLoading ? "Loading…" : "Billing"}</button>
             )}
             <Link href="/settings"
-              style={{ fontSize: 13, fontWeight: 500, color: "#52525b", textDecoration: "none", padding: "6px 12px", borderRadius: 8 }}
+              style={{ fontSize: 13, fontWeight: 500, color: "#52525b", textDecoration: "none", padding: "6px 10px", borderRadius: 8, display: "inline-flex", alignItems: "center", gap: 5 }}
               onMouseEnter={e => { e.currentTarget.style.background = "#f4f4f5"; e.currentTarget.style.color = "#09090b"; }}
               onMouseLeave={e => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = "#52525b"; }}
-            >Settings</Link>
-            <div style={{ width: 1, height: 16, background: "#e4e4e7", margin: "0 4px" }} />
+            >
+              <Icon name="settings" size={14} strokeWidth={1.75} />
+              <span className="hidden sm:inline">Settings</span>
+            </Link>
+            <div className="hidden sm:block" style={{ width: 1, height: 16, background: "#e4e4e7", margin: "0 2px" }} />
             <button onClick={handleLogout}
-              style={{ fontSize: 13, fontWeight: 500, color: "#a1a1aa", background: "none", border: "none", cursor: "pointer", padding: "6px 12px", borderRadius: 8 }}
+              style={{ fontSize: 13, fontWeight: 500, color: "#a1a1aa", background: "none", border: "none", cursor: "pointer", padding: "6px 10px", borderRadius: 8, display: "inline-flex", alignItems: "center", gap: 5 }}
               onMouseEnter={e => { e.currentTarget.style.background = "#fff7f7"; e.currentTarget.style.color = "#ef4444"; }}
               onMouseLeave={e => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = "#a1a1aa"; }}
-            >Log out</button>
+            >
+              <Icon name="log-out" size={14} strokeWidth={1.75} />
+              <span className="hidden sm:inline">Log out</span>
+            </button>
           </div>
         </div>
       </nav>
 
       <main style={{ maxWidth: 680, margin: "0 auto", padding: "36px 24px 80px" }}>
 
-        {/* ── ONBOARDING — shown only to first-time users with no track yet ── */}
-        {completedCount === 0 && !profile.track ? (
+        {/* ── ONBOARDING — shown only to brand-new free users (no completions, no
+             quiz track, not yet upgraded). Paid users skip this — they get the
+             returning-user view + the post-upgrade banner instead, since the
+             "12 modules · Start Module 1" framing is wrong for them. ── */}
+        {completedCount === 0 && !profile.track && !isPro ? (
           <div className="fade-up" style={{ marginBottom: 28 }}>
             <div style={{
               background: "linear-gradient(135deg, #1e1b4b 0%, #312e81 50%, #4c1d95 100%)",
@@ -397,12 +423,12 @@ export default function DashboardPage() {
               <div style={{ position: "relative" }}>
 
                 {/* Label */}
-                <span style={{ display: "inline-block", fontSize: 10, fontWeight: 700, letterSpacing: "0.14em", textTransform: "uppercase", color: "rgba(167,139,250,0.9)", marginBottom: 14, background: "rgba(99,102,241,0.2)", border: "1px solid rgba(99,102,241,0.35)", padding: "4px 12px", borderRadius: 99 }}>
-                  Welcome 🎉
+                <span style={{ display: "inline-flex", alignItems: "center", gap: 6, fontSize: 10, fontWeight: 700, letterSpacing: "0.14em", textTransform: "uppercase", color: "rgba(167,139,250,0.9)", marginBottom: 14, background: "rgba(99,102,241,0.2)", border: "1px solid rgba(99,102,241,0.35)", padding: "4px 12px", borderRadius: 99 }}>
+                  <Icon name="sparkles" size={11} strokeWidth={2.5} /> Welcome
                 </span>
 
                 <h2 style={{ fontSize: 22, fontWeight: 900, color: "#fff", letterSpacing: "-0.6px", lineHeight: 1.2, marginBottom: 10 }}>
-                  You&apos;re all set, {firstName}. Here&apos;s how this works.
+                  You&apos;re all set{firstName ? `, ${firstName}` : ""}. Here&apos;s how this works.
                 </h2>
                 <p style={{ fontSize: 13, color: "rgba(255,255,255,0.6)", lineHeight: 1.65, marginBottom: 24, maxWidth: 460 }}>
                   12 focused modules. Real tasks. One clear step at a time. Complete each module&apos;s task to unlock the next — no skipping ahead.
@@ -432,7 +458,7 @@ export default function DashboardPage() {
                   onMouseEnter={e => { e.currentTarget.style.transform = "translateY(-1px)"; e.currentTarget.style.boxShadow = "0 6px 24px rgba(250,204,21,0.5)"; }}
                   onMouseLeave={e => { e.currentTarget.style.transform = "translateY(0)"; e.currentTarget.style.boxShadow = "0 4px 16px rgba(250,204,21,0.35)"; }}
                 >
-                  🚀 Start Module 1 →
+                  <Icon name="rocket" size={14} strokeWidth={2} /> Start Module 1 →
                 </Link>
               </div>
             </div>
@@ -442,7 +468,7 @@ export default function DashboardPage() {
             {/* ── Welcome (returning users) ── */}
             <div className="fade-up" style={{ marginBottom: 24 }}>
               <p style={{ fontSize: 13, fontWeight: 600, color: trackColor, marginBottom: 4 }}>
-                {getGreeting()}, {firstName} 👋
+                {getGreeting()}{firstName ? `, ${firstName}` : ""}
               </p>
               <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 8 }}>
                 <div>
