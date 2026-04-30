@@ -251,7 +251,10 @@ export function briefingNewsletterHTML(firstName: string, content: BriefingConte
 
 export function proWelcomeEmailHTML(firstName: string): string {
   const month = new Date().toLocaleDateString("en-US", { month: "long", year: "numeric" });
-  const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://firstsalelab.com";
+  const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.firstsalelab.com";
+  const name = (firstName ?? "").trim();
+  const safeName = name.length > 0 && name.length < 30 ? name : "";
+  const greeting = safeName ? `You&apos;re now Pro, ${safeName}.` : "You&apos;re now Pro.";
 
   return `<!DOCTYPE html>
 <html>
@@ -261,62 +264,69 @@ export function proWelcomeEmailHTML(firstName: string): string {
     <tr><td align="center">
       <table width="100%" cellpadding="0" cellspacing="0" style="max-width:540px;">
 
-        <!-- Header -->
-        <tr><td style="background:#1e1b4b;border-radius:20px 20px 0 0;padding:40px;text-align:center;">
-          <div style="font-size:48px;margin-bottom:12px;">🎉</div>
-          <h1 style="margin:0 0 8px;font-size:24px;font-weight:900;color:#fff;letter-spacing:-0.5px;">You're now Pro, ${firstName}!</h1>
-          <p style="margin:0;font-size:14px;color:rgba(255,255,255,0.5);">Welcome to First Sale Lab Pro</p>
+        <!-- Header — text-only -->
+        <tr><td style="background:#1e1b4b;border-radius:20px 20px 0 0;padding:48px 40px 40px;text-align:center;">
+          <p style="margin:0 0 18px;font-size:11px;font-weight:700;letter-spacing:0.22em;text-transform:uppercase;color:#a78bfa;">Pro · Active</p>
+          <h1 style="margin:0 0 8px;font-size:26px;font-weight:900;color:#fff;letter-spacing:-0.6px;line-height:1.15;">${greeting}</h1>
+          <p style="margin:0;font-size:14px;color:rgba(255,255,255,0.55);">Modules 7–12 unlocked. Time to make your first sale.</p>
         </td></tr>
 
         <!-- Body -->
         <tr><td style="background:#fff;padding:36px 40px;">
-          <p style="margin:0 0 20px;font-size:15px;color:#3f3f46;line-height:1.7;">
-            Your subscription is active. Here's everything you now have access to:
+          <p style="margin:0 0 22px;font-size:15px;color:#3f3f46;line-height:1.7;">
+            Your subscription is active. Two parts work together — the modules teach the system, the AI tools apply it to your specific store.
           </p>
 
           <!-- Unlocked modules -->
-          <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:16px;">
-            <tr><td style="background:#f5f3ff;border-radius:14px;padding:18px 20px;border:1px solid #ede9fe;">
-              <p style="margin:0 0 12px;font-size:11px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:#7c3aed;">🔓 Modules Unlocked</p>
+          <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:18px;">
+            <tr><td style="background:#fafafa;border-radius:14px;padding:20px 22px;border:1px solid #e4e4e7;">
+              <p style="margin:0 0 14px;font-size:11px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:#0c0a09;">Modules unlocked</p>
               <table width="100%" cellpadding="0" cellspacing="0">
-                <tr>
-                  <td width="50%" style="vertical-align:top;padding-right:8px;">
-                    <p style="margin:0 0 6px;font-size:12px;color:#4c1d95;">📱 Module 7 — TikTok Organic</p>
-                    <p style="margin:0 0 6px;font-size:12px;color:#4c1d95;">📣 Module 8 — Run Your First Ad</p>
-                    <p style="margin:0 0 6px;font-size:12px;color:#4c1d95;">📈 Module 9 — Conversion Optimisation</p>
-                  </td>
-                  <td width="50%" style="vertical-align:top;">
-                    <p style="margin:0 0 6px;font-size:12px;color:#4c1d95;">📧 Module 10 — Build Email List</p>
-                    <p style="margin:0 0 6px;font-size:12px;color:#4c1d95;">💰 Module 11 — Make Your First Sale</p>
-                    <p style="margin:0 0 6px;font-size:12px;color:#4c1d95;">🚀 Module 12 — Scale and Grow</p>
-                  </td>
-                </tr>
+                <tr><td style="padding:4px 0;font-size:13px;color:#27272a;line-height:1.6;"><strong style="color:#0c0a09;">Module 7</strong> &nbsp;<span style="color:#a1a1aa;">~30 min</span> — TikTok Organic</td></tr>
+                <tr><td style="padding:4px 0;font-size:13px;color:#27272a;line-height:1.6;"><strong style="color:#0c0a09;">Module 8</strong> &nbsp;<span style="color:#a1a1aa;">~40 min</span> — Run Your First Paid Ad</td></tr>
+                <tr><td style="padding:4px 0;font-size:13px;color:#27272a;line-height:1.6;"><strong style="color:#0c0a09;">Module 9</strong> &nbsp;<span style="color:#a1a1aa;">~30 min</span> — Conversion Optimisation</td></tr>
+                <tr><td style="padding:4px 0;font-size:13px;color:#27272a;line-height:1.6;"><strong style="color:#0c0a09;">Module 10</strong> &nbsp;<span style="color:#a1a1aa;">~35 min</span> — Build Your Email List</td></tr>
+                <tr><td style="padding:4px 0;font-size:13px;color:#27272a;line-height:1.6;"><strong style="color:#0c0a09;">Module 11</strong> &nbsp;<span style="color:#a1a1aa;">~20 min</span> — Make Your First Sale</td></tr>
+                <tr><td style="padding:4px 0;font-size:13px;color:#27272a;line-height:1.6;"><strong style="color:#0c0a09;">Module 12</strong> &nbsp;<span style="color:#a1a1aa;">~25 min</span> — Scale and Grow</td></tr>
               </table>
             </td></tr>
           </table>
 
-          <!-- Weekly picks -->
-          <table width="100%" cellpadding="0" cellspacing="6" style="margin-bottom:16px;">
+          <!-- AI tools section — the new differentiator -->
+          <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:18px;">
+            <tr><td style="background:#1e1b4b;border-radius:14px;padding:22px 24px;">
+              <p style="margin:0 0 6px;font-size:11px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:#a78bfa;">Your Pro AI tools · 5 runs each per day</p>
+              <p style="margin:0 0 14px;font-size:12px;color:rgba(255,255,255,0.55);line-height:1.55;">Five tools at /tools that do real work for your store.</p>
+              <table width="100%" cellpadding="0" cellspacing="0">
+                <tr><td style="padding:6px 0;font-size:13px;color:rgba(255,255,255,0.85);line-height:1.55;border-top:1px solid rgba(167,139,250,0.18);"><strong style="color:#c4b5fd;">Ad Copywriter</strong> — paste product info, get 5 ad variants across psychological angles</td></tr>
+                <tr><td style="padding:6px 0;font-size:13px;color:rgba(255,255,255,0.85);line-height:1.55;border-top:1px solid rgba(167,139,250,0.18);"><strong style="color:#c4b5fd;">UGC Brief Generator</strong> — complete creator-ready brief: hook + shot list + format specs</td></tr>
+                <tr><td style="padding:6px 0;font-size:13px;color:rgba(255,255,255,0.85);line-height:1.55;border-top:1px solid rgba(167,139,250,0.18);"><strong style="color:#c4b5fd;">Ad Auditor</strong> — paste an ad, get scored on Cialdini&apos;s 6 + concrete rewrites</td></tr>
+                <tr><td style="padding:6px 0;font-size:13px;color:rgba(255,255,255,0.85);line-height:1.55;border-top:1px solid rgba(167,139,250,0.18);"><strong style="color:#c4b5fd;">Product Description Writer</strong> — 3 description variants per run, 4 tones × 3 lengths</td></tr>
+                <tr><td style="padding:6px 0;font-size:13px;color:rgba(255,255,255,0.85);line-height:1.55;border-top:1px solid rgba(167,139,250,0.18);"><strong style="color:#c4b5fd;">Subject Line Tester</strong> — 10 variants with predicted open rate + preheader text</td></tr>
+              </table>
+            </td></tr>
+          </table>
+
+          <!-- Pro perks (Picks + Briefing) -->
+          <table width="100%" cellpadding="0" cellspacing="6" style="margin-bottom:24px;">
             <tr>
               <td width="50%" style="vertical-align:top;">
-                <div style="background:#f0fdf4;border-radius:14px;padding:16px 18px;border:1px solid #bbf7d0;">
-                  <p style="margin:0 0 6px;font-size:22px;">📦</p>
-                  <p style="margin:0 0 4px;font-size:13px;font-weight:800;color:#09090b;">Weekly Product Picks</p>
-                  <p style="margin:0;font-size:12px;color:#52525b;line-height:1.5;">5 trending products with margins &amp; ad hooks — every Monday in your inbox.</p>
+                <div style="background:#f9fafb;border-radius:12px;padding:14px 16px;border:1px solid #e5e7eb;">
+                  <p style="margin:0 0 2px;font-size:12px;font-weight:800;color:#0c0a09;letter-spacing:-0.1px;">Weekly Product Picks</p>
+                  <p style="margin:0;font-size:11px;color:#52525b;line-height:1.5;">5 trending products with margins and ad hooks — every Monday.</p>
                 </div>
               </td>
               <td width="50%" style="vertical-align:top;padding-left:6px;">
-                <div style="background:#eff6ff;border-radius:14px;padding:16px 18px;border:1px solid #bfdbfe;">
-                  <p style="margin:0 0 6px;font-size:22px;">📋</p>
-                  <p style="margin:0 0 4px;font-size:13px;font-weight:800;color:#09090b;">${month} Ad Strategy</p>
-                  <p style="margin:0;font-size:12px;color:#52525b;line-height:1.5;">What's working on Meta &amp; TikTok right now — updated every month.</p>
+                <div style="background:#f9fafb;border-radius:12px;padding:14px 16px;border:1px solid #e5e7eb;">
+                  <p style="margin:0 0 2px;font-size:12px;font-weight:800;color:#0c0a09;letter-spacing:-0.1px;">${month} Ad Strategy</p>
+                  <p style="margin:0;font-size:11px;color:#52525b;line-height:1.5;">What&apos;s actually working on Meta &amp; TikTok this month.</p>
                 </div>
               </td>
             </tr>
           </table>
 
-          <p style="margin:0 0 28px;font-size:13px;color:#71717a;line-height:1.6;">
-            No ads. No limits. Just the full system — from your first store to your first sale and beyond.
+          <p style="margin:0 0 22px;font-size:13px;color:#71717a;line-height:1.6;">
+            No ads. No limits. The full system — from your first store to your first sale.
           </p>
 
           <div style="text-align:center;">
@@ -324,13 +334,16 @@ export function proWelcomeEmailHTML(firstName: string): string {
               style="display:inline-block;background:#6366f1;color:#fff;font-weight:800;font-size:15px;padding:14px 40px;border-radius:14px;text-decoration:none;letter-spacing:-0.2px;">
               Go to Dashboard →
             </a>
+            <p style="margin:14px 0 0;font-size:12px;color:#a1a1aa;">
+              Or jump to a tool: <a href="${SITE_URL}/tools" style="color:#6366f1;text-decoration:none;font-weight:600;">browse the 5 AI tools →</a>
+            </p>
           </div>
         </td></tr>
 
         <!-- Footer -->
-        <tr><td style="background:#f8f8fb;border-radius:0 0 20px 20px;padding:20px 40px;text-align:center;border-top:1px solid #e4e4e7;">
-          <p style="margin:0 0 4px;font-size:12px;font-weight:700;color:#09090b;">First Sale Lab Pro</p>
-          <p style="margin:0;font-size:12px;color:#a1a1aa;">Questions? Reply to this email — we read every one.</p>
+        <tr><td style="background:#f8f8fb;border-radius:0 0 20px 20px;padding:22px 40px;text-align:center;border-top:1px solid #e4e4e7;">
+          <p style="margin:0 0 4px;font-size:12px;font-weight:700;color:#0c0a09;">First Sale Lab · Pro</p>
+          <p style="margin:0;font-size:11px;color:#a1a1aa;">Reply to this email with any questions — we read every one.</p>
         </td></tr>
 
       </table>
@@ -758,7 +771,12 @@ export function reengagementEmailHTML(firstName: string): string {
 // ── Email: Growth (Scale Lab) welcome ─────────────────────────
 
 export function growthWelcomeEmailHTML(firstName: string): string {
-  const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://firstsalelab.com";
+  const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.firstsalelab.com";
+  // Drop the name entirely if it's missing or looks invalid — never write
+  // an awkward email-prefix or fallback string into the user's name slot.
+  const name = (firstName ?? "").trim();
+  const safeName = name.length > 0 && name.length < 30 ? name : "";
+  const greeting = safeName ? `You're in, ${safeName}.` : "You're in.";
 
   return `<!DOCTYPE html>
 <html>
@@ -768,12 +786,11 @@ export function growthWelcomeEmailHTML(firstName: string): string {
     <tr><td align="center">
       <table width="100%" cellpadding="0" cellspacing="0" style="max-width:560px;">
 
-        <!-- Header -->
-        <tr><td style="background:#0c0a09;border-radius:20px 20px 0 0;padding:42px 40px 36px;text-align:center;">
-          <p style="margin:0 0 8px;font-size:11px;font-weight:700;letter-spacing:0.18em;text-transform:uppercase;color:#fde68a;">Scale Lab</p>
-          <div style="font-size:48px;line-height:1;margin-bottom:12px;">🚀</div>
-          <h1 style="margin:0 0 8px;font-size:26px;font-weight:900;color:#fff;letter-spacing:-0.6px;line-height:1.2;">You&apos;re in, ${firstName}.</h1>
-          <p style="margin:0;font-size:14px;color:rgba(255,255,255,0.55);">Welcome to the Growth Tier</p>
+        <!-- Header — text-only, no decorative emoji -->
+        <tr><td style="background:#0c0a09;border-radius:20px 20px 0 0;padding:48px 40px 40px;text-align:center;">
+          <p style="margin:0 0 18px;font-size:11px;font-weight:700;letter-spacing:0.22em;text-transform:uppercase;color:#facc15;">Scale Lab · Active</p>
+          <h1 style="margin:0 0 8px;font-size:28px;font-weight:900;color:#fff;letter-spacing:-0.7px;line-height:1.15;">${greeting}</h1>
+          <p style="margin:0;font-size:14px;color:rgba(255,255,255,0.55);">Modules 13–24 unlocked. Your operator playbook starts now.</p>
         </td></tr>
 
         <!-- Body -->
@@ -781,70 +798,77 @@ export function growthWelcomeEmailHTML(firstName: string): string {
           <p style="margin:0 0 18px;font-size:15px;color:#3f3f46;line-height:1.7;">
             You made the upgrade most operators never make — from <em>I had a sale</em> to <em>I&apos;m running a real business</em>.
           </p>
-          <p style="margin:0 0 22px;font-size:14px;color:#52525b;line-height:1.7;">
-            The Growth Tier (modules 13–24) is built for one thing: turning random sales into predictable revenue. By the end you&apos;ll know exactly what daily ad spend produces what daily sales — and why.
+          <p style="margin:0 0 26px;font-size:14px;color:#52525b;line-height:1.7;">
+            Scale Lab is built for one thing: turning random sales into predictable revenue. Two parts work together — the modules teach the framework, the AI tools apply it to your specific store and ads.
           </p>
 
-          <!-- 5-phase journey -->
+          <!-- 12-module roadmap (no decorative emojis — typography only) -->
           <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:22px;">
-            <tr><td style="background:#f5f3ff;border-radius:14px;padding:20px 22px;border:1px solid #ede9fe;">
-              <p style="margin:0 0 14px;font-size:11px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:#7c3aed;">Your 12-module roadmap</p>
+            <tr><td style="background:#fafafa;border-radius:14px;padding:20px 22px;border:1px solid #e4e4e7;">
+              <p style="margin:0 0 14px;font-size:11px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:#0c0a09;">The 12-module roadmap</p>
               <table width="100%" cellpadding="0" cellspacing="0">
-                <tr>
-                  <td style="padding:6px 0;font-size:13px;color:#4c1d95;"><strong>🔬 Diagnose (M13–15)</strong> — why first sales don&apos;t repeat, the 8 metrics that matter, the profit audit</td>
-                </tr>
-                <tr>
-                  <td style="padding:6px 0;font-size:13px;color:#4c1d95;"><strong>🎯 Validate (M16–18)</strong> — real winners vs fake signals, engineering offers, increasing AOV</td>
-                </tr>
-                <tr>
-                  <td style="padding:6px 0;font-size:13px;color:#4c1d95;"><strong>🧠 Persuade (M19–21)</strong> — Cialdini&apos;s 6, hook library, UGC at scale</td>
-                </tr>
-                <tr>
-                  <td style="padding:6px 0;font-size:13px;color:#4c1d95;"><strong>🧪 Test (M22–23)</strong> — proper experimentation, kill/iterate/scale matrix</td>
-                </tr>
-                <tr>
-                  <td style="padding:6px 0;font-size:13px;color:#4c1d95;"><strong>🚀 Scale (M24)</strong> — 30-day scaling plan with kill triggers</td>
-                </tr>
+                <tr><td style="padding:5px 0;font-size:13px;color:#27272a;line-height:1.6;"><strong style="color:#0c0a09;">Diagnose</strong> &nbsp;<span style="color:#a1a1aa;">M13–15</span> — why first sales don&apos;t repeat, the 8 metrics that matter, the profit audit</td></tr>
+                <tr><td style="padding:5px 0;font-size:13px;color:#27272a;line-height:1.6;"><strong style="color:#0c0a09;">Validate</strong> &nbsp;<span style="color:#a1a1aa;">M16–18</span> — real winners vs fake signals, engineering offers, increasing AOV</td></tr>
+                <tr><td style="padding:5px 0;font-size:13px;color:#27272a;line-height:1.6;"><strong style="color:#0c0a09;">Persuade</strong> &nbsp;<span style="color:#a1a1aa;">M19–21</span> — Cialdini&apos;s 6, hook library, UGC at scale</td></tr>
+                <tr><td style="padding:5px 0;font-size:13px;color:#27272a;line-height:1.6;"><strong style="color:#0c0a09;">Test</strong> &nbsp;<span style="color:#a1a1aa;">M22–23</span> — proper experimentation, kill / iterate / scale matrix</td></tr>
+                <tr><td style="padding:5px 0;font-size:13px;color:#27272a;line-height:1.6;"><strong style="color:#0c0a09;">Scale</strong> &nbsp;<span style="color:#a1a1aa;">M24</span> — 30-day scaling plan with kill triggers</td></tr>
               </table>
             </td></tr>
           </table>
 
-          <!-- What's still active from Pro -->
-          <table width="100%" cellpadding="0" cellspacing="6" style="margin-bottom:22px;">
+          <!-- AI tools — the differentiator. Subtle gold left-border for premium feel -->
+          <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:22px;">
+            <tr><td style="background:#0c0a09;border-radius:14px;padding:22px 24px;">
+              <p style="margin:0 0 6px;font-size:11px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:#facc15;">Your Scale Lab AI tools</p>
+              <p style="margin:0 0 16px;font-size:12px;color:rgba(255,255,255,0.55);line-height:1.55;">All 10 tools at /tools. The 5 below are Scale-Lab-only — they apply the modules to your actual store.</p>
+              <table width="100%" cellpadding="0" cellspacing="0">
+                <tr><td style="padding:6px 0;font-size:13px;color:rgba(255,255,255,0.85);line-height:1.55;border-top:1px solid rgba(250,204,21,0.12);"><strong style="color:#facc15;">Store Autopsy</strong> — paste a competitor URL, get a structured teardown of their offer, hooks, and conversion gaps</td></tr>
+                <tr><td style="padding:6px 0;font-size:13px;color:rgba(255,255,255,0.85);line-height:1.55;border-top:1px solid rgba(250,204,21,0.12);"><strong style="color:#facc15;">Grand Slam Offer Builder</strong> — Hormozi value equation applied to your product → headline + bonus stack + guarantee</td></tr>
+                <tr><td style="padding:6px 0;font-size:13px;color:rgba(255,255,255,0.85);line-height:1.55;border-top:1px solid rgba(250,204,21,0.12);"><strong style="color:#facc15;">Cialdini Page Audit</strong> — paste your product page, get scored on all 6 principles + concrete fixes</td></tr>
+                <tr><td style="padding:6px 0;font-size:13px;color:rgba(255,255,255,0.85);line-height:1.55;border-top:1px solid rgba(250,204,21,0.12);"><strong style="color:#facc15;">AOV Optimization Audit</strong> — finds every missing upsell, bundle, order bump in your store with paste-ready copy</td></tr>
+                <tr><td style="padding:6px 0;font-size:13px;color:rgba(255,255,255,0.85);line-height:1.55;border-top:1px solid rgba(250,204,21,0.12);"><strong style="color:#facc15;">Scale or Kill</strong> — paste 7 days of ad numbers, get scale / iterate / kill verdict with the next action</td></tr>
+              </table>
+              <p style="margin:14px 0 0;font-size:11px;color:rgba(255,255,255,0.45);line-height:1.5;">Plus all 5 Pro tools (Ad Copywriter, UGC Brief, Ad Auditor, Product Description Writer, Subject Line Tester) at higher daily limits.</p>
+            </td></tr>
+          </table>
+
+          <!-- Pro perks (still active) -->
+          <table width="100%" cellpadding="0" cellspacing="6" style="margin-bottom:26px;">
             <tr>
               <td width="50%" style="vertical-align:top;">
-                <div style="background:#f0fdf4;border-radius:12px;padding:14px 16px;border:1px solid #bbf7d0;">
-                  <p style="margin:0 0 4px;font-size:18px;">📦</p>
-                  <p style="margin:0 0 2px;font-size:12px;font-weight:800;color:#09090b;">Weekly product picks</p>
-                  <p style="margin:0;font-size:11px;color:#52525b;line-height:1.5;">Every Monday — included in Growth.</p>
+                <div style="background:#f9fafb;border-radius:12px;padding:14px 16px;border:1px solid #e5e7eb;">
+                  <p style="margin:0 0 2px;font-size:12px;font-weight:800;color:#0c0a09;letter-spacing:-0.1px;">Weekly product picks</p>
+                  <p style="margin:0;font-size:11px;color:#52525b;line-height:1.5;">Every Monday — 5 trending products with margins and ad hooks.</p>
                 </div>
               </td>
               <td width="50%" style="vertical-align:top;padding-left:6px;">
-                <div style="background:#eff6ff;border-radius:12px;padding:14px 16px;border:1px solid #bfdbfe;">
-                  <p style="margin:0 0 4px;font-size:18px;">📋</p>
-                  <p style="margin:0 0 2px;font-size:12px;font-weight:800;color:#09090b;">Monthly briefing</p>
-                  <p style="margin:0;font-size:11px;color:#52525b;line-height:1.5;">What&apos;s working on Meta &amp; TikTok, every month.</p>
+                <div style="background:#f9fafb;border-radius:12px;padding:14px 16px;border:1px solid #e5e7eb;">
+                  <p style="margin:0 0 2px;font-size:12px;font-weight:800;color:#0c0a09;letter-spacing:-0.1px;">Monthly briefing</p>
+                  <p style="margin:0;font-size:11px;color:#52525b;line-height:1.5;">What&apos;s actually working on Meta &amp; TikTok this month.</p>
                 </div>
               </td>
             </tr>
           </table>
 
-          <p style="margin:0 0 24px;font-size:13px;color:#71717a;line-height:1.6;font-style:italic;">
-            Module 13 takes ~30 minutes. By the time you finish, you&apos;ll know whether your &ldquo;winners&rdquo; were real or just lucky days.
+          <p style="margin:0 0 22px;font-size:13px;color:#71717a;line-height:1.6;">
+            Start where you&apos;ll feel the impact fastest — Module 13 takes ~30 minutes and tells you whether your &ldquo;winners&rdquo; were real or just lucky days.
           </p>
 
           <div style="text-align:center;">
             <a href="${SITE_URL}/modules/13"
-              style="display:inline-block;background:linear-gradient(135deg,#1c1917 0%,#0c0a09 100%);color:#fde68a;font-weight:800;font-size:15px;padding:14px 36px;border-radius:14px;text-decoration:none;letter-spacing:-0.2px;">
+              style="display:inline-block;background:#0c0a09;color:#facc15;font-weight:800;font-size:15px;padding:14px 36px;border-radius:14px;text-decoration:none;letter-spacing:-0.2px;border:1px solid rgba(250,204,21,0.3);">
               Start Module 13 →
             </a>
+            <p style="margin:14px 0 0;font-size:12px;color:#a1a1aa;">
+              Or jump straight to a tool: <a href="${SITE_URL}/tools" style="color:#7c3aed;text-decoration:none;font-weight:600;">browse the 10 AI tools →</a>
+            </p>
           </div>
         </td></tr>
 
         <!-- Footer -->
-        <tr><td style="background:#f8f8fb;border-radius:0 0 20px 20px;padding:20px 40px;text-align:center;border-top:1px solid #e4e4e7;">
-          <p style="margin:0 0 4px;font-size:12px;font-weight:700;color:#09090b;">First Sale Lab · Scale Lab tier</p>
-          <p style="margin:0;font-size:11px;color:#a1a1aa;">Reply to this email if you have questions — we read every one.</p>
+        <tr><td style="background:#f8f8fb;border-radius:0 0 20px 20px;padding:22px 40px;text-align:center;border-top:1px solid #e4e4e7;">
+          <p style="margin:0 0 4px;font-size:12px;font-weight:700;color:#0c0a09;">First Sale Lab · Scale Lab</p>
+          <p style="margin:0;font-size:11px;color:#a1a1aa;">Reply to this email with any questions — we read every one.</p>
         </td></tr>
 
       </table>
