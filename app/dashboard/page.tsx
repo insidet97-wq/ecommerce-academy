@@ -198,22 +198,6 @@ export default function DashboardPage() {
         supabase.from("supplier_validations") .select("id", { count: "exact", head: true }).eq("user_id", user.id),
       ]);
 
-      // Diagnostic: if the profile fetch returns null/error or claims the user
-      // has no Pro flag, log the full response so we can see what's wrong.
-      // Open DevTools console after a hard refresh to inspect.
-      if (!profileRes.data || profileRes.data.is_pro !== true) {
-        console.warn("[dashboard] profile fetch suspect:", {
-          dataIsNull:   profileRes.data === null,
-          error:        profileRes.error,
-          status:       profileRes.status,
-          statusText:   profileRes.statusText,
-          fullData:     profileRes.data,
-          userId:       user.id,
-          authUserId:   user.id,
-          hasSession:   Boolean(user),
-        });
-      }
-
       setCompleted((progressRes.data ?? []).map((r: { module_id: number }) => r.module_id));
       setHasUsedTool((aiToolRes.count ?? 0) > 0 || (supplierValRes.count ?? 0) > 0);
       // Always call setProfile — even if no row exists, use safe defaults
@@ -248,7 +232,10 @@ export default function DashboardPage() {
         body: JSON.stringify({ userId }),
       });
       const { url } = await res.json();
-      if (url) window.location.href = url;
+      // Open the Stripe billing portal in a new tab so the user keeps their
+      // dashboard context — closing the portal returns them to the same tab
+      // instead of having to navigate back.
+      if (url) window.open(url, "_blank", "noopener,noreferrer");
     } finally {
       setPortalLoading(false);
     }
