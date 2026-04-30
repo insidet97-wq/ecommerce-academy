@@ -1127,17 +1127,24 @@ export default function Home() {
                   {[
                     "Everything in Free",
                     "Modules 7–12 — traffic, ads, conversions, first sale",
-                    "TikTok organic growth playbook",
-                    "Step-by-step paid ads launch guide",
-                    "Email list building from scratch",
-                    "📦 Weekly product picks (every Monday)",
-                    "📋 Monthly ad strategy briefing",
+                    "5 AI tools (5 runs/day each):",
+                    "  · Ad Copywriter — 5 ad variants per run",
+                    "  · UGC Brief Generator — creator-ready briefs",
+                    "  · Ad Auditor — Cialdini-scored rewrites",
+                    "  · Product Description Writer — 3 angles per run",
+                    "  · Subject Line Tester — 10 variants with predicted opens",
+                    "Weekly product picks (every Monday)",
+                    "Monthly ad strategy briefing",
                     "Ad-free experience",
-                  ].map(item => (
-                    <li key={item} className="flex items-start gap-2 text-xs leading-relaxed" style={{ color: "rgba(255,255,255,0.78)" }}>
-                      <span className="font-bold flex-shrink-0 mt-0.5" style={{ color: "#a78bfa" }}>✓</span>{item}
-                    </li>
-                  ))}
+                  ].map(item => {
+                    const isSub = item.startsWith("  · ");
+                    return (
+                      <li key={item} className="flex items-start gap-2 text-xs leading-relaxed" style={{ color: isSub ? "rgba(196,181,253,0.75)" : "rgba(255,255,255,0.78)", paddingLeft: isSub ? 14 : 0 }}>
+                        {!isSub && <span className="font-bold flex-shrink-0 mt-0.5" style={{ color: "#a78bfa" }}>✓</span>}
+                        {isSub ? item.replace("  · ", "") : item}
+                      </li>
+                    );
+                  })}
                 </ul>
 
                 <div className="flex-1" />
@@ -1171,19 +1178,28 @@ export default function Home() {
 
                 <ul className="space-y-2.5 mb-5" style={{ listStyle: "none", padding: 0 }}>
                   {[
-                    "Everything in Pro",
+                    "Everything in Pro (incl. all 5 Pro AI tools)",
                     "Modules 13–24 — 12 advanced modules",
+                    "5 Scale-Lab-only AI tools (20 runs/day each):",
+                    "  · Store Autopsy — competitor URL teardown",
+                    "  · Grand Slam Offer Builder — Hormozi value equation",
+                    "  · Cialdini Page Audit — 6-principle scoring",
+                    "  · AOV Audit — find missing upsells & bundles",
+                    "  · Scale or Kill — verdict on your ad performance",
                     "Diagnose: why first sales don't repeat",
                     "Validate: real winners vs fake signals",
                     "Persuade: Cialdini's 6 + UGC at scale",
                     "Test: ICE framework + sample size discipline",
                     "Scale: 30-day plan with kill triggers",
-                    "Built on Cialdini, Hormozi, Sean Ellis, Hopkins",
-                  ].map(item => (
-                    <li key={item} className="flex items-start gap-2 text-xs leading-relaxed" style={{ color: "rgba(255,255,255,0.78)" }}>
-                      <span className="font-bold flex-shrink-0 mt-0.5" style={{ color: "#fde68a" }}>✓</span>{item}
-                    </li>
-                  ))}
+                  ].map(item => {
+                    const isSub = item.startsWith("  · ");
+                    return (
+                      <li key={item} className="flex items-start gap-2 text-xs leading-relaxed" style={{ color: isSub ? "rgba(253,224,71,0.75)" : "rgba(255,255,255,0.78)", paddingLeft: isSub ? 14 : 0 }}>
+                        {!isSub && <span className="font-bold flex-shrink-0 mt-0.5" style={{ color: "#fde68a" }}>✓</span>}
+                        {isSub ? item.replace("  · ", "") : item}
+                      </li>
+                    );
+                  })}
                 </ul>
 
                 <div className="flex-1" />

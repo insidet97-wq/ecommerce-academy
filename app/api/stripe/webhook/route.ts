@@ -132,14 +132,19 @@ export async function POST(req: Request) {
         break;
       }
 
-      /* ── Payment failed → revoke (treat like cancelled) ── */
+      /* ── Payment failed → log it. DO NOT revoke access here.
+           Stripe runs its own dunning (retries failed payments for ~3 weeks
+           via Smart Retries). Revoking on the first failed attempt would
+           lock the user out during a routine retry that will likely succeed.
+           We only revoke on `customer.subscription.deleted`, which Stripe
+           fires when dunning has fully given up. ── */
       case "invoice.payment_failed": {
         const invoice = event.data.object as Stripe.Invoice;
-        // We don't know which tier from invoice alone; revoke both for safety.
-        await supabase.from("user_profiles").update({
-          is_pro:    false,
-          is_growth: false,
-        }).eq("stripe_customer_id", invoice.customer as string);
+        console.warn("invoice.payment_failed — Stripe will retry, no revocation:", {
+          customer: invoice.customer,
+          invoice:  invoice.id,
+          attempt:  invoice.attempt_count,
+        });
         break;
       }
     }
