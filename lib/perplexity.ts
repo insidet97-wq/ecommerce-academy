@@ -940,6 +940,131 @@ Quality bar:
   };
 }
 
+// ── Scale / Kill / Iterate Decision Helper (Growth — Module 23 fit)
+//
+// User pastes their last 7-day ad performance numbers. AI applies the
+// Module 23 decision matrix and returns: kill | iterate | scale, the
+// reasoning, the specific next action (with budget if scaling, with the
+// exact variable to change if iterating), and the kill triggers to watch
+// for going forward.
+
+export type AdDecision = "scale" | "iterate" | "kill";
+
+export type ScaleDecision = {
+  decision:           AdDecision;
+  confidence:         "Low" | "Medium" | "High";   // how clear-cut the call is
+  headline:           string;                       // 1-sentence verdict
+  reasoning:          string;                       // 2-3 sentences explaining the math
+  next_action:        string;                       // exact instruction with numbers
+  variable_to_change: string;                       // for iterate — single variable to test (creative / hook / audience / offer / LP)
+  kill_triggers:      string[];                     // 3-5 specific signals to watch for that mean stop
+  metrics_diagnosis:  { metric: string; value: string; verdict: "Healthy" | "Borderline" | "Concerning" }[]; // one per submitted metric
+};
+
+export type ScaleDecisionInput = {
+  product_name:        string;
+  target_cpa:          string;       // e.g. "$25"
+  spend_7d:            string;       // e.g. "$840"
+  revenue_7d:          string;       // e.g. "$1,920"
+  roas:                string;       // e.g. "2.3"
+  ctr:                 string;       // e.g. "1.2%"
+  cpc:                 string;       // e.g. "$0.85"
+  cpa:                 string;       // e.g. "$22"
+  aov:                 string;       // e.g. "$48"
+  frequency:           string;       // e.g. "1.4"
+  days_running:        string;       // e.g. "9"
+  notes:               string;       // optional — anything else worth knowing
+};
+
+export async function decideScale(input: ScaleDecisionInput): Promise<ScaleDecision> {
+  const prompt = `You are an ecommerce media buyer applying the Scale Lab Module 23 decision framework. A user has been running an ad for ${input.days_running || "?"} days and needs a verdict: SCALE, ITERATE, or KILL.
+
+Product: ${input.product_name}
+Target CPA: ${input.target_cpa}
+Last 7 days:
+  - Spend:       ${input.spend_7d}
+  - Revenue:     ${input.revenue_7d}
+  - ROAS:        ${input.roas}
+  - CTR:         ${input.ctr}
+  - CPC:         ${input.cpc}
+  - CPA:         ${input.cpa}
+  - AOV:         ${input.aov}
+  - Frequency:   ${input.frequency}
+  - Days running: ${input.days_running}
+${input.notes ? `User notes: ${input.notes}\n` : ""}
+Apply the Module 23 framework:
+
+SCALE if:
+  - CPA < target_cpa AND ROAS > 1.7 (or higher break-even threshold)
+  - Frequency < 2.0 (still fresh)
+  - At least 5-7 days of data
+  - Then increase budget by 20% maximum (the 20% rule — never double-scale)
+
+ITERATE if:
+  - CPA is 1.0-1.3× target (close but not profitable)
+  - OR CTR is healthy (>1%) but CPA too high → likely the LP/offer
+  - OR CTR is weak (<0.8%) but CPA workable → likely the hook/creative
+  - Pick the SINGLE variable most likely to move the needle. NEVER change two.
+
+KILL if:
+  - CPA > 1.5× target after 5+ days
+  - CTR < 0.5% AND tested 3+ creatives
+  - Frequency > 3.0 (audience burnt out)
+  - Total spend > 3× target_cpa with zero conversions
+
+Return JSON:
+{
+  "decision": "scale" | "iterate" | "kill",
+  "confidence": "Low" | "Medium" | "High" — how clear-cut. Borderline cases are Medium.
+  "headline": "One-sentence verdict the user can read first. e.g. 'Scale: this is profitable, move budget up Monday.'",
+  "reasoning": "2-3 sentences. Show the math. Tie specific numbers to the framework rules.",
+  "next_action": "Exact instruction with numbers. SCALE: 'Increase daily budget from $X to $Y on Monday.' ITERATE: 'Test new hook with same audience. Run for 5 more days, check CTR by Thursday.' KILL: 'Pause this ad set today. Reallocate $X/day to your next test.'",
+  "variable_to_change": "ONLY if decision is 'iterate'. The single variable: 'creative' | 'hook' | 'audience' | 'offer' | 'landing_page'. If decision is scale or kill, leave empty string.",
+  "kill_triggers": ["3-5 specific numeric signals to watch over the next 5 days that would mean stop. Examples: 'CPA rises above $30 for 2 consecutive days' / 'Frequency crosses 2.5' / 'CTR drops below 0.9% on the new creative.'"],
+  "metrics_diagnosis": [
+    { "metric": "ROAS", "value": "${input.roas}", "verdict": "Healthy" | "Borderline" | "Concerning" },
+    { "metric": "CTR", "value": "${input.ctr}", "verdict": "..." },
+    { "metric": "CPC", "value": "${input.cpc}", "verdict": "..." },
+    { "metric": "CPA", "value": "${input.cpa}", "verdict": "..." },
+    { "metric": "AOV", "value": "${input.aov}", "verdict": "..." },
+    { "metric": "Frequency", "value": "${input.frequency}", "verdict": "..." }
+  ]
+}
+
+Quality bar:
+- "headline" must include the verdict word (Scale / Iterate / Kill) in plain language.
+- "reasoning" must reference at least 2 specific numbers from their inputs.
+- "next_action" must include a SPECIFIC budget change ($) or timeline (days) — never generic advice.
+- "kill_triggers" must be specific numeric thresholds, not vague guidelines.
+- For metrics_diagnosis: Healthy = clearly within target. Borderline = within 20% of threshold. Concerning = clearly off-target.
+- If days_running < 5: confidence should be "Low" regardless of other signals (insufficient data).
+- If spend_7d is very small (< 3× target_cpa): confidence "Low" — not enough volume for a decision.`;
+
+  const raw = await generate(prompt, "growth");
+  const parsed = JSON.parse(raw);
+
+  const decision: AdDecision = ["scale", "iterate", "kill"].includes(parsed.decision)
+    ? parsed.decision
+    : "iterate";
+
+  return {
+    decision,
+    confidence:         ["Low", "Medium", "High"].includes(parsed.confidence) ? parsed.confidence : "Medium",
+    headline:           String(parsed.headline ?? "").slice(0, 300),
+    reasoning:          String(parsed.reasoning ?? "").slice(0, 800),
+    next_action:        String(parsed.next_action ?? "").slice(0, 500),
+    variable_to_change: decision === "iterate" ? String(parsed.variable_to_change ?? "").slice(0, 80) : "",
+    kill_triggers:      Array.isArray(parsed.kill_triggers) ? parsed.kill_triggers.slice(0, 6).map(String) : [],
+    metrics_diagnosis:  Array.isArray(parsed.metrics_diagnosis)
+      ? parsed.metrics_diagnosis.slice(0, 8).map((m: Record<string, unknown>) => ({
+          metric:  String(m.metric ?? "").slice(0, 40),
+          value:   String(m.value  ?? "").slice(0, 30),
+          verdict: ["Healthy", "Borderline", "Concerning"].includes(String(m.verdict)) ? (m.verdict as "Healthy" | "Borderline" | "Concerning") : "Borderline",
+        }))
+      : [],
+  };
+}
+
 // ── Module Q&A (AI assistant) ────────────────────────────────
 
 export async function answerModuleQuestion(input: {

@@ -13,6 +13,7 @@ import SubjectLineTester from "@/components/SubjectLineTester";
 import OfferBuilder from "@/components/OfferBuilder";
 import CialdiniAudit from "@/components/CialdiniAudit";
 import AOVAudit from "@/components/AOVAudit";
+import DecisionHelper from "@/components/DecisionHelper";
 import UserAdBanner from "@/components/UserAdBanner";
 import { Icon, type IconName } from "@/components/Icon";
 
@@ -812,7 +813,8 @@ function ToolsPageInner() {
           {active === "subject-lines" && <SubjectLineTester />}
           {active === "offer-builder"  && <OfferBuilder />}
           {active === "cialdini-audit" && <CialdiniAudit />}
-          {active === "aov-audit"      && <AOVAudit />}
+          {active === "aov-audit"        && <AOVAudit />}
+          {active === "decision-helper"  && <DecisionHelper />}
         </div>
 
         {/* Ad — shown to free / anonymous users only */}
