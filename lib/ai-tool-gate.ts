@@ -43,7 +43,11 @@ export type AITool =
   | "ad_audit"
   | "store_autopsy"
   | "product_description"
-  | "subject_lines";
+  | "subject_lines"
+  | "offer_builder"          // Growth-only: Hormozi grand slam offer
+  | "cialdini_audit"         // Growth-only: 6-principles page audit (uses Gemini url_context)
+  | "aov_audit"              // Growth-only: missing AOV mechanisms audit (uses Gemini url_context)
+  | "decision_helper";       // Growth-only: scale / kill / iterate ad recommendation
 
 export const AI_TOOLS: AITool[] = [
   "ad_copywriter",
@@ -52,6 +56,10 @@ export const AI_TOOLS: AITool[] = [
   "store_autopsy",
   "product_description",
   "subject_lines",
+  "offer_builder",
+  "cialdini_audit",
+  "aov_audit",
+  "decision_helper",
 ];
 
 export type GateResult = {

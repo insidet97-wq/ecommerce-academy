@@ -48,13 +48,21 @@ export async function GET(request: Request) {
 
   // One COUNT query per tool. Could fold into a single grouped query but
   // Supabase JS doesn't expose group-by neatly; small counts in parallel is fine.
+  // Free / Pro users see limit:0 on Growth-only tools (the UI renders the
+  // locked card from that signal). Pro tools get the standard tier limit.
+  const growthOnlyLimit = tier === "growth" ? limit : 0;
   const usage: Record<AITool, { used: number; limit: number }> = {
     ad_copywriter:       { used: 0, limit },
     ugc_brief:           { used: 0, limit },
     ad_audit:            { used: 0, limit },
-    store_autopsy:       { used: 0, limit: tier === "growth" ? limit : 0 },
     product_description: { used: 0, limit },
     subject_lines:       { used: 0, limit },
+    // Growth-tier exclusive
+    store_autopsy:       { used: 0, limit: growthOnlyLimit },
+    offer_builder:       { used: 0, limit: growthOnlyLimit },
+    cialdini_audit:      { used: 0, limit: growthOnlyLimit },
+    aov_audit:           { used: 0, limit: growthOnlyLimit },
+    decision_helper:     { used: 0, limit: growthOnlyLimit },
   };
 
   await Promise.all(

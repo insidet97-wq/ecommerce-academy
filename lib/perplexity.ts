@@ -624,6 +624,95 @@ Each item: one sharp sentence. Reference specific things from the user's descrip
   };
 }
 
+// ── Grand Slam Offer Builder (Growth-only — Module 17 fit) ─────────
+//
+// Builds an irresistible offer using the Hormozi value equation:
+//   value = (dream outcome × likelihood of achievement)
+//         / (time delay × effort & sacrifice)
+// The output is structured so the user can paste each piece directly
+// into a Shopify product page or landing page.
+
+export type OfferBuilder = {
+  headline:           string;        // the offer in one sentence — "I will help you ___ in ___ without ___"
+  dream_outcome:      string;        // 1-2 sentences. Specific, vivid, sensory.
+  likelihood_levers:  string[];      // 3-5 things to ADD to make achievement feel inevitable (proof, frameworks, credentials)
+  time_compression:   string[];      // 3-5 things that compress time-to-result (templates, swipe files, quick-wins)
+  effort_removers:    string[];      // 3-5 things that remove friction (done-for-you components, automation)
+  bonus_stack:        { name: string; value: string; why_it_matters: string }[]; // 4-6 bonuses with $ value + reasoning
+  guarantee:          string;        // risk-reversal phrasing (conditional/unconditional/100% specific)
+  scarcity_hook:      string;        // a REAL reason to act now (capacity / cohort / seasonal / cost-of-delay)
+  total_value:        string;        // e.g. "$1,847"
+  price_anchor:       string;        // how to position the actual price relative to the value stack
+  cta_line:           string;        // the closing CTA copy
+};
+
+export type OfferBuilderInput = {
+  product_name:    string;
+  current_price:   string;       // e.g. "$49" or "$49/mo"
+  target_customer: string;
+  dream_outcome:   string;       // what the customer says they want
+  current_obstacles: string;     // what's stopping them from achieving it today
+};
+
+export async function buildOffer(input: OfferBuilderInput): Promise<OfferBuilder> {
+  const prompt = `You are a direct-response marketer trained on Alex Hormozi's "Grand Slam Offer" framework from "$100M Offers". A Scale Lab user wants to engineer an irresistible offer for the following product.
+
+Product: ${input.product_name}
+Current price: ${input.current_price}
+Target customer: ${input.target_customer}
+Dream outcome (what they really want): ${input.dream_outcome}
+Current obstacles (what's stopping them): ${input.current_obstacles}
+
+Apply the Hormozi value equation: VALUE = (dream outcome × perceived likelihood of achievement) ÷ (time delay × effort & sacrifice). Your job is to maximise the numerator and minimise the denominator.
+
+Return a JSON object with these exact fields:
+{
+  "headline": "The offer in one sentence using the format 'I will help you [dream outcome] in [time] without [effort/risk]'. No corporate-speak. Specific.",
+  "dream_outcome": "1-2 sentences. Restate the dream outcome with vivid sensory detail. The customer should picture it.",
+  "likelihood_levers": ["3-5 specific things to ADD to the offer that make achieving the dream feel inevitable. Examples: a named framework, a case study quote, a credential, a step-by-step roadmap, a trust signal."],
+  "time_compression": ["3-5 specific elements that compress time-to-result. Examples: a templated component, a swipe file, a 7-day quick-win, automation that does X for them."],
+  "effort_removers": ["3-5 specific friction-removers. Examples: done-for-you setup, plug-and-play templates, the only-thing-they-need-to-do is X."],
+  "bonus_stack": [
+    { "name": "Specific bonus name (not generic — e.g. 'The 47-Hook Swipe File' not 'Marketing Templates')", "value": "$XXX", "why_it_matters": "1 sentence on why this bonus collapses the equation." },
+    { ... 3-5 more bonuses, each clearly distinct and aimed at different friction points ... }
+  ],
+  "guarantee": "A specific risk-reversal phrasing. Avoid 'money-back guarantee' generic. Better: 'If you don't get X by day 30, we refund AND let you keep all the bonuses.' Conditional or unconditional, but make the condition concrete and verifiable.",
+  "scarcity_hook": "A REAL reason to act now — capacity, cohort start date, seasonal relevance, cost-of-waiting calculation. Never fabricate fake countdowns.",
+  "total_value": "Sum the bonus_stack + base offer value as one number string, e.g. '$2,340'.",
+  "price_anchor": "1-2 sentences positioning the actual price (${input.current_price}) against the total_value. Example: 'Total value: $2,340. Price: ${input.current_price}. The one-time price is less than the cost of one botched ad campaign.'",
+  "cta_line": "Closing CTA copy. Specific verb. No 'Learn more'. Examples: 'Lock in your offer →' / 'Start the 30-day plan →'."
+}
+
+Quality bar:
+- Every bonus has a specific NAME. No "Bonus #1" or "Marketing Pack."
+- Each bonus has a clear, separate purpose — never duplicate themes.
+- The likelihood/time/effort sections must reference concrete, deliverable elements, not vague promises.
+- Total value should be 5-10× the price (Hormozi's "irresistible" threshold), but earned through real bonuses — don't inflate.
+- Tone matches the customer (${input.target_customer}). Avoid B2B jargon if they're a beginner; avoid hype if they're skeptical.`;
+
+  const raw = await generate(prompt, "growth");
+  const parsed = JSON.parse(raw);
+  return {
+    headline:           String(parsed.headline ?? "").slice(0, 300),
+    dream_outcome:      String(parsed.dream_outcome ?? "").slice(0, 500),
+    likelihood_levers:  Array.isArray(parsed.likelihood_levers)  ? parsed.likelihood_levers.slice(0, 6).map(String)  : [],
+    time_compression:   Array.isArray(parsed.time_compression)   ? parsed.time_compression.slice(0, 6).map(String)   : [],
+    effort_removers:    Array.isArray(parsed.effort_removers)    ? parsed.effort_removers.slice(0, 6).map(String)    : [],
+    bonus_stack:        Array.isArray(parsed.bonus_stack)
+      ? parsed.bonus_stack.slice(0, 6).map((b: Record<string, unknown>) => ({
+          name:           String(b.name ?? "").slice(0, 200),
+          value:          String(b.value ?? "").slice(0, 30),
+          why_it_matters: String(b.why_it_matters ?? "").slice(0, 300),
+        }))
+      : [],
+    guarantee:          String(parsed.guarantee ?? "").slice(0, 500),
+    scarcity_hook:      String(parsed.scarcity_hook ?? "").slice(0, 400),
+    total_value:        String(parsed.total_value ?? "").slice(0, 30),
+    price_anchor:       String(parsed.price_anchor ?? "").slice(0, 500),
+    cta_line:           String(parsed.cta_line ?? "").slice(0, 100),
+  };
+}
+
 // ── Module Q&A (AI assistant) ────────────────────────────────
 
 export async function answerModuleQuestion(input: {

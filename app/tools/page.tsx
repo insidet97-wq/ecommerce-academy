@@ -10,6 +10,7 @@ import UGCBriefGenerator from "@/components/UGCBriefGenerator";
 import AdAuditor from "@/components/AdAuditor";
 import ProductDescriptionWriter from "@/components/ProductDescriptionWriter";
 import SubjectLineTester from "@/components/SubjectLineTester";
+import OfferBuilder from "@/components/OfferBuilder";
 import UserAdBanner from "@/components/UserAdBanner";
 import { Icon, type IconName } from "@/components/Icon";
 
@@ -17,7 +18,7 @@ import { Icon, type IconName } from "@/components/Icon";
 const INDIGO = "#6366f1";
 const GRAD   = "linear-gradient(135deg, #6366f1 0%, #7c3aed 100%)";
 
-type Tool = "profit" | "validation" | "roas" | "checklist" | "supplier" | "autopsy" | "copywriter" | "ugc-brief" | "ad-audit" | "product-desc" | "subject-lines";
+type Tool = "profit" | "validation" | "roas" | "checklist" | "supplier" | "autopsy" | "copywriter" | "ugc-brief" | "ad-audit" | "product-desc" | "subject-lines" | "offer-builder" | "cialdini-audit" | "aov-audit" | "decision-helper";
 
 /* ════════════════════════════════════════════
    Shared UI primitives
@@ -609,7 +610,11 @@ const TOOLS_META: { id: Tool; icon: IconName; label: string; tagline: string; ti
   { id: "product-desc",  icon: "file-text",   label: "Product Desc",   tagline: "Pro · 3 angles per run",            tier: "pro" },
   { id: "subject-lines", icon: "send",        label: "Subject Lines",  tagline: "Pro · 10 with predicted opens",     tier: "pro" },
   // Scale Lab exclusive
-  { id: "autopsy",       icon: "scan-search", label: "Store Autopsy",  tagline: "Scale Lab · competitor teardown",   tier: "growth" },
+  { id: "autopsy",         icon: "scan-search", label: "Store Autopsy",   tagline: "Scale Lab · competitor teardown", tier: "growth" },
+  { id: "offer-builder",   icon: "gift",        label: "Offer Builder",   tagline: "Scale Lab · Hormozi grand slam",  tier: "growth" },
+  { id: "cialdini-audit",  icon: "shield",      label: "Cialdini Audit",  tagline: "Scale Lab · 6-principle scoring", tier: "growth" },
+  { id: "aov-audit",       icon: "layers",      label: "AOV Audit",       tagline: "Scale Lab · upsell + bundle gaps", tier: "growth" },
+  { id: "decision-helper", icon: "compass",     label: "Scale or Kill",   tagline: "Scale Lab · ad performance call",  tier: "growth" },
 ];
 
 /**
@@ -664,7 +669,7 @@ const TIER_THEME: Record<ToolTier, {
   },
 };
 
-const VALID_TOOLS: Tool[] = ["profit", "validation", "roas", "checklist", "supplier", "autopsy", "copywriter", "ugc-brief", "ad-audit", "product-desc", "subject-lines"];
+const VALID_TOOLS: Tool[] = ["profit", "validation", "roas", "checklist", "supplier", "autopsy", "copywriter", "ugc-brief", "ad-audit", "product-desc", "subject-lines", "offer-builder", "cialdini-audit", "aov-audit", "decision-helper"];
 
 // useSearchParams must be wrapped in a Suspense boundary in Next.js App Router,
 // otherwise the build fails with "useSearchParams() should be wrapped in a
@@ -803,6 +808,7 @@ function ToolsPageInner() {
           {active === "ad-audit"      && <AdAuditor />}
           {active === "product-desc"  && <ProductDescriptionWriter />}
           {active === "subject-lines" && <SubjectLineTester />}
+          {active === "offer-builder" && <OfferBuilder />}
         </div>
 
         {/* Ad — shown to free / anonymous users only */}
