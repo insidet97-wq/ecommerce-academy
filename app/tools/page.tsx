@@ -11,6 +11,7 @@ import AdAuditor from "@/components/AdAuditor";
 import ProductDescriptionWriter from "@/components/ProductDescriptionWriter";
 import SubjectLineTester from "@/components/SubjectLineTester";
 import OfferBuilder from "@/components/OfferBuilder";
+import CialdiniAudit from "@/components/CialdiniAudit";
 import UserAdBanner from "@/components/UserAdBanner";
 import { Icon, type IconName } from "@/components/Icon";
 
@@ -808,7 +809,8 @@ function ToolsPageInner() {
           {active === "ad-audit"      && <AdAuditor />}
           {active === "product-desc"  && <ProductDescriptionWriter />}
           {active === "subject-lines" && <SubjectLineTester />}
-          {active === "offer-builder" && <OfferBuilder />}
+          {active === "offer-builder"  && <OfferBuilder />}
+          {active === "cialdini-audit" && <CialdiniAudit />}
         </div>
 
         {/* Ad — shown to free / anonymous users only */}

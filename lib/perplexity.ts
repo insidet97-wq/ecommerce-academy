@@ -713,6 +713,108 @@ Quality bar:
   };
 }
 
+// ── Cialdini Page Audit (Growth-only — Module 19 fit) ──────────────
+//
+// Uses Gemini's url_context tool to FETCH the user's product/landing page
+// and score it against Cialdini's 6 principles of influence. For each
+// principle: 0-10 score, what's present, what's missing, the highest-impact
+// fix to apply next.
+
+export type CialdiniPrincipleScore = {
+  principle: string;        // "Reciprocity" | "Commitment & Consistency" | "Social Proof" | "Authority" | "Liking" | "Scarcity"
+  score:     number;        // 0-10
+  whats_working:  string;   // 1-2 sentences
+  whats_missing:  string;   // 1-2 sentences
+  fix:            string;   // 1 concrete improvement
+};
+
+export type CialdiniAudit = {
+  summary:     string;                       // 2-3 sentence read of the page's overall persuasion strength
+  overall_score: number;                     // 0-100 (weighted average across the 6 principles)
+  scores:      CialdiniPrincipleScore[];     // one per principle, in standard order
+  highest_impact_fix: string;                // 1-2 sentence next-action: which principle to fix first and why
+};
+
+const CIALDINI_PRINCIPLE_NAMES = [
+  "Reciprocity",
+  "Commitment & Consistency",
+  "Social Proof",
+  "Authority",
+  "Liking",
+  "Scarcity",
+] as const;
+
+export async function auditCialdini(input: { url: string }): Promise<CialdiniAudit> {
+  const prompt = `You are a direct-response copywriter trained on Cialdini's "Influence". A Scale Lab user wants their product page or landing page audited against Cialdini's 6 principles. The URL is below — fetch it and score it.
+
+URL: ${input.url}
+
+Score each principle 0-10 based on what's actually on the page. Be honest — most pages score 3-5 on most principles. A 9 or 10 is rare and must be earned.
+
+Return a JSON object:
+{
+  "summary": "2-3 sentences. What's the page's overall persuasion posture? Does it lean on any principle? What's the dominant impression?",
+  "overall_score": 0-100, "weighted average — Social Proof and Authority count double for ecom.",
+  "scores": [
+    { "principle": "Reciprocity",              "score": 0-10, "whats_working": "what's actually there", "whats_missing": "what's not", "fix": "specific concrete improvement" },
+    { "principle": "Commitment & Consistency", "score": 0-10, ... },
+    { "principle": "Social Proof",             "score": 0-10, ... },
+    { "principle": "Authority",                "score": 0-10, ... },
+    { "principle": "Liking",                   "score": 0-10, ... },
+    { "principle": "Scarcity",                 "score": 0-10, ... }
+  ],
+  "highest_impact_fix": "1-2 sentences naming the lowest-scoring principle that has the highest expected ROI to fix, plus the concrete next action."
+}
+
+Quality rules:
+- For "whats_working" — name SPECIFIC elements you saw on the page, not generic categories. "Trust badges (Stripe, Shopify Secure) above the buy button" not "Trust signals present".
+- For "whats_missing" — be specific too. "No founder photo or named author on the about section" not "Missing personality".
+- For "fix" — exact action. "Add a 30-second founder video at the top of the product page explaining why you built this." not "Add personality".
+- If the URL fetch fails (page is JS-only or blocked), do your best from any available context, and note it transparently in the summary.
+- For ecom product pages, weight Social Proof and Authority higher than Liking and Reciprocity in the overall_score calculation.`;
+
+  // Pass the URL to Gemini's url_context tool. If Gemini fails, the chain
+  // falls through to Groq which will reason from the URL string + heuristics.
+  const raw = await callAI(
+    {
+      systemPrompt: SYSTEM_PROMPT,
+      userPrompt:   prompt,
+      json:         true,
+      temperature:  0.4,
+      urls:         [input.url],
+    },
+    "growth",
+  );
+  const parsed = JSON.parse(raw);
+
+  // Defensive normalisation — make sure scores array is exactly 6 items in
+  // the expected order, even if the model skipped or duplicated one
+  const scoresMap = new Map<string, Record<string, unknown>>();
+  if (Array.isArray(parsed.scores)) {
+    for (const s of parsed.scores) {
+      const name = String(s?.principle ?? "").trim();
+      if (name) scoresMap.set(name, s);
+    }
+  }
+  const scores: CialdiniPrincipleScore[] = CIALDINI_PRINCIPLE_NAMES.map(name => {
+    const s = scoresMap.get(name) ?? {};
+    return {
+      principle:     name,
+      score:         Math.max(0, Math.min(10, Math.round(Number(s.score) || 0))),
+      whats_working: String(s.whats_working ?? "").slice(0, 400),
+      whats_missing: String(s.whats_missing ?? "").slice(0, 400),
+      fix:           String(s.fix           ?? "").slice(0, 400),
+    };
+  });
+
+  return {
+    summary:            String(parsed.summary ?? "").slice(0, 800),
+    overall_score:      Math.max(0, Math.min(100, Math.round(Number(parsed.overall_score) || 0))),
+    scores,
+    highest_impact_fix: String(parsed.highest_impact_fix ?? "").slice(0, 600),
+  };
+}
+
 // ── Module Q&A (AI assistant) ────────────────────────────────
 
 export async function answerModuleQuestion(input: {
