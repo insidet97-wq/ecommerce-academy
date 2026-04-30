@@ -9,7 +9,7 @@ export const revalidate = 300; // 5 min ISR
 export const metadata: Metadata = {
   title: "Blog — First Sale Lab",
   description: "Practical, no-fluff articles on dropshipping, niche selection, ads, and turning ecommerce learners into ecommerce sellers.",
-  alternates: { canonical: "https://firstsalelab.com/blog" },
+  alternates: { canonical: "https://www.firstsalelab.com/blog" },
 };
 
 type BlogListItem = {

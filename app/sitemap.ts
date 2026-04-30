@@ -1,7 +1,10 @@
 import type { MetadataRoute } from "next";
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  const base = "https://firstsalelab.com";
+  // Use the canonical www host so Google crawls URLs directly without
+  // hitting the apex → www middleware redirect (which would get flagged as
+  // "Page with redirect" in Search Console).
+  const base = "https://www.firstsalelab.com";
 
   return [
     {

@@ -558,10 +558,10 @@ export default function Home() {
     "@graph": [
       {
         "@type": "Organization",
-        "@id": "https://firstsalelab.com/#organization",
+        "@id": "https://www.firstsalelab.com/#organization",
         "name": "First Sale Lab",
-        "url": "https://firstsalelab.com",
-        "logo": "https://firstsalelab.com/logo.png",
+        "url": "https://www.firstsalelab.com",
+        "logo": "https://www.firstsalelab.com/logo.png",
         "description": "First Sale Lab is a freemium ecommerce course that gets complete beginners to their first Shopify sale through 12 focused modules.",
         "contactPoint": {
           "@type": "ContactPoint",
@@ -571,13 +571,13 @@ export default function Home() {
       },
       {
         "@type": "Course",
-        "@id": "https://firstsalelab.com/#course",
+        "@id": "https://www.firstsalelab.com/#course",
         "name": "First Sale Lab — From Zero to First Sale",
         "description": "12 focused ecommerce modules that take complete beginners from idea to first Shopify sale. Modules 1–6 are free. Pro unlocks traffic, ads, conversions, and scaling.",
-        "url": "https://firstsalelab.com",
+        "url": "https://www.firstsalelab.com",
         "provider": {
           "@type": "Organization",
-          "@id": "https://firstsalelab.com/#organization",
+          "@id": "https://www.firstsalelab.com/#organization",
         },
         "educationalLevel": "Beginner",
         "teaches": "Shopify dropshipping, niche selection, product research, TikTok organic traffic, Meta ads, conversion optimisation, email marketing, ecommerce metrics (CPA, ROAS, AOV), persuasion copywriting, A/B testing, UGC creative strategy, profitable ad scaling",
@@ -595,7 +595,7 @@ export default function Home() {
             "price": "0",
             "priceCurrency": "USD",
             "availability": "https://schema.org/InStock",
-            "url": "https://firstsalelab.com/signup",
+            "url": "https://www.firstsalelab.com/signup",
           },
           {
             "@type": "Offer",
@@ -603,7 +603,7 @@ export default function Home() {
             "price": "19",
             "priceCurrency": "USD",
             "availability": "https://schema.org/InStock",
-            "url": "https://firstsalelab.com/upgrade?tier=pro",
+            "url": "https://www.firstsalelab.com/upgrade?tier=pro",
           },
           {
             "@type": "Offer",
@@ -611,7 +611,7 @@ export default function Home() {
             "price": "49",
             "priceCurrency": "USD",
             "availability": "https://schema.org/InStock",
-            "url": "https://firstsalelab.com/upgrade?tier=growth",
+            "url": "https://www.firstsalelab.com/upgrade?tier=growth",
           },
         ],
       },

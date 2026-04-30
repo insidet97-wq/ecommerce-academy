@@ -39,7 +39,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   const post = await getPost(slug);
   if (!post) return { title: "Article not found" };
 
-  const url = `https://firstsalelab.com/blog/${post.slug}`;
+  const url = `https://www.firstsalelab.com/blog/${post.slug}`;
   return {
     title: `${post.title} | First Sale Lab`,
     description: post.excerpt ?? undefined,
@@ -90,9 +90,9 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
     "headline": post.title,
     "description": post.excerpt,
     "datePublished": post.published_at,
-    "author": { "@type": "Organization", "name": "First Sale Lab", "url": "https://firstsalelab.com" },
-    "publisher": { "@type": "Organization", "name": "First Sale Lab", "url": "https://firstsalelab.com" },
-    "mainEntityOfPage": `https://firstsalelab.com/blog/${post.slug}`,
+    "author": { "@type": "Organization", "name": "First Sale Lab", "url": "https://www.firstsalelab.com" },
+    "publisher": { "@type": "Organization", "name": "First Sale Lab", "url": "https://www.firstsalelab.com" },
+    "mainEntityOfPage": `https://www.firstsalelab.com/blog/${post.slug}`,
   };
 
   return (

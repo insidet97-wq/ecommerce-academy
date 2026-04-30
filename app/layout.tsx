@@ -22,7 +22,7 @@ export const metadata: Metadata = {
   },
   description:
     "12 focused modules, real tools, and a personalised roadmap that gets complete beginners to their first online sale.",
-  metadataBase: new URL("https://firstsalelab.com"),
+  metadataBase: new URL("https://www.firstsalelab.com"),
   other: {
     "google-adsense-account": "ca-pub-1382028135058819",
   },
@@ -32,7 +32,7 @@ export const metadata: Metadata = {
     locale:      "en_US",
     title:       "First Sale Lab — Stop learning. Start selling.",
     description: "12 focused modules, real tools, and a personalised roadmap that gets complete beginners to their first online sale.",
-    url:         "https://firstsalelab.com",
+    url:         "https://www.firstsalelab.com",
   },
   twitter: {
     card:        "summary_large_image",

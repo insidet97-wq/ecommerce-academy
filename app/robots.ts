@@ -9,6 +9,6 @@ export default function robots(): MetadataRoute.Robots {
         disallow: ["/dashboard", "/admin", "/pro", "/modules", "/api", "/certificate"],
       },
     ],
-    sitemap: "https://firstsalelab.com/sitemap.xml",
+    sitemap: "https://www.firstsalelab.com/sitemap.xml",
   };
 }
