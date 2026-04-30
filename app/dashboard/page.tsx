@@ -186,7 +186,11 @@ export default function DashboardPage() {
 
       const [progressRes, profileRes, aiToolRes, supplierValRes] = await Promise.all([
         supabase.from("user_progress").select("module_id").eq("user_id", user.id),
-        supabase.from("user_profiles").select("track, start_module, goal, first_name, streak_days, last_active, is_pro, is_growth, stripe_customer_id").eq("id", user.id).single(),
+        // Use `*` rather than enumerating columns — that way a single column
+        // rename or missing migration doesn't 400 the whole fetch and silently
+        // make the user look like Free. Columns we don't render are just
+        // ignored by the destructuring below.
+        supabase.from("user_profiles").select("*").eq("id", user.id).single(),
         // For the getting-started checklist: has the user touched any tool?
         // Two HEAD-only count queries (no rows returned). Either one being non-zero
         // is enough to check off the "Try a tool" milestone.
