@@ -81,15 +81,6 @@ export default function AuthCallbackPage() {
             firstWord(ident.name)        ||
             "";
 
-          // Diagnostic so we can see what Google actually sent if firstName
-          // is still empty after all fallbacks. Safe to log — no secrets.
-          if (!firstName) {
-            console.warn("[auth/callback] empty firstName after fallbacks:", {
-              user_metadata: meta,
-              identity_data: ident,
-            });
-          }
-
           // Pull quiz results from localStorage if the user took the quiz before signing in
           let quizFields: Record<string, unknown> = {};
           try {
