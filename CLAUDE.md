@@ -191,6 +191,7 @@ CRON_SECRET
 
 | What | Detail |
 |------|--------|
+| **🚨 CRITICAL — RLS lockdown on `user_profiles` (and all sibling tables) after a real exploit** | A friend acting as pen-tester demonstrated a live exploit: with the (publicly-exposed) `NEXT_PUBLIC_SUPABASE_ANON_KEY` plus their own logged-in JWT, they could `PATCH /rest/v1/user_profiles?id=eq.<self>` directly and flip `is_pro=true, is_growth=true` — granting themselves Scale Lab without paying. Root cause: RLS was never enabled on `user_profiles` (Supabase's default is OFF), so PostgREST happily applied any owner-scoped UPDATE the JWT identified. **Fix landed in three layers:** (1) **RLS enabled** on `user_profiles` with three policies — users can SELECT/INSERT/UPDATE only `WHERE auth.uid() = id`, no DELETE policy at all. Same RLS pattern applied to `user_progress`, `ai_tool_log`, `module_qa_log`, `supplier_validations`, `referrals` (read own only), `niche_leads`, `email_events`, `blog_posts` (public read of `status='published'` only), `stripe_webhook_events`. (2) **Column-protection trigger** `protect_user_profile_columns_trg` on `user_profiles` BEFORE UPDATE that hard-blocks writes to `is_pro`, `is_growth`, `stripe_customer_id`, `stripe_subscription_id`, `streak_days`, `last_active`, `reengagement_sent_at`, `streak_save_email_date`, `referral_code` whenever `current_user IN ('authenticated', 'anon')`. The trigger is **`SECURITY INVOKER`** (the default) — earlier draft used `SECURITY DEFINER` which silently broke the protection because `current_user` inside a definer function returns the function's owner (postgres) not the calling role, so the guard was always false and writes went through. Took two debug rounds to find this — documented here so we don't repeat it. (3) **Service-role API route for streaks**: `app/api/streak/route.ts` (new) takes the bearer token, validates the user, then writes `streak_days`/`last_active` via service role (bypassing the trigger). `lib/streak.ts` rewritten to call the route via `fetch` instead of touching Supabase directly. Service role still bypasses RLS + the trigger entirely, so the Stripe webhook + cron jobs + `/api/admin/users/[id]/(pro\|growth)` admin-grant routes keep working unchanged. **Verification:** ran the original PATCH exploit from the browser console after lockdown — server returned `400 Bad Request` with body `{ code: 'P0001', message: 'is_pro is read-only' }`. Streak counter still increments on dashboard reload through the new route. **Two ghost rows cleaned up:** the pen-tester's account (`joyefac538@gixpos.com`) and a separate test row (Abdellah) that had been ghost-upgraded earlier; the `testhack147@yopmail.com` debug account was reset and then deleted. **Lessons:** Supabase's anon key is meant to be public, RLS is what actually protects rows — turning RLS off is equivalent to no security. Any future table that holds tier/billing/auth state must enable RLS at creation time AND have its sensitive columns protected by trigger if end users own rows in the table. |
 | **Pre-launch security pass 3 — small hardening from third audit (Stripe is live, real money flowing)** | Third pre-launch audit done after Stripe went live. Most "critical/high" findings dissolved on closer inspection (false positives: email regex `\s` already blocks `\n`/`\r`; `blog_posts` has no `user_id` FK so nothing to cascade; niche_picker already toLowerCases email; OAuth race admitted-mitigated by agent). **Real fixes shipped:** (1) `/api/contact/route.ts` — explicit `\r\n` block on email field as defense-in-depth, plus a 50-char cap on the `subject` field so future code changes can't accidentally render unbounded user input. (2) Dashboard self-heal + OAuth callback — `first_name` now `slice(0, 30)` on upsert, matching the display-side cap applied everywhere else (keeps DB+UI in sync, prevents storing names we'd never render). (3) Password strength on `/signup` + `/reset-password` — bumped minimum from Supabase's 6-char default to 8 chars + at least one letter + one number; with Stripe live, weak passwords are an account-takeover vector against paying users. **Known not-addressed:** contact form rate-limit is in-memory-per-Vercel-instance (bounded by honeypot + low scale, would need Supabase/KV for perfect coverage); no CSP header (inline styles + AdSense + GA4 + Stripe.js make strict CSP painful). Realistic launch readiness ~90/100 — structural security is solid across three audit passes |
 | **Blog generator no longer produces duplicates** | Owner spotted that admin "Generate" button kept producing similar posts (Find Your Goldmine Niche / Find Your Profitable Niche / etc). Root cause: `generateBlogPost()` picked at random from a static 12-topic `BLOG_TOPIC_POOL` and never passed existing titles to the LLM, so the model had no idea what was already published. Slug-collision suffix kept dupes from breaking the UNIQUE constraint but didn't prevent semantic duplication. **Fix:** (1) `generateBlogPost(suggestedTopic?, existingTitles?)` now accepts a list of recent titles. The prompt explicitly tells the LLM "we have ALREADY PUBLISHED these — pick something genuinely different" with a numbered list. (2) The pool expanded from 12 → 50+ topics covering the full curriculum (24 modules + 10 AI tools' worth of source material) so there's headroom. (3) The pool is now framed as INSPIRATION, not a strict pick-one — the LLM is told to reframe / narrow / pick a different angle if a pool topic overlaps with an existing post. (4) Admin override path preserved: if `suggestedTopic` is passed, the generator uses it directly. (5) Both `app/api/cron/blog/route.ts` and `app/api/admin/generate/blog/route.ts` now fetch the most recent 30 titles before calling the generator and pass them in. (6) Slug-collision fallback retained as final defense (timestamp-suffix). Net result: every generation is now "informed" of what already exists; pool exhaustion isn't possible at current scale; admin can still override |
 | **OAuth resilience: self-heal missing user_profiles + maybeSingle + greeting fix** | Two issues spotted from the second Google OAuth test: (1) Owner got authenticated by Google but the `/auth/callback` page failed mid-flight with Supabase's "Session as retrieved from URL was issued over 120s ago" stale-token security check. They ended up logged in with NO `user_profiles` row, and subsequent loads 406'd on `.single()`. (2) Logged-in homepage rendered `Hey, . 👋` (literal comma + period + emoji) when `firstName` was empty because the template was hard-coded that way. **Fixes:** All client-side `user_profiles` fetches switched from `.single()` (406s on missing row) to `.maybeSingle()` (returns null cleanly) — affects `app/page.tsx`, `app/dashboard/page.tsx`, `app/modules/[id]/page.tsx`. Dashboard now **self-heals** if profile row is missing on load: extracts the best name from `user_metadata` + `identities[0].identity_data`, upserts a fresh profile row, re-fetches, and uses it. Only runs once — next dashboard visit finds the row. Greeting on the logged-in homepage now uses `Hey{firstName ? ", " + firstName : ""} 👋` so empty names render cleanly without orphan commas. Net effect: any OAuth callback failure (stale token, network hiccup, page reload mid-callback) no longer leaves the user stuck — dashboard heals it automatically. Diagnostic console.warn from the prior debug session is now removed |
@@ -263,6 +264,9 @@ All security + data-protection work for live-mode launch is shipped:
 - Getting Started checklist (with admin/power-user fixes)
 - 2 new AI tools (Product Description Writer + Subject Line Tester)
 
+### ✅ RLS lockdown deployed (2026-05-01)
+All previously-public-via-anon-key tables are now RLS-protected. End users cannot self-upgrade tier flags, change Stripe IDs, inflate streaks, or read other users' rows. The Stripe webhook + admin endpoints use the service role and are unaffected. See "Recent changes" entry above for the full story including the `SECURITY DEFINER` gotcha that broke the trigger on the first deploy.
+
 ### 🔄 SQL migration needed before next deploy fully takes effect
 **ONE new table required** (Stripe webhook idempotency):
 ```sql
@@ -299,6 +303,68 @@ Owner walked through the live-mode flip end-to-end and verified with a real $19 
 
 ### 📜 Full SQL migrations (run all once in the Supabase SQL editor — `IF NOT EXISTS` makes them safe to re-run)
   ```sql
+  -- 🚨 RLS LOCKDOWN (run on any DB where RLS isn't already on user_profiles).
+  -- Without this, anyone with the anon key + their own JWT can PATCH their
+  -- row directly and self-grant Pro/Growth. Trigger MUST be SECURITY INVOKER
+  -- (default) — SECURITY DEFINER makes current_user return the function owner
+  -- not the caller, silently breaking the protection.
+  ALTER TABLE user_profiles ENABLE ROW LEVEL SECURITY;
+
+  DROP POLICY IF EXISTS "Users can read own profile"   ON user_profiles;
+  DROP POLICY IF EXISTS "Users can insert own profile" ON user_profiles;
+  DROP POLICY IF EXISTS "Users can update own profile" ON user_profiles;
+  CREATE POLICY "Users can read own profile"   ON user_profiles FOR SELECT USING (auth.uid() = id);
+  CREATE POLICY "Users can insert own profile" ON user_profiles FOR INSERT WITH CHECK (auth.uid() = id);
+  CREATE POLICY "Users can update own profile" ON user_profiles FOR UPDATE USING (auth.uid() = id) WITH CHECK (auth.uid() = id);
+
+  CREATE OR REPLACE FUNCTION protect_user_profile_columns()
+  RETURNS trigger LANGUAGE plpgsql SET search_path = public AS $$
+  BEGIN
+    IF current_user IN ('authenticated', 'anon') THEN
+      IF NEW.is_pro                 IS DISTINCT FROM OLD.is_pro                 THEN RAISE EXCEPTION 'is_pro is read-only'; END IF;
+      IF NEW.is_growth              IS DISTINCT FROM OLD.is_growth              THEN RAISE EXCEPTION 'is_growth is read-only'; END IF;
+      IF NEW.stripe_customer_id     IS DISTINCT FROM OLD.stripe_customer_id     THEN RAISE EXCEPTION 'stripe_customer_id is read-only'; END IF;
+      IF NEW.stripe_subscription_id IS DISTINCT FROM OLD.stripe_subscription_id THEN RAISE EXCEPTION 'stripe_subscription_id is read-only'; END IF;
+      IF NEW.streak_days            IS DISTINCT FROM OLD.streak_days            THEN RAISE EXCEPTION 'streak_days is read-only'; END IF;
+      IF NEW.last_active            IS DISTINCT FROM OLD.last_active            THEN RAISE EXCEPTION 'last_active is read-only'; END IF;
+      IF NEW.reengagement_sent_at   IS DISTINCT FROM OLD.reengagement_sent_at   THEN RAISE EXCEPTION 'reengagement_sent_at is read-only'; END IF;
+      IF NEW.streak_save_email_date IS DISTINCT FROM OLD.streak_save_email_date THEN RAISE EXCEPTION 'streak_save_email_date is read-only'; END IF;
+      IF NEW.referral_code          IS DISTINCT FROM OLD.referral_code          THEN RAISE EXCEPTION 'referral_code is read-only'; END IF;
+    END IF;
+    RETURN NEW;
+  END $$;
+
+  DROP TRIGGER IF EXISTS protect_user_profile_columns_trg ON user_profiles;
+  CREATE TRIGGER protect_user_profile_columns_trg
+    BEFORE UPDATE ON user_profiles
+    FOR EACH ROW EXECUTE FUNCTION protect_user_profile_columns();
+
+  -- Sibling tables: lock to owner via RLS. Service role bypasses these.
+  ALTER TABLE user_progress         ENABLE ROW LEVEL SECURITY;
+  ALTER TABLE ai_tool_log           ENABLE ROW LEVEL SECURITY;
+  ALTER TABLE module_qa_log         ENABLE ROW LEVEL SECURITY;
+  ALTER TABLE supplier_validations  ENABLE ROW LEVEL SECURITY;
+  ALTER TABLE referrals             ENABLE ROW LEVEL SECURITY;
+  ALTER TABLE niche_leads           ENABLE ROW LEVEL SECURITY;
+  ALTER TABLE email_events          ENABLE ROW LEVEL SECURITY;
+  ALTER TABLE blog_posts            ENABLE ROW LEVEL SECURITY;
+  ALTER TABLE stripe_webhook_events ENABLE ROW LEVEL SECURITY;
+
+  DROP POLICY IF EXISTS "user_progress own"        ON user_progress;
+  DROP POLICY IF EXISTS "ai_tool_log own"          ON ai_tool_log;
+  DROP POLICY IF EXISTS "module_qa_log own"        ON module_qa_log;
+  DROP POLICY IF EXISTS "supplier_validations own" ON supplier_validations;
+  DROP POLICY IF EXISTS "referrals read own"       ON referrals;
+  DROP POLICY IF EXISTS "blog public published"    ON blog_posts;
+
+  CREATE POLICY "user_progress own"        ON user_progress        FOR ALL    USING (auth.uid() = user_id) WITH CHECK (auth.uid() = user_id);
+  CREATE POLICY "ai_tool_log own"          ON ai_tool_log          FOR ALL    USING (auth.uid() = user_id) WITH CHECK (auth.uid() = user_id);
+  CREATE POLICY "module_qa_log own"        ON module_qa_log        FOR ALL    USING (auth.uid() = user_id) WITH CHECK (auth.uid() = user_id);
+  CREATE POLICY "supplier_validations own" ON supplier_validations FOR ALL    USING (auth.uid() = user_id) WITH CHECK (auth.uid() = user_id);
+  CREATE POLICY "referrals read own"       ON referrals            FOR SELECT USING (auth.uid() = referrer_id OR auth.uid() = referred_id);
+  CREATE POLICY "blog public published"    ON blog_posts           FOR SELECT USING (status = 'published');
+  -- niche_leads / email_events / stripe_webhook_events: no policies = service-role-only (correct).
+
   -- Scale Lab tier (already done 2026-04-28)
   ALTER TABLE user_profiles ADD COLUMN IF NOT EXISTS is_growth boolean NOT NULL DEFAULT false;
 
