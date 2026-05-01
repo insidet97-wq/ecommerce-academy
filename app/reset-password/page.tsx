@@ -32,8 +32,14 @@ export default function ResetPasswordPage() {
     e.preventDefault();
     setError("");
 
-    if (password.length < 6) {
-      setError("Password must be at least 6 characters.");
+    // Stricter than Supabase's 6-char default. With Stripe live, weak passwords
+    // become an account-takeover vector against paying users.
+    if (password.length < 8) {
+      setError("Password must be at least 8 characters.");
+      return;
+    }
+    if (!/[0-9]/.test(password) || !/[a-zA-Z]/.test(password)) {
+      setError("Password must contain at least one letter and one number.");
       return;
     }
     if (password !== confirm) {

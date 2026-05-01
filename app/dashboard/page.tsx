@@ -212,10 +212,14 @@ export default function DashboardPage() {
         const ident = (user.identities?.[0]?.identity_data ?? {}) as Record<string, unknown>;
         const asString  = (v: unknown) => (typeof v === "string" ? v.trim() : "");
         const firstWord = (v: unknown) => asString(v).split(/\s+/)[0] ?? "";
-        const name =
+        const rawName =
           asString (meta.given_name)  || asString (ident.given_name) ||
           firstWord(meta.full_name)   || firstWord(ident.full_name)  ||
           firstWord(meta.name)        || firstWord(ident.name)       || "";
+        // Cap at 30 chars to match the display-side rule applied everywhere
+        // else (dashboard greeting, welcome card, emails). Keeps the DB and
+        // the UI in sync — never store a name we wouldn't actually render.
+        const name = rawName.slice(0, 30);
         await supabase
           .from("user_profiles")
           .upsert({ id: user.id, first_name: name }, { onConflict: "id" });

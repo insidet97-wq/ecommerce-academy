@@ -50,6 +50,19 @@ function SignupPageInner() {
   async function handleSignup(e: React.FormEvent) {
     e.preventDefault();
     setError("");
+
+    // Password strength — stricter than Supabase's 6-char default since
+    // Stripe is live and weak passwords are an account-takeover vector
+    // against paying users. 8+ chars + at least one letter + one number.
+    if (password.length < 8) {
+      setError("Password must be at least 8 characters.");
+      return;
+    }
+    if (!/[0-9]/.test(password) || !/[a-zA-Z]/.test(password)) {
+      setError("Password must contain at least one letter and one number.");
+      return;
+    }
+
     setLoading(true);
 
     const { data, error } = await supabase.auth.signUp({ email, password });

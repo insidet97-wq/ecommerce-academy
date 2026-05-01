@@ -70,11 +70,21 @@ export async function POST(request: Request) {
   if (name.length < 2 || name.length > 120) {
     return NextResponse.json({ error: "Please enter your name (2–120 chars)." }, { status: 400 });
   }
-  if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email) || email.length > 200) {
+  // Email regex `\s` covers `\n` and `\r`, so a header-injection payload
+  // like "user@example.com\nBcc: attacker@..." would fail validation. The
+  // explicit newline check below is belt-and-braces — even if the regex
+  // ever loosens, headers can't be smuggled through replyTo.
+  if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email) || email.length > 200 || /[\r\n]/.test(email)) {
     return NextResponse.json({ error: "Please enter a valid email." }, { status: 400 });
   }
   if (message.length < 20 || message.length > 3000) {
     return NextResponse.json({ error: "Message must be between 20 and 3000 characters." }, { status: 400 });
+  }
+  // Cap subject defensively — even though it's only used as a lookup key
+  // into SUBJECT_LABELS, capping prevents future accidental exposure if
+  // the field is ever rendered directly.
+  if (subject.length > 50) {
+    return NextResponse.json({ error: "Invalid subject." }, { status: 400 });
   }
   const subjectLabel = SUBJECT_LABELS[subject] ?? "General question";
 

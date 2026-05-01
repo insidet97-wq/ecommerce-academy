@@ -72,14 +72,15 @@ export default function AuthCallbackPage() {
           const asString  = (v: unknown): string => (typeof v === "string" ? v.trim() : "");
           const firstWord = (v: unknown): string => asString(v).split(/\s+/)[0] ?? "";
 
-          const firstName: string =
+          const firstName: string = (
             asString (meta.given_name)   ||
             asString (ident.given_name)  ||
             firstWord(meta.full_name)    ||
             firstWord(ident.full_name)   ||
             firstWord(meta.name)         ||
             firstWord(ident.name)        ||
-            "";
+            ""
+          ).slice(0, 30); // matches display-side cap everywhere else
 
           // Pull quiz results from localStorage if the user took the quiz before signing in
           let quizFields: Record<string, unknown> = {};
