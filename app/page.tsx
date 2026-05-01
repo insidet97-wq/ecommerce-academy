@@ -169,7 +169,8 @@ export default function Home() {
         .from("user_profiles")
         .select("first_name, is_pro, is_growth")
         .eq("id", session.user.id)
-        .single();
+        .maybeSingle();   // returns null cleanly if profile row doesn't exist
+                           // yet (e.g. OAuth callback didn't complete setup)
       // Only use first_name if it looks like a real name. Email prefix is
       // never a good substitute — better to show no name than the wrong one.
       const realName = (profile?.first_name ?? "").trim();
@@ -334,7 +335,7 @@ export default function Home() {
               className="text-4xl sm:text-5xl font-extrabold text-white mb-5"
               style={{ lineHeight: "1.05", letterSpacing: "-0.04em" }}
             >
-              Hey, {firstName}. 👋
+              Hey{firstName ? `, ${firstName}` : ""} 👋
             </h1>
 
             {/* Dynamic subtext */}

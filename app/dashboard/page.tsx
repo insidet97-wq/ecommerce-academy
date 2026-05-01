@@ -190,7 +190,7 @@ export default function DashboardPage() {
         // rename or missing migration doesn't 400 the whole fetch and silently
         // make the user look like Free. Columns we don't render are just
         // ignored by the destructuring below.
-        supabase.from("user_profiles").select("*").eq("id", user.id).single(),
+        supabase.from("user_profiles").select("*").eq("id", user.id).maybeSingle(),
         // For the getting-started checklist: has the user touched any tool?
         // Two HEAD-only count queries (no rows returned). Either one being non-zero
         // is enough to check off the "Try a tool" milestone.
@@ -200,17 +200,41 @@ export default function DashboardPage() {
 
       setCompleted((progressRes.data ?? []).map((r: { module_id: number }) => r.module_id));
       setHasUsedTool((aiToolRes.count ?? 0) > 0 || (supplierValRes.count ?? 0) > 0);
+
+      // Self-heal: if the user is authenticated but has no user_profiles row
+      // (e.g. OAuth callback failed mid-flight, or Supabase auto-created the
+      // auth.users row without our profile row), create the profile row now
+      // using whatever name we can extract from the auth metadata. Only runs
+      // once — next dashboard load will find the row and skip this branch.
+      let profileData = profileRes.data;
+      if (!profileData) {
+        const meta  = (user.user_metadata ?? {}) as Record<string, unknown>;
+        const ident = (user.identities?.[0]?.identity_data ?? {}) as Record<string, unknown>;
+        const asString  = (v: unknown) => (typeof v === "string" ? v.trim() : "");
+        const firstWord = (v: unknown) => asString(v).split(/\s+/)[0] ?? "";
+        const name =
+          asString (meta.given_name)  || asString (ident.given_name) ||
+          firstWord(meta.full_name)   || firstWord(ident.full_name)  ||
+          firstWord(meta.name)        || firstWord(ident.name)       || "";
+        await supabase
+          .from("user_profiles")
+          .upsert({ id: user.id, first_name: name }, { onConflict: "id" });
+        const { data: rehydrated } = await supabase
+          .from("user_profiles").select("*").eq("id", user.id).maybeSingle();
+        profileData = rehydrated ?? { id: user.id, first_name: name };
+      }
+
       // Always call setProfile — even if no row exists, use safe defaults
       setProfile({
-        track:               profileRes.data?.track               ?? null,
-        start_module:        profileRes.data?.start_module        ?? 1,
-        goal:                profileRes.data?.goal                ?? null,
-        first_name:          profileRes.data?.first_name          ?? null,
-        streak_days:         profileRes.data?.streak_days         ?? 0,
-        last_active:         profileRes.data?.last_active         ?? null,
-        is_pro:              (profileRes.data?.is_pro ?? false)   || justUpgraded,
-        is_growth:           (profileRes.data?.is_growth ?? false) || upgradedToGrowth,
-        stripe_customer_id:  profileRes.data?.stripe_customer_id ?? null,
+        track:               profileData?.track               ?? null,
+        start_module:        profileData?.start_module        ?? 1,
+        goal:                profileData?.goal                ?? null,
+        first_name:          profileData?.first_name          ?? null,
+        streak_days:         profileData?.streak_days         ?? 0,
+        last_active:         profileData?.last_active         ?? null,
+        is_pro:              (profileData?.is_pro ?? false)   || justUpgraded,
+        is_growth:           (profileData?.is_growth ?? false) || upgradedToGrowth,
+        stripe_customer_id:  profileData?.stripe_customer_id ?? null,
       });
       setLoading(false);
     }

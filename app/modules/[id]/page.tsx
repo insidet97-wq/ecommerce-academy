@@ -119,7 +119,7 @@ export default function ModulePage() {
         .from("user_profiles")
         .select("first_name, is_pro, is_growth")
         .eq("id", user.id)
-        .single();
+        .maybeSingle();   // null cleanly if no profile row, instead of 406
       // Use first_name if real, otherwise fall back to "there" (never to email prefix).
       const realName = (profile?.first_name ?? "").trim();
       setFirstName(realName.length > 0 && realName.length < 30 ? realName : "there");
