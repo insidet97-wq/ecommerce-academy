@@ -280,14 +280,8 @@ Other older migrations (referral codes, Q&A log, ai_tool_log, etc.) — already 
 ### ✅ 4 new Growth-tier AI tools shipped (2026-04-30)
 The Scale Lab quartet brainstormed yesterday is now live: **Grand Slam Offer Builder** (Module 17), **Cialdini Page Audit** (Module 19, Gemini url_context), **AOV Optimization Audit** (Module 18, Gemini url_context), **Scale or Kill Decision Helper** (Module 23). All 4 are gated `tier === "growth"` only, 20/day rate limit each, logged to `ai_tool_log`. Pro and Free users see locked upgrade cards. Future-alt ideas if the owner wants to expand later: Customer Review Miner (URL → extract pain phrases) and Profit P&L Analyzer (paste numbers → contribution margin).
 
-### 🔄 Next session: Stripe live-mode flip
-Owner stepping away briefly; will resume to flip Stripe to live mode. Steps in one batch:
-1. Switch Pro to live keys (`STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY`)
-2. Re-point Stripe webhook to live endpoint (`https://www.firstsalelab.com/api/stripe/webhook`)
-3. Create live Stripe Products: **Pro $19/mo**, **Scale Lab $49/mo**, optionally **Pro $190/yr** + **Scale Lab $490/yr** (annual plans)
-4. Vercel env vars: `STRIPE_PRICE_ID`, `STRIPE_PRICE_ID_GROWTH`, optionally `STRIPE_PRICE_ID_ANNUAL` + `STRIPE_PRICE_ID_GROWTH_ANNUAL`
-5. Redeploy
-6. **Test the full flow with a real card on a non-admin account** before sharing the upgrade page widely (admin accounts bypass Stripe entirely so they can't be used for end-to-end testing)
+### ✅ Stripe live mode — DONE (2026-05-01)
+Owner walked through the live-mode flip end-to-end and verified with a real $19 Pro charge on a non-admin account: live products created (Pro $19/mo, Scale Lab $49/mo), live webhook endpoint at `https://www.firstsalelab.com/api/stripe/webhook` listening for `checkout.session.completed` + `customer.subscription.deleted` + `invoice.payment_failed`, all 5 Vercel env vars updated for Production (`STRIPE_SECRET_KEY`, `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY`, `STRIPE_WEBHOOK_SECRET`, `STRIPE_PRICE_ID`, `STRIPE_PRICE_ID_GROWTH`). Real-card test passed: checkout → webhook → DB → dashboard Pro badge → welcome email. Owner refunded the test charge. **Site now takes real money.** Annual plan products (`STRIPE_PRICE_ID_ANNUAL` + `STRIPE_PRICE_ID_GROWTH_ANNUAL`) still deferred — code path supports them but products not yet created.
 
 ### ⏳ External waiting (no action needed)
 - **Google AdSense site approval:** "Getting ready" as of last check. All three slot IDs configured in Vercel (`NEXT_PUBLIC_ADSENSE_SLOT_DASHBOARD`, `_MODULE`, `_CONTENT`). Once Google approves, ads fill automatically. Verify in incognito (admins are ad-free).
@@ -295,7 +289,7 @@ Owner stepping away briefly; will resume to flip Stripe to live mode. Steps in o
 - **Sitemap** submitted to Google Search Console — indexing takes days.
 
 ### 🛠 Owner-action operational state
-- **Stripe** is still in test mode — flip queued for next session (see above).
+- **Stripe** is LIVE ✅ — Pro $19 + Scale Lab $49 products created, webhook live at `https://www.firstsalelab.com/api/stripe/webhook`, signing secret + secret key + publishable key + price IDs all updated in Vercel Production env. Annual plan products still deferred.
 - **`support@firstsalelab.com`** mailbox is set up ✅
 - **Resend webhook** — endpoint configured, `RESEND_WEBHOOK_SECRET` set in Vercel ✅
 - **Gemini** paid tier 1 enabled with $5/mo budget alert + 30 req/min cap ✅
