@@ -521,7 +521,15 @@ export default function Home() {
               <span className="text-sm font-bold text-white" style={{ letterSpacing: "-0.3px" }}>First Sale Lab</span>
             </div>
             <p className="text-sm" style={{ color: "rgba(255,255,255,0.35)" }}>© 2026 First Sale Lab</p>
-            <div className="flex items-center gap-5">
+            <div className="flex items-center gap-5 flex-wrap justify-center">
+              <Link href="/about" className="text-xs" style={{ color: "rgba(255,255,255,0.35)" }}
+                onMouseEnter={e => (e.currentTarget.style.color = "rgba(255,255,255,0.6)")}
+                onMouseLeave={e => (e.currentTarget.style.color = "rgba(255,255,255,0.35)")}
+              >About</Link>
+              <Link href="/contact" className="text-xs" style={{ color: "rgba(255,255,255,0.35)" }}
+                onMouseEnter={e => (e.currentTarget.style.color = "rgba(255,255,255,0.6)")}
+                onMouseLeave={e => (e.currentTarget.style.color = "rgba(255,255,255,0.35)")}
+              >Contact</Link>
               <Link href="/privacy" className="text-xs" style={{ color: "rgba(255,255,255,0.35)" }}
                 onMouseEnter={e => (e.currentTarget.style.color = "rgba(255,255,255,0.6)")}
                 onMouseLeave={e => (e.currentTarget.style.color = "rgba(255,255,255,0.35)")}
@@ -1356,9 +1364,11 @@ export default function Home() {
           </div>
           <p className="text-sm text-gray-400">© 2026 · Built for complete beginners</p>
           <div className="flex items-center gap-5 flex-wrap justify-center">
-            <Link href="/niche-picker" className="text-xs text-gray-400 hover:text-gray-700">🎯 Niche Picker</Link>
+            <Link href="/niche-picker" className="text-xs text-gray-400 hover:text-gray-700">Niche Picker</Link>
             <Link href="/tools" className="text-xs text-gray-400 hover:text-gray-700">Free Tools</Link>
             <Link href="/blog" className="text-xs text-gray-400 hover:text-gray-700">Blog</Link>
+            <Link href="/about" className="text-xs text-gray-400 hover:text-gray-700">About</Link>
+            <Link href="/contact" className="text-xs text-gray-400 hover:text-gray-700">Contact</Link>
             <Link href="/privacy" className="text-xs text-gray-400 hover:text-gray-700">Privacy</Link>
             <Link href="/terms" className="text-xs text-gray-400 hover:text-gray-700">Terms</Link>
             <Link href="/login" className="text-xs text-gray-400 hover:text-gray-700">Log in</Link>
