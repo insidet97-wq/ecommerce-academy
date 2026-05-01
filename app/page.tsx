@@ -170,7 +170,10 @@ export default function Home() {
         .select("first_name, is_pro, is_growth")
         .eq("id", session.user.id)
         .single();
-      setFirstName(profile?.first_name || session.user.email?.split("@")[0] || "");
+      // Only use first_name if it looks like a real name. Email prefix is
+      // never a good substitute — better to show no name than the wrong one.
+      const realName = (profile?.first_name ?? "").trim();
+      setFirstName(realName.length > 0 && realName.length < 30 ? realName : "");
       // Admin email is treated as Scale Lab everywhere else — mirror that here.
       const admin = isAdmin(session.user.email);
       const growth = admin || (profile?.is_growth ?? false);

@@ -120,7 +120,9 @@ export default function ModulePage() {
         .select("first_name, is_pro, is_growth")
         .eq("id", user.id)
         .single();
-      setFirstName(profile?.first_name || user.email?.split("@")[0] || "there");
+      // Use first_name if real, otherwise fall back to "there" (never to email prefix).
+      const realName = (profile?.first_name ?? "").trim();
+      setFirstName(realName.length > 0 && realName.length < 30 ? realName : "there");
 
       const { data } = await supabase
         .from("user_progress")

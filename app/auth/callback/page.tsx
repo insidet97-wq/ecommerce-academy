@@ -62,13 +62,33 @@ export default function AuthCallbackPage() {
         const isFirstTime = !existingProfile;
 
         if (isFirstTime) {
-          // Pull the best name we can from Google's metadata
-          const meta = user.user_metadata ?? {};
+          // Supabase stores OAuth profile fields in two places depending on
+          // provider + version: `user.user_metadata` and the per-provider
+          // `user.identities[].identity_data`. Try both, with a chain of
+          // common name keys, before giving up.
+          const meta: Record<string, unknown>  = (user.user_metadata ?? {}) as Record<string, unknown>;
+          const ident: Record<string, unknown> = (user.identities?.[0]?.identity_data ?? {}) as Record<string, unknown>;
+
+          const asString  = (v: unknown): string => (typeof v === "string" ? v.trim() : "");
+          const firstWord = (v: unknown): string => asString(v).split(/\s+/)[0] ?? "";
+
           const firstName: string =
-            (typeof meta.given_name === "string" && meta.given_name.trim()) ||
-            (typeof meta.full_name  === "string" && meta.full_name.split(" ")[0].trim()) ||
-            (typeof meta.name       === "string" && meta.name.split(" ")[0].trim()) ||
+            asString (meta.given_name)   ||
+            asString (ident.given_name)  ||
+            firstWord(meta.full_name)    ||
+            firstWord(ident.full_name)   ||
+            firstWord(meta.name)         ||
+            firstWord(ident.name)        ||
             "";
+
+          // Diagnostic so we can see what Google actually sent if firstName
+          // is still empty after all fallbacks. Safe to log — no secrets.
+          if (!firstName) {
+            console.warn("[auth/callback] empty firstName after fallbacks:", {
+              user_metadata: meta,
+              identity_data: ident,
+            });
+          }
 
           // Pull quiz results from localStorage if the user took the quiz before signing in
           let quizFields: Record<string, unknown> = {};
@@ -115,7 +135,8 @@ export default function AuthCallbackPage() {
             }
           } catch {}
 
-          // Send welcome email — fire-and-forget, doesn't block the redirect
+          // Send welcome email — fire-and-forget, doesn't block the redirect.
+          // Surface failures to the console so they don't disappear silently.
           if (user.email && session.access_token) {
             const startModule = (quizFields.start_module as number) ?? 1;
             fetch("/api/send-welcome", {
@@ -130,7 +151,14 @@ export default function AuthCallbackPage() {
                 startModule,
                 userId: user.id,
               }),
-            }).catch(() => {});
+            })
+              .then(async res => {
+                if (!res.ok) {
+                  const body = await res.text().catch(() => "");
+                  console.error("[auth/callback] welcome email failed:", res.status, body);
+                }
+              })
+              .catch(err => console.error("[auth/callback] welcome email error:", err));
           }
         }
 
