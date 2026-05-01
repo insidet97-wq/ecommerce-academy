@@ -70,7 +70,8 @@ export default function PrivacyPage() {
               </thead>
               <tbody>
                 {[
-                  ["Supabase", "Database and authentication (EU/US servers)"],
+                  ["Supabase", "Database and authentication (EU/US servers). If you sign in with Google, Supabase brokers the OAuth handshake."],
+                  ["Google (sign-in)", "Optional sign-in via your Google account. Google sees only that you authenticated to firstsalelab.com — we receive your email address, name, and profile picture."],
                   ["Stripe", "Payment processing, subscriptions, and billing portal"],
                   ["Resend", "Transactional emails (welcome, module completion, weekly digest, etc.)"],
                   ["Groq", "AI generation for free / Pro-tier features (Niche Picker, blog, weekly product picks, ad copy). Inputs you provide are sent to Groq for processing."],

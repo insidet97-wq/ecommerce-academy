@@ -4,6 +4,7 @@ import { useState } from "react";
 import { supabase } from "@/lib/supabase";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import GoogleSignInButton from "@/components/GoogleSignInButton";
 
 const heroBg = { background: "linear-gradient(135deg, #1e1b4b 0%, #312e81 40%, #4c1d95 100%)" };
 
@@ -59,6 +60,18 @@ export default function LoginPage() {
             <Link href="/" className="text-lg font-bold text-gray-900">First Sale Lab</Link>
             <h1 className="mt-4 text-2xl font-bold text-gray-900">Welcome back</h1>
             <p className="mt-2 text-gray-500 text-sm">Continue your journey to your first sale.</p>
+          </div>
+
+          {/* Google sign-in — primary path for new and returning users alike. */}
+          <div className="mb-5">
+            <GoogleSignInButton label="Continue with Google" onError={msg => setError(msg)} />
+          </div>
+
+          {/* Divider */}
+          <div className="flex items-center gap-3 my-5">
+            <div className="flex-1 h-px bg-gray-200" />
+            <span className="text-xs font-medium text-gray-400 uppercase tracking-wider">or</span>
+            <div className="flex-1 h-px bg-gray-200" />
           </div>
 
           <form onSubmit={handleLogin} className="space-y-4">

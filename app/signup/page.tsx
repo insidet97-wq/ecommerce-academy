@@ -4,6 +4,7 @@ import { useState, useRef, useEffect, Suspense } from "react";
 import { supabase } from "@/lib/supabase";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
+import GoogleSignInButton from "@/components/GoogleSignInButton";
 
 const HERO_BG = "linear-gradient(135deg, #1e1b4b 0%, #312e81 40%, #4c1d95 100%)";
 const INDIGO  = "#6366f1";
@@ -124,6 +125,18 @@ function SignupPageInner() {
               Create your free account
             </h1>
             <p style={{ fontSize: 13, color: "#71717a" }}>Your personalised roadmap is waiting.</p>
+          </div>
+
+          {/* Google sign-up — fastest path. Skips the password form entirely. */}
+          <div style={{ marginBottom: 16 }}>
+            <GoogleSignInButton label="Sign up with Google" onError={msg => setError(msg)} />
+          </div>
+
+          {/* Divider */}
+          <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 14 }}>
+            <div style={{ flex: 1, height: 1, background: "#e4e4e7" }} />
+            <span style={{ fontSize: 11, fontWeight: 600, color: "#a1a1aa", textTransform: "uppercase", letterSpacing: "0.06em" }}>or with email</span>
+            <div style={{ flex: 1, height: 1, background: "#e4e4e7" }} />
           </div>
 
           <form onSubmit={handleSignup} style={{ display: "flex", flexDirection: "column", gap: 12 }}>
