@@ -10,6 +10,12 @@ export const dynamic = "force-dynamic";
  * Body (optional): { topic: string }
  *
  * Manually trigger a new blog draft. Admin-only.
+ *
+ * If `topic` is provided, the generator uses it directly (admin override).
+ * If not provided, the generator picks a fresh angle from the topic pool —
+ * existing titles are passed in as a "do not repeat" list to prevent the
+ * duplicate-generation problem we kept hitting (Find Your Goldmine Niche /
+ * Find Your Profitable Niche / etc).
  */
 export async function POST(request: Request) {
   const token = request.headers.get("authorization")?.replace("Bearer ", "");
@@ -32,15 +38,23 @@ export async function POST(request: Request) {
       ? body.topic.trim().slice(0, 200)
       : undefined;
 
-    const post = await generateBlogPost(topic);
-
+    // Fetch existing titles + slugs as the "do not repeat" list. Same logic
+    // as the cron, kept inline rather than extracted because the surface is
+    // tiny.
     const { data: existing } = await supabase
       .from("blog_posts")
-      .select("slug")
-      .eq("slug", post.slug)
-      .maybeSingle();
+      .select("title, slug")
+      .order("created_at", { ascending: false })
+      .limit(30);
 
-    const finalSlug = existing ? `${post.slug}-${Date.now().toString(36).slice(-5)}` : post.slug;
+    const existingTitles = (existing ?? []).map(p => p.title).filter(Boolean);
+    const existingSlugs  = new Set((existing ?? []).map(p => p.slug));
+
+    const post = await generateBlogPost(topic, existingTitles);
+
+    const finalSlug = existingSlugs.has(post.slug)
+      ? `${post.slug}-${Date.now().toString(36).slice(-5)}`
+      : post.slug;
 
     const { data, error } = await supabase
       .from("blog_posts")

@@ -77,49 +77,144 @@ export type BlogPost = {
   created_at: string;
 };
 
+/**
+ * Topic pool for the LLM to draw inspiration from. Not used as a strict
+ * "pick one" list — we feed the whole pool plus the recently-published
+ * titles into the prompt and the LLM picks a fresh angle.
+ *
+ * Expanded to cover the full curriculum (24 modules + 10 AI tools' worth
+ * of material) so there's always headroom for a genuinely new post.
+ */
 const BLOG_TOPIC_POOL = [
+  // Foundation / niche / product (Modules 1-3)
   "How to find a winning ecommerce product in 2026",
   "The 3X markup rule: why most dropshippers go broke ignoring it",
-  "TikTok organic vs paid ads: which is better for new stores in 2026",
-  "Best Shopify themes for dropshipping (and what to avoid)",
-  "Email marketing for ecommerce: 5 flows every store needs",
-  "How much budget do you really need to start dropshipping",
-  "Niche down or go broad: ecommerce niche selection in 2026",
-  "Common dropshipping mistakes that kill stores in the first month",
-  "How to read a Meta ads dashboard without losing your mind",
-  "The first 100 customers: how to get them when you have $0 budget",
-  "Customer avatar templates for ecommerce — fill-in-the-blank guide",
   "How to spot a saturated product (before you waste money on ads)",
+  "Niche down or go broad: ecommerce niche selection in 2026",
+  "Validating a product idea with $0 — the 10-question test",
+  "The difference between a passion niche and a profitable niche",
+  "How to read AliExpress reviews like a pro buyer (not a tourist)",
+  "Why most 'trending products' lists are useless — and what to use instead",
+  // Customer & avatar (Module 4)
+  "Customer avatar templates for ecommerce — fill-in-the-blank guide",
+  "The single question that reveals whether your product solves a real problem",
+  "How to interview your future customers when you have zero of them",
+  // Store setup (Module 5)
+  "Best Shopify themes for dropshipping (and what to avoid)",
+  "5 trust signals every Shopify product page needs",
+  "The product page anatomy: what each section above the fold has to do",
+  "Why your store converts at 0.4% and how to get to 2%",
+  // Funnel + landing pages (Module 6)
+  "Single-product landing pages vs full stores: which converts better",
+  "The hero section formula: what to put above the fold",
+  // Traffic — TikTok (Module 7)
+  "TikTok organic vs paid ads: which is better for new stores in 2026",
+  "Posting on TikTok: how often, what time, and what content actually works",
+  "Why your TikTok ads get rejected — and the fix for each reason",
+  // Traffic — Meta ads (Module 8)
+  "How to read a Meta ads dashboard without losing your mind",
+  "Your first $100 in Meta ads: exactly how to spend it",
+  "Why CBO beats ABO for beginners — and when to switch",
+  // Conversion optimization (Module 9)
+  "5 quick wins that lift conversion rate before you touch traffic",
+  "Cart abandonment: the 3 reasons it happens and how to fix each one",
+  // Email (Module 10)
+  "Email marketing for ecommerce: 5 flows every store needs",
+  "Klaviyo vs Omnisend vs Mailchimp for new stores",
+  "Welcome series: the 4-email sequence that converts cold subscribers",
+  // First sale & scaling (Module 11-12)
+  "The first 100 customers: how to get them when you have $0 budget",
+  "How much budget do you really need to start dropshipping in 2026",
+  "Common dropshipping mistakes that kill stores in the first month",
+  // Diagnose / metrics (Modules 13-15)
+  "Why your first sales don't repeat — the survivorship bias trap",
+  "The 8 metrics every operator should know cold (and what 'good' looks like)",
+  "Running a real 30-day P&L for your store: a template",
+  "Break-even ROAS: how to calculate yours in 2 minutes",
+  // Real winners (Module 16)
+  "The 100-click rule: how to know if a product is actually a winner",
+  "The repeatability test: separating real winners from lucky days",
+  // Offer engineering (Module 17)
+  "Hormozi's value equation explained for beginner dropshippers",
+  "How to build a $20 product into a $97 perceived-value offer",
+  "Risk reversal: 5 guarantee structures that actually convert",
+  // AOV (Module 18)
+  "AOV mechanics: 7 ways to lift average order value without more traffic",
+  "Order bumps that actually work (and the ones customers find scammy)",
+  "Bundle pricing strategy: how to price the discount, not the product",
+  // Persuasion (Module 19)
+  "Cialdini's 6 principles applied to a Shopify product page",
+  "Social proof on ecommerce pages: real vs fake (and which Google rewards)",
+  // Hooks (Module 20)
+  "6 hook frameworks for ecommerce ads — with examples",
+  "Why your TikTok ad gets scrolled past in 2 seconds — diagnosis + fix",
+  // UGC at scale (Module 21)
+  "Briefing UGC creators: the template that gets usable footage every time",
+  "How to build a UGC creator pipeline at $50–150 per video",
+  // Testing / scaling (Modules 22-24)
+  "ICE framework for prioritising ad tests when you can't run them all",
+  "When to scale, when to iterate, when to kill — the decision matrix",
+  "The 20% scaling rule: why doubling budgets destroys ROAS",
+  "Ad fatigue diagnosis: 4 signals that say it's time to refresh creative",
+  // Tools / ecosystem
+  "Best free tools for ecommerce in 2026 (the ones we actually use)",
+  "Choosing a supplier: red flags and the 5-question vetting test",
 ];
 
-export async function generateBlogPost(suggestedTopic?: string): Promise<{
+export async function generateBlogPost(
+  suggestedTopic?: string,
+  existingTitles: string[] = [],
+): Promise<{
   slug: string;
   title: string;
   excerpt: string;
   content: BlogPostContent;
 }> {
-  // Pick a random topic if none provided
-  const topic = suggestedTopic ?? BLOG_TOPIC_POOL[Math.floor(Math.random() * BLOG_TOPIC_POOL.length)];
+  // Two paths:
+  //   1. Admin provided an explicit topic → use it directly, no pool randomness
+  //   2. No topic given → let the LLM pick a FRESH angle from the broader
+  //      domain, having seen what's already been published. This is the
+  //      duplicate-prevention path the cron + the unguided "Generate" admin
+  //      button rely on.
+  const hasSuggestion = !!(suggestedTopic && suggestedTopic.trim());
+  const recent = existingTitles.slice(0, 30); // cap context size
 
-  const prompt = `Write a long-form, SEO-optimised blog post for a beginner ecommerce education site (firstsalelab.com). The site teaches complete beginners how to launch a Shopify dropshipping store.
+  const avoidList = recent.length > 0
+    ? `\nWe have ALREADY PUBLISHED these posts. Do not repeat their topics, angles, or core takeaways — pick something genuinely different:\n${recent.map((t, i) => `  ${i + 1}. ${t}`).join("\n")}\n`
+    : "";
 
-Topic: "${topic}"
+  const topicSection = hasSuggestion
+    ? `Topic: "${suggestedTopic!.trim()}"`
+    : `Pick ONE specific, narrow topic for this post. Use the inspiration list below as a starting point — but if a topic on the list is too close to something already published, pick a different angle or a different aspect of the same area.
 
-Tone: direct, practical, no fluff. Target reader is a complete beginner who hasn't sold anything yet. Reference specific tools/numbers/frameworks where relevant (Shopify, AliExpress, Meta ads, the 3X markup rule, etc.). Avoid corporate-speak.
+Inspiration topics (don't pick verbatim — reframe, narrow, or attack from a fresh angle):
+${BLOG_TOPIC_POOL.map(t => `  - ${t}`).join("\n")}
+
+Your topic must:
+- Solve a concrete problem a beginner ecommerce operator faces
+- Be specific enough to write 1200+ words on without padding
+- NOT overlap with any of the already-published posts above
+- Have a clear, hooky title (not "Tips for X" — make it specific and earned)`;
+
+  const prompt = `Write a long-form, SEO-optimised blog post for a beginner ecommerce education site (firstsalelab.com). The site teaches complete beginners how to launch a Shopify dropshipping store and grow it into a real business.
+${avoidList}
+${topicSection}
+
+Tone: direct, practical, no fluff. Target reader is a complete beginner who hasn't sold anything yet, or has 1-2 sales and wants more. Reference specific tools / numbers / frameworks where relevant (Shopify, AliExpress, Meta ads, TikTok, Klaviyo, the 3X markup rule, ROAS thresholds, etc.). Avoid corporate-speak. Avoid "in conclusion" / "as we've seen". Concrete > abstract. Numbers > adjectives.
 
 Length: ~1200–1600 words total. 4–6 sections. Each section's body should be 2–4 paragraphs of substance, not 1-line filler.
 
 Return a JSON object:
 {
-  "title":  "5–10 word headline, punchy, searchable. Don't restate the topic verbatim — make it a real headline.",
+  "title":  "5–10 word headline, punchy, searchable. Specific. Not a duplicate of any in the avoid list. Not a question.",
   "slug":   "lowercase-hyphenated-version-of-title (URL safe, no special chars)",
   "excerpt": "1 sentence (under 160 chars) — meta description for SEO",
   "content": {
-    "intro": "2 short paragraphs setting up the problem and what the reader will learn. Hook them.",
+    "intro": "2 short paragraphs setting up the problem and what the reader will learn. Hook them in the first sentence.",
     "sections": [
       { "heading": "Section heading (5–8 words, no questions)", "body": "2–4 paragraphs. Concrete. Examples. Numbers." }
     ],
-    "conclusion": "1 short paragraph summarising the takeaway.",
+    "conclusion": "1 short paragraph summarising the takeaway. NOT 'In conclusion'.",
     "cta": "1 short paragraph nudging the reader to take the free First Sale Lab quiz at /quiz to get their personalised roadmap."
   }
 }`;
@@ -136,7 +231,7 @@ Return a JSON object:
 
   return {
     slug,
-    title:   String(parsed.title ?? topic).slice(0, 200),
+    title:   String(parsed.title ?? suggestedTopic ?? "Untitled").slice(0, 200),
     excerpt: String(parsed.excerpt ?? "").slice(0, 200),
     content: parsed.content,
   };

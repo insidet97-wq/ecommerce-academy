@@ -10,6 +10,11 @@ export const dynamic = "force-dynamic";
  * Weekly cron — drafts a new blog post via Groq (admin reviews + publishes).
  * Schedule: every Wednesday at 07:00 UTC.
  *
+ * Duplicate prevention: fetches the last 30 titles (drafts + published) and
+ * passes them to generateBlogPost as the "avoid this list". The LLM picks a
+ * genuinely fresh angle. If somehow the slug still collides (rare), we fall
+ * back to a timestamp-suffixed slug to keep the unique constraint satisfied.
+ *
  * SQL migration required (run once):
  *   CREATE TABLE blog_posts (
  *     id           uuid PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -33,16 +38,25 @@ export async function GET(request: Request) {
   const supabase = getAdminSupabase();
 
   try {
-    const post = await generateBlogPost();
-
-    // Ensure slug is unique — append timestamp suffix if collision
+    // Fetch existing titles (newest first). The generator uses these as a
+    // "do not repeat" list. Both drafts and published posts count — a draft
+    // sitting in the queue still represents a topic the team has spoken to.
     const { data: existing } = await supabase
       .from("blog_posts")
-      .select("slug")
-      .eq("slug", post.slug)
-      .maybeSingle();
+      .select("title, slug")
+      .order("created_at", { ascending: false })
+      .limit(30);
 
-    const finalSlug = existing ? `${post.slug}-${Date.now().toString(36).slice(-5)}` : post.slug;
+    const existingTitles = (existing ?? []).map(p => p.title).filter(Boolean);
+    const existingSlugs  = new Set((existing ?? []).map(p => p.slug));
+
+    const post = await generateBlogPost(undefined, existingTitles);
+
+    // Final defense: if the LLM's slug somehow collides with an existing
+    // one, append a short timestamp suffix so the UNIQUE constraint passes.
+    const finalSlug = existingSlugs.has(post.slug)
+      ? `${post.slug}-${Date.now().toString(36).slice(-5)}`
+      : post.slug;
 
     const { data, error } = await supabase
       .from("blog_posts")
